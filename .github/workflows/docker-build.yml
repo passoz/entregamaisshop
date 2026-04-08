@@ -1,0 +1,11 @@
+name: docker-build
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [backend, frontend, gateway, auth]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t entregamais/${{ matrix.component }}:ci ./${{ matrix.component }}

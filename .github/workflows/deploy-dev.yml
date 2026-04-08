@@ -1,0 +1,17 @@
+name: deploy-dev
+on: [workflow_dispatch]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and Push Images
+        run: |
+          docker build -t entregamais/backend:dev ./backend
+          docker build -t entregamais/frontend:dev ./frontend
+          # docker push entregamais/backend:dev
+          # docker push entregamais/frontend:dev
+      - name: Deploy to K8s (Dev)
+        run: |
+          # kubectl config set-context --current --namespace=entregamais
+          kubectl kustomize infra/kubernetes/overlays/dev | kubectl apply -f -

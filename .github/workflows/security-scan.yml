@@ -1,0 +1,36 @@
+name: security-scan
+on: [workflow_dispatch]
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [backend, frontend, gateway, auth]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build local image for scanning
+        run: docker build -t entregamais/${{ matrix.component }}:scan ./${{ matrix.component }}
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'entregamais/${{ matrix.component }}:scan'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Frontend Audit
+        working-directory: frontend
+        run: npm audit --audit-level=high
+      - name: Backend Audit
+        working-directory: backend
+        run: go list -m all | xargs -n1 go list -json | grep -v "Standard" # Simple manual check or use a tool like 'govulncheck'
+      - name: Run Govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          cd backend && govulncheck ./...

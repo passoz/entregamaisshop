@@ -1,0 +1,9 @@
+name: observability-ci
+on: [workflow_dispatch]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: test -f logstash/pipelines/logstash.conf
+      - run: test -f elasticsearch/config/elasticsearch.yml

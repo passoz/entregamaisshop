@@ -1,0 +1,9 @@
+name: kubernetes-validate
+on: [workflow_dispatch]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: kubectl kustomize infra/kubernetes/overlays/dev > /tmp/k8s-dev.yaml
+      - run: helm lint infra/helm/platform

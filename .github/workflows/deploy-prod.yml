@@ -1,0 +1,17 @@
+name: deploy-prod
+on: [workflow_dispatch]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and Push Images
+        run: |
+          docker build -t entregamais/backend:latest ./backend
+          docker build -t entregamais/frontend:latest ./frontend
+          # docker push entregamais/backend:latest
+          # docker push entregamais/frontend:latest
+      - name: Deploy to K8s (Prod)
+        run: |
+          # kubectl config set-context --current --namespace=entregamais
+          kubectl kustomize infra/kubernetes/overlays/prod | kubectl apply -f -

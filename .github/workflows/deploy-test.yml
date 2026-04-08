@@ -1,0 +1,17 @@
+name: deploy-test
+on: [workflow_dispatch]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and Push Images
+        run: |
+          docker build -t entregamais/backend:test ./backend
+          docker build -t entregamais/frontend:test ./frontend
+          # docker push entregamais/backend:test
+          # docker push entregamais/frontend:test
+      - name: Deploy to K8s (Test)
+        run: |
+          # kubectl config set-context --current --namespace=entregamais
+          kubectl kustomize infra/kubernetes/overlays/test | kubectl apply -f -
