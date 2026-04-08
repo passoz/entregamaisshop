@@ -1,0 +1,36 @@
+# Global
+.DS_Store
+*.log
+*.tmp
+*.swp
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Node / Next
+node_modules/
+.next/
+out/
+coverage/
+
+# Go
+bin/
+backend/bin/
+*.test
+backend/coverage.out
+
+# Python
+__pycache__/
+*.pyc
+
+# Docker
+*.pid
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db

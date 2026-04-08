@@ -1,0 +1,4 @@
+backend:
+  image: entregamais/backend:latest
+frontend:
+  image: entregamais/frontend:latest

@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ze-yellow: #F7E01B;
+  --ze-black: #222222;
+  --ze-red: #E31B23;
+  --ze-gray: #F4F4F4;
+  --ze-white: #FFFFFF;
+}
+
+body {
+  @apply bg-ze-gray text-ze-black antialiased overflow-x-hidden;
+}
+
+.ze-gradient-yellow {
+  background: linear-gradient(180deg, var(--ze-yellow) 0%, #E9D216 100%);
+}
+
+.ze-card-hover {
+  @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-ze-yellow;
+}

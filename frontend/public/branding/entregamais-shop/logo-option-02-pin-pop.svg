@@ -1,0 +1,36 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="option2-card" x1="130" y1="140" x2="520" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#067BC2"/>
+      <stop offset="0.5" stop-color="#84BCDA"/>
+      <stop offset="1" stop-color="#D56062"/>
+    </linearGradient>
+    <linearGradient id="option2-pill" x1="1108" y1="454" x2="1260" y2="454" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ECC30B"/>
+      <stop offset="1" stop-color="#F37748"/>
+    </linearGradient>
+    <filter id="option2-shadow" x="40" y="70" width="600" height="620" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="26" stdDeviation="28" flood-color="#D56062" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#option2-shadow)">
+    <rect x="118" y="132" width="430" height="430" rx="112" fill="url(#option2-card)"/>
+    <path d="M333 211C256 211 205 267 205 343C205 434 287 506 333 562C379 506 461 434 461 343C461 267 410 211 333 211Z" fill="white"/>
+    <path d="M333 249C285 249 253 285 253 331C253 387 304 435 333 472C362 435 413 387 413 331C413 285 381 249 333 249Z" fill="#067BC2"/>
+    <rect x="300" y="255" width="66" height="36" rx="16" fill="#ECC30B"/>
+    <rect x="309" y="280" width="48" height="119" rx="20" fill="white"/>
+    <circle cx="333" cy="354" r="24" fill="#F37748"/>
+    <path d="M267 406C290 425 308 434 333 434C358 434 376 425 399 406" stroke="#84BCDA" stroke-width="14" stroke-linecap="round"/>
+    <path d="M405 222L430 196L457 223" stroke="#ECC30B" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="642" y="402" fill="#067BC2" font-size="160" font-weight="800" font-family="'Sora', 'Poppins', sans-serif" letter-spacing="-7">entrega</text>
+  <text x="1140" y="402" fill="#F37748" font-size="160" font-weight="800" font-family="'Sora', 'Poppins', sans-serif" letter-spacing="-7">mais</text>
+  <rect x="1112" y="422" width="166" height="64" rx="32" fill="url(#option2-pill)"/>
+  <text x="1152" y="466" fill="#0C395B" font-size="42" font-weight="900" font-family="'Sora', 'Poppins', sans-serif" letter-spacing="3">SHOP</text>
+  <path d="M646 455C705 510 790 540 897 540C1012 540 1097 509 1163 449" stroke="#84BCDA" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="665" cy="455" r="11" fill="#84BCDA"/>
+  <circle cx="1145" cy="455" r="11" fill="#84BCDA"/>
+  <text x="646" y="598" fill="#D56062" font-size="34" font-weight="700" font-family="'Sora', 'Poppins', sans-serif" letter-spacing="5">DELIVERY DE BEBIDAS</text>
+</svg>

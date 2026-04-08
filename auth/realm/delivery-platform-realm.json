@@ -1,0 +1,24 @@
+{
+  "realm": "delivery-platform",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {"name": "customer"},
+      {"name": "seller"},
+      {"name": "driver"},
+      {"name": "admin"},
+      {"name": "operator"}
+    ]
+  },
+  "clients": [
+    {"clientId": "frontend", "publicClient": true, "redirectUris": ["http://localhost:3000/*"]},
+    {"clientId": "gateway", "secret": "gateway-secret", "serviceAccountsEnabled": true, "protocol": "openid-connect"},
+    {"clientId": "backend-service", "secret": "backend-secret", "serviceAccountsEnabled": true, "protocol": "openid-connect"}
+  ],
+  "users": [
+    {"username": "customer.demo", "enabled": true, "email": "customer@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["customer"]},
+    {"username": "seller.demo", "enabled": true, "email": "seller@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["seller", "operator"]},
+    {"username": "driver.demo", "enabled": true, "email": "driver@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["driver"]},
+    {"username": "admin.demo", "enabled": true, "email": "admin@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["admin"]}
+  ]
+}

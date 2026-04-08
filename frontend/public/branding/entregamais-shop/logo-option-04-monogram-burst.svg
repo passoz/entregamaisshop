@@ -1,0 +1,36 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="option4-icon" x1="121" y1="117" x2="531" y2="527" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#067BC2"/>
+      <stop offset="0.35" stop-color="#84BCDA"/>
+      <stop offset="0.7" stop-color="#ECC30B"/>
+      <stop offset="1" stop-color="#F37748"/>
+    </linearGradient>
+    <linearGradient id="option4-pill" x1="1000" y1="281" x2="1180" y2="281" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D56062"/>
+      <stop offset="1" stop-color="#F37748"/>
+    </linearGradient>
+    <filter id="option4-shadow" x="70" y="70" width="520" height="520" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#067BC2" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#option4-shadow)">
+    <rect x="121" y="121" width="418" height="418" rx="130" fill="url(#option4-icon)"/>
+    <path d="M213 356C213 282 270 225 349 225C393 225 430 243 459 279L414 319C399 300 378 291 354 291C313 291 282 318 282 356C282 394 312 421 355 421C374 421 390 416 404 406V377H345V324H475V438C440 469 394 487 347 487C269 487 213 430 213 356Z" fill="white"/>
+    <circle cx="454" cy="243" r="28" fill="#ECC30B"/>
+    <path d="M438 243H470" stroke="#067BC2" stroke-width="12" stroke-linecap="round"/>
+    <path d="M454 227V259" stroke="#067BC2" stroke-width="12" stroke-linecap="round"/>
+  </g>
+
+  <rect x="609" y="222" width="575" height="118" rx="59" fill="white"/>
+  <text x="636" y="298" fill="#067BC2" font-size="114" font-weight="900" font-family="'Sora', 'Poppins', sans-serif" letter-spacing="-6">entregamais</text>
+  <rect x="990" y="240" width="178" height="72" rx="36" fill="url(#option4-pill)"/>
+  <text x="1032" y="289" fill="white" font-size="44" font-weight="900" font-family="'Sora', 'Poppins', sans-serif" letter-spacing="3">SHOP</text>
+  <path d="M612 406H1180" stroke="#84BCDA" stroke-width="14" stroke-linecap="round"/>
+  <path d="M612 500C670 455 727 432 782 432C855 432 917 472 987 472C1049 472 1117 444 1180 395" stroke="#D56062" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="636" cy="500" r="18" fill="#ECC30B"/>
+  <circle cx="1030" cy="472" r="16" fill="#84BCDA"/>
+  <circle cx="1165" cy="404" r="14" fill="#F37748"/>
+  <text x="612" y="592" fill="#067BC2" font-size="34" font-weight="700" font-family="'Sora', 'Poppins', sans-serif" letter-spacing="5">DELIVERY DE BEBIDAS</text>
+</svg>

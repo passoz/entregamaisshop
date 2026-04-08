@@ -1,0 +1,23 @@
+{
+  "vhosts": [{"name": "/"}],
+  "exchanges": [
+    {"name": "orders.events", "vhost": "/", "type": "topic", "durable": true},
+    {"name": "catalog.events", "vhost": "/", "type": "topic", "durable": true},
+    {"name": "uploads.events", "vhost": "/", "type": "topic", "durable": true},
+    {"name": "notifications.events", "vhost": "/", "type": "topic", "durable": true}
+  ],
+  "queues": [
+    {"name": "orders.lifecycle", "vhost": "/", "durable": true, "arguments": {"x-dead-letter-exchange": "orders.events", "x-dead-letter-routing-key": "orders.dlq"}},
+    {"name": "orders.dlq", "vhost": "/", "durable": true},
+    {"name": "inventory.sync", "vhost": "/", "durable": true},
+    {"name": "uploads.completed", "vhost": "/", "durable": true},
+    {"name": "notifications.dispatch", "vhost": "/", "durable": true}
+  ],
+  "bindings": [
+    {"source": "orders.events", "vhost": "/", "destination": "orders.lifecycle", "destination_type": "queue", "routing_key": "order.*"},
+    {"source": "orders.events", "vhost": "/", "destination": "orders.dlq", "destination_type": "queue", "routing_key": "orders.dlq"},
+    {"source": "catalog.events", "vhost": "/", "destination": "inventory.sync", "destination_type": "queue", "routing_key": "inventory.updated"},
+    {"source": "uploads.events", "vhost": "/", "destination": "uploads.completed", "destination_type": "queue", "routing_key": "upload.completed"},
+    {"source": "notifications.events", "vhost": "/", "destination": "notifications.dispatch", "destination_type": "queue", "routing_key": "notification.requested"}
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "EntregaMais API",
+    "version": "1.0.0",
+    "description": "API da plataforma distribuida de delivery especializado em bebidas"
+  },
+  "servers": [
+    {"url": "http://localhost:9080/api/v1", "description": "Gateway"}
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
+    }
+  },
+  "paths": {
+    "/health": {"get": {"summary": "Health check", "responses": {"200": {"description": "OK"}}}},
+    "/ready": {"get": {"summary": "Readiness check", "responses": {"200": {"description": "Ready"}}}},
+    "/live": {"get": {"summary": "Liveness check", "responses": {"200": {"description": "Alive"}}}},
+
+    "/categories": {"get": {"summary": "List categories", "responses": {"200": {"description": "OK"}}}},
+
+    "/sellers": {"get": {"summary": "List sellers", "responses": {"200": {"description": "OK"}}}},
+    "/sellers/{id}": {"get": {"summary": "Get seller", "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/sellers/{id}/products": {"get": {"summary": "List seller products", "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+
+    "/products": {"get": {"summary": "List products", "responses": {"200": {"description": "OK"}}}},
+    "/products/{id}": {"get": {"summary": "Get product", "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+
+    "/cart": {"get": {"summary": "Get customer cart", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+    "/cart/items": {"post": {"summary": "Add item to cart", "security": [{"bearerAuth": []}], "responses": {"201": {"description": "Created"}}}},
+    "/cart/items/{id}": {
+      "put": {"summary": "Update cart item", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}},
+      "delete": {"summary": "Delete cart item", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}
+    },
+
+    "/orders": {"post": {"summary": "Create order", "security": [{"bearerAuth": []}], "responses": {"201": {"description": "Created"}}}},
+    "/orders/{id}": {"get": {"summary": "Get order", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/orders/me": {"get": {"summary": "List my orders", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+
+    "/seller/profile": {"get": {"summary": "Get seller profile", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+    "/seller/products": {
+      "get": {"summary": "List seller products", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}},
+      "post": {"summary": "Create seller product", "security": [{"bearerAuth": []}], "responses": {"201": {"description": "Created"}}}
+    },
+    "/seller/products/{id}": {
+      "get": {"summary": "Get seller product", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}},
+      "put": {"summary": "Update seller product", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}},
+      "delete": {"summary": "Delete seller product", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}
+    },
+    "/seller/inventory": {"get": {"summary": "List seller inventory", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+    "/seller/inventory/{productId}": {"put": {"summary": "Update seller inventory", "security": [{"bearerAuth": []}], "parameters": [{"name": "productId", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/seller/orders": {"get": {"summary": "List seller orders", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+    "/seller/orders/{id}": {"get": {"summary": "Get seller order", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/seller/orders/{id}/confirm": {"post": {"summary": "Confirm order", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/seller/orders/{id}/prepare": {"post": {"summary": "Prepare order", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/seller/orders/{id}/ready": {"post": {"summary": "Ready order", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+
+    "/driver/profile": {"get": {"summary": "Get driver profile", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+    "/driver/orders": {"get": {"summary": "List driver orders", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+    "/driver/orders/{id}": {"get": {"summary": "Get driver order", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/driver/orders/{id}/accept": {"post": {"summary": "Accept order", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/driver/orders/{id}/pickup": {"post": {"summary": "Pickup order", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/driver/orders/{id}/deliver": {"post": {"summary": "Deliver order", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/driver/status": {"post": {"summary": "Update driver status", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+
+    "/uploads": {"post": {"summary": "Create upload", "security": [{"bearerAuth": []}], "responses": {"201": {"description": "Created"}}}},
+    "/uploads/{id}": {"get": {"summary": "Get upload", "security": [{"bearerAuth": []}], "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+
+    "/admin/dashboard": {"get": {"summary": "Admin dashboard", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+    "/admin/sellers": {
+      "get": {"summary": "List sellers admin", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}},
+      "post": {"summary": "Create seller admin", "security": [{"bearerAuth": []}], "responses": {"201": {"description": "Created"}}}
+    },
+    "/admin/drivers": {
+      "get": {"summary": "List drivers admin", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}},
+      "post": {"summary": "Create driver admin", "security": [{"bearerAuth": []}], "responses": {"201": {"description": "Created"}}}
+    },
+    "/admin/orders": {"get": {"summary": "List orders admin", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}},
+    "/admin/users": {"get": {"summary": "List users admin", "security": [{"bearerAuth": []}], "responses": {"200": {"description": "OK"}}}}
+  }
+}

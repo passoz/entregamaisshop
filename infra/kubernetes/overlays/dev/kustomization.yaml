@@ -1,0 +1,31 @@
+resources:
+  - ../../base
+
+configMapGenerator:
+  - name: service-config
+    literals:
+      - ENVIRONMENT=dev
+      - LOG_LEVEL=debug
+      - DATABASE_URL=postgres://app:app@postgres:5432/entregamais?sslmode=disable
+
+patches:
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: entregamais/backend:dev
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: entregamais/frontend:dev

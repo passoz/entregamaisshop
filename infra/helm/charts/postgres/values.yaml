@@ -1,0 +1,3 @@
+image: entregamais/postgresatest
+service:
+  port: 80

@@ -1,0 +1,33 @@
+frontend/src/middleware.ts:  const isSellerRoute = nextUrl.pathname.startsWith("/seller")
+frontend/src/middleware.ts:  if (isSellerRoute && !roles.includes("seller")) {
+frontend/src/middleware.ts:  matcher: ["/admin/:path*", "/seller/:path*", "/driver/:path*"],
+frontend/src/app/seller/dashboard/page.tsx:    <PortalLayout title="Painel do Lojista" role="seller">
+frontend/src/app/seller/orders/page.tsx:      <Sidebar role="seller" currentRoute="/seller/orders" />
+frontend/src/app/seller/products/page.tsx:      <Sidebar role="seller" currentRoute="/seller/products" />
+frontend/src/app/auth/signup/seller/page.tsx:      role="seller" 
+frontend/src/app/auth/signup/seller/page.tsx:            Já é um parceiro? <Link href="/auth/login/seller" className="text-brand-teal font-black hover:underline">Entrar no Painel</Link>
+frontend/src/app/auth/login/seller/page.tsx:      role="seller" 
+frontend/src/app/auth/login/seller/page.tsx:            <Link href="/auth/signup/seller" className="text-brand-teal font-black hover:underline">Solicite sua conta</Link>
+frontend/src/components/layout/Navbar.tsx:          <Link href="/auth/login/seller" className="text-sm font-medium text-slate-600 hover:text-brand-teal transition-colors">
+frontend/src/components/layout/Navbar.tsx:            <Link href="/auth/login/seller">
+frontend/src/components/layout/Navbar.tsx:            <Link href="/auth/signup/seller">
+frontend/src/components/layout/Sidebar.tsx:  role: "seller" | "driver";
+frontend/src/components/layout/Sidebar.tsx:  const sellerLinks = [
+frontend/src/components/layout/Sidebar.tsx:    { href: "/seller/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+frontend/src/components/layout/Sidebar.tsx:    { href: "/seller/orders", icon: ShoppingBag, label: "Pedidos" },
+frontend/src/components/layout/Sidebar.tsx:    { href: "/seller/products", icon: Package, label: "Produtos e Estoque" },
+frontend/src/components/layout/Sidebar.tsx:    { href: "/seller/settings", icon: Settings, label: "Configurações" },
+frontend/src/components/layout/Sidebar.tsx:  const links = role === "seller" ? sellerLinks : driverLinks;
+frontend/src/components/layout/Sidebar.tsx:  const brandColor = role === "seller" ? "brand-amber" : "brand-sky";
+frontend/src/components/layout/AuthLayout.tsx:  role: 'admin' | 'seller' | 'driver' | 'customer'
+frontend/src/components/layout/AuthLayout.tsx:    seller: "from-brand-teal to-brand-sky",
+frontend/src/components/layout/AuthLayout.tsx:            Junte-se a milhares de {role === 'seller' ? 'lojistas' : role === 'driver' ? 'entregadores' : 'parceiros'} e aumente sua renda.
+frontend/src/components/layout/AuthLayout.tsx:            +10k {role === 'seller' ? 'Sellers' : role === 'driver' ? 'Entregadores' : 'Usuários'} ativos hoje
+frontend/src/components/layout/PortalLayout.tsx:  role: 'admin' | 'seller' | 'driver'
+frontend/src/components/layout/PortalLayout.tsx:      { icon: <Package className="w-5 h-5" />, label: "Lojas", href: "/admin/sellers" },
+frontend/src/components/layout/PortalLayout.tsx:    seller: [
+frontend/src/components/layout/PortalLayout.tsx:      { icon: <LayoutDashboard className="w-5 h-5" />, label: "Dashboard", href: "/seller", active: true },
+frontend/src/components/layout/PortalLayout.tsx:      { icon: <Package className="w-5 h-5" />, label: "Produtos", href: "/seller/products" },
+frontend/src/components/layout/PortalLayout.tsx:      { icon: <BarChart3 className="w-5 h-5" />, label: "Pedidos", href: "/seller/orders" },
+frontend/src/components/layout/PortalLayout.tsx:      { icon: <Settings className="w-5 h-5" />, label: "Loja", href: "/seller/settings" },
+frontend/src/components/layout/PortalLayout.tsx:            Portal do {role === 'admin' ? 'Administrador' : role === 'seller' ? 'Lojista' : 'Entregador'}

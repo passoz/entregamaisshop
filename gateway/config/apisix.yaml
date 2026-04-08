@@ -1,0 +1,49 @@
+routes:
+  # 1. Assets
+  - id: frontend-assets
+    uri: /_next/*
+    priority: 30
+    upstream:
+      type: roundrobin
+      nodes:
+        "frontend:3000": 1
+
+  # 2. Backend API
+  - id: api-routes
+    uri: /api/v1/*
+    priority: 25
+    upstream:
+      type: roundrobin
+      nodes:
+        "backend:8080": 1
+    plugins:
+      cors: {}
+
+  # 3. Transparent Proxy for all Frontend Hosts
+  - id: frontend-proxy
+    hosts: 
+      - "entregamais.shop"
+      - "admin.entregamais.shop"
+      - "vendedor.entregamais.shop"
+      - "entregador.entregamais.shop"
+      - "entregamais.127.0.0.1.nip.io"
+      - "admin.entregamais.127.0.0.1.nip.io"
+      - "vendedor.entregamais.127.0.0.1.nip.io"
+      - "entregador.entregamais.127.0.0.1.nip.io"
+      - "entregamais..127.0.0.1.nip.io"
+    uri: /*
+    priority: 10
+    upstream:
+      type: roundrobin
+      nodes:
+        "frontend:3000": 1
+
+  # 4. Global Fallback
+  - id: global-fallback
+    uri: /*
+    priority: 1
+    upstream:
+      type: roundrobin
+      nodes:
+        "frontend:3000": 1
+#END

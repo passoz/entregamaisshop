@@ -1,0 +1,27 @@
+frontend/src/middleware.ts:  const isDriverRoute = nextUrl.pathname.startsWith("/driver")
+frontend/src/middleware.ts:  if (isDriverRoute && !roles.includes("driver")) {
+frontend/src/middleware.ts:  matcher: ["/admin/:path*", "/seller/:path*", "/driver/:path*"],
+frontend/src/app/driver/dashboard/page.tsx:    <PortalLayout title="Portal do Entregador" role="driver">
+frontend/src/app/driver/queue/page.tsx:      <Sidebar role="driver" currentRoute="/driver/queue" />
+frontend/src/app/auth/signup/driver/page.tsx:      role="driver" 
+frontend/src/app/auth/signup/driver/page.tsx:            Já é um parceiro? <Link href="/auth/login/driver" className="text-brand-coral font-black hover:underline">Entrar Agora</Link>
+frontend/src/app/auth/login/driver/page.tsx:      role="driver" 
+frontend/src/app/auth/login/driver/page.tsx:          <Link href="/auth/signup/driver">
+frontend/src/components/layout/Navbar.tsx:          <Link href="/auth/login/driver" className="text-sm font-medium text-slate-600 hover:text-brand-teal transition-colors">
+frontend/src/components/layout/Sidebar.tsx:  role: "seller" | "driver";
+frontend/src/components/layout/Sidebar.tsx:  const driverLinks = [
+frontend/src/components/layout/Sidebar.tsx:    { href: "/driver/dashboard", icon: LayoutDashboard, label: "Painel" },
+frontend/src/components/layout/Sidebar.tsx:    { href: "/driver/queue", icon: Bike, label: "Fila de Entregas" },
+frontend/src/components/layout/Sidebar.tsx:    { href: "/driver/history", icon: ShoppingBag, label: "Histórico" },
+frontend/src/components/layout/Sidebar.tsx:    { href: "/driver/settings", icon: Settings, label: "Conta" },
+frontend/src/components/layout/Sidebar.tsx:  const links = role === "seller" ? sellerLinks : driverLinks;
+frontend/src/components/layout/AuthLayout.tsx:  role: 'admin' | 'seller' | 'driver' | 'customer'
+frontend/src/components/layout/AuthLayout.tsx:    driver: "from-brand-amber to-brand-coral",
+frontend/src/components/layout/AuthLayout.tsx:            Junte-se a milhares de {role === 'seller' ? 'lojistas' : role === 'driver' ? 'entregadores' : 'parceiros'} e aumente sua renda.
+frontend/src/components/layout/AuthLayout.tsx:            +10k {role === 'seller' ? 'Sellers' : role === 'driver' ? 'Entregadores' : 'Usuários'} ativos hoje
+frontend/src/components/layout/PortalLayout.tsx:  role: 'admin' | 'seller' | 'driver'
+frontend/src/components/layout/PortalLayout.tsx:      { icon: <Truck className="w-5 h-5" />, label: "Entregadores", href: "/admin/drivers" },
+frontend/src/components/layout/PortalLayout.tsx:    driver: [
+frontend/src/components/layout/PortalLayout.tsx:      { icon: <LayoutDashboard className="w-5 h-5" />, label: "Fila de Entregas", href: "/driver", active: true },
+frontend/src/components/layout/PortalLayout.tsx:      { icon: <BarChart3 className="w-5 h-5" />, label: "Ganhos", href: "/driver/earnings" },
+frontend/src/components/layout/PortalLayout.tsx:      { icon: <Settings className="w-5 h-5" />, label: "Perfil", href: "/driver/profile" },

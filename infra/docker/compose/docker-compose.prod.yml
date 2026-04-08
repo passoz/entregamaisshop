@@ -1,0 +1,26 @@
+services:
+  backend:
+    restart: always
+  frontend:
+    restart: always
+  gateway:
+    restart: always
+    ports: ["80:9080"]
+  keycloak:
+    restart: always
+  postgres:
+    restart: always
+  postgres-auth:
+    restart: always
+  redis:
+    restart: always
+  minio:
+    restart: always
+  rabbitmq:
+    restart: always
+  elasticsearch:
+    restart: always
+  logstash:
+    restart: always
+  kibana:
+    restart: always

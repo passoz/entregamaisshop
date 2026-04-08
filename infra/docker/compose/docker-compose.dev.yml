@@ -1,0 +1,32 @@
+services:
+  backend:
+    ports: ["8080:8080"]
+  frontend:
+    ports: ["3000:3000"]
+    volumes:
+      - ../../../frontend:/app
+      - /app/node_modules
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+  gateway:
+    ports: ["80:9080", "9180:9180"]
+  keycloak:
+    ports: ["8081:8080"]
+  postgres:
+    ports: ["5432:5432"]
+  postgres-auth:
+    ports: ["5433:5432"]
+  redis:
+    ports: ["6379:6379"]
+  minio:
+    ports: ["9000:9000", "9001:9001"]
+  rabbitmq:
+    ports: ["5672:5672", "15672:15672"]
+  elasticsearch:
+    ports: ["9200:9200"]
+  logstash:
+    ports: ["5044:5044"]
+  kibana:
+    ports: ["5601:5601"]

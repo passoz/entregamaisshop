@@ -1,0 +1,106 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE:-entregamais/backend:latest}
+    environment:
+      - ENVIRONMENT=prod
+      - LOG_LEVEL=error
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+      - REDIS_ADDR=redis:${REDIS_PORT}
+      - MINIO_ENDPOINT=minio:${MINIO_PORT}
+      - MINIO_BUCKET=uploads
+      - RABBITMQ_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:${RABBITMQ_PORT}/
+      - KEYCLOAK_ISSUER_URL=http://keycloak:8080/realms/delivery-platform
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+      - minio
+      - rabbitmq
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-entregamais/frontend:latest}
+    environment:
+      - NEXT_PUBLIC_GATEWAY_URL=https://api.entregamais.com
+      - NEXT_PUBLIC_KEYCLOAK_URL=https://auth.entregamais.com/realms/delivery-platform
+      - NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=frontend
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    restart: always
+    depends_on:
+      - gateway
+
+  gateway:
+    image: apache/apisix:3.12.0-debian
+    volumes:
+      - ./gateway/config/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+      - ./gateway/routes/routes.yaml:/usr/local/apisix/conf/apisix.d/routes.yaml:ro
+    ports:
+      - "${APISIX_PROXY_PORT}:9080"
+    restart: always
+    depends_on:
+      - backend
+      - keycloak
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    command: start --import-realm
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres-auth:${POSTGRES_AUTH_PORT}/${POSTGRES_AUTH_DB}
+      - KC_DB_USERNAME=${POSTGRES_AUTH_USER}
+      - KC_DB_PASSWORD=${POSTGRES_AUTH_PASSWORD}
+      - KC_HOSTNAME=auth.entregamais.com
+    restart: always
+    depends_on:
+      - postgres-auth
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  postgres-auth:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_AUTH_DB}
+      - POSTGRES_USER=${POSTGRES_AUTH_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_AUTH_PASSWORD}
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+
+  minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    command: server /data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3.13-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: always
+
+volumes:
+  postgres_data:
+  postgres_auth_data:
+  minio_data:
+  rabbitmq_data:

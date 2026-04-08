@@ -1,0 +1,94 @@
+services:
+  backend:
+    build: ../../../backend
+    image: ${BACKEND_IMAGE:-entregamais/backend:local}
+    env_file:
+      - ../../../backend/.env.example
+    depends_on: [postgres, redis, minio, rabbitmq]
+
+  frontend:
+    build: ../../../frontend
+    image: ${FRONTEND_IMAGE:-entregamais/frontend:local}
+    env_file:
+      - ../../../frontend/.env.example
+    depends_on: [gateway]
+
+  gateway:
+    image: apache/apisix:3.12.0-debian
+    environment:
+      APISIX_STAND_ALONE: "true"
+    volumes:
+      - ../../../gateway/config/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ../../../gateway/config/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+    depends_on: [backend, keycloak]
+
+  keycloak:
+    build: ../../../auth
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-auth:5432/${POSTGRES_AUTH_DB}
+      KC_DB_USERNAME: ${POSTGRES_AUTH_USER}
+      KC_DB_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
+    depends_on: [postgres-auth]
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ../../../postgres/init:/docker-entrypoint-initdb.d:ro
+
+  postgres-auth:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_AUTH_DB}
+      POSTGRES_USER: ${POSTGRES_AUTH_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
+    volumes:
+      - ../../../postgres-auth/init:/docker-entrypoint-initdb.d:ro
+
+  redis:
+    image: redis:7
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - ../../../redis/config/redis.conf:/usr/local/etc/redis/redis.conf:ro
+
+  minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbitmq_management load_definitions \"/etc/rabbitmq/definitions.json\""
+    volumes:
+      - ../../../rabbitmq/definitions/definitions.json:/etc/rabbitmq/definitions.json:ro
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+    volumes:
+      - ../../../elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.3
+    depends_on: [elasticsearch]
+    volumes:
+      - ../../../logstash/pipelines/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.3
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on: [elasticsearch]

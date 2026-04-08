@@ -1,0 +1,34 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="option3-badge" x1="121" y1="317" x2="553" y2="317" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ECC30B"/>
+      <stop offset="0.55" stop-color="#F37748"/>
+      <stop offset="1" stop-color="#D56062"/>
+    </linearGradient>
+    <linearGradient id="option3-wave" x1="650" y1="482" x2="1210" y2="482" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#067BC2"/>
+      <stop offset="1" stop-color="#84BCDA"/>
+    </linearGradient>
+    <filter id="option3-shadow" x="60" y="100" width="560" height="520" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#F37748" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#option3-shadow)">
+    <rect x="125" y="140" width="420" height="360" rx="180" fill="url(#option3-badge)"/>
+    <circle cx="240" cy="318" r="30" fill="white"/>
+    <circle cx="428" cy="318" r="30" fill="white"/>
+    <path d="M240 318H428" stroke="white" stroke-width="18" stroke-linecap="round"/>
+    <path d="M333 208C304 208 282 231 282 260V372C282 401 304 424 333 424C362 424 384 401 384 372V260C384 231 362 208 333 208Z" fill="#067BC2"/>
+    <rect x="299" y="190" width="68" height="34" rx="16" fill="#84BCDA"/>
+    <path d="M346 245H322V294L297 337H323V391L367 322H346V245Z" fill="white"/>
+    <path d="M200 382C244 417 284 432 333 432C382 432 422 417 466 382" stroke="#067BC2" stroke-width="16" stroke-linecap="round"/>
+  </g>
+
+  <text x="650" y="386" fill="#067BC2" font-size="164" font-weight="900" font-family="'Poppins', 'Montserrat', sans-serif" letter-spacing="-8">entregamais</text>
+  <path d="M650 462C726 432 796 418 864 418C960 418 1062 446 1206 523" stroke="url(#option3-wave)" stroke-width="22" stroke-linecap="round"/>
+  <path d="M1116 454L1213 523L1112 584" stroke="#F37748" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="656" y="506" width="198" height="72" rx="24" fill="#067BC2"/>
+  <text x="703" y="557" fill="#ECC30B" font-size="46" font-weight="900" font-family="'Poppins', 'Montserrat', sans-serif" letter-spacing="4">SHOP</text>
+  <text x="886" y="558" fill="#84BCDA" font-size="34" font-weight="700" font-family="'Poppins', 'Montserrat', sans-serif" letter-spacing="5">DELIVERY DE BEBIDAS</text>
+</svg>

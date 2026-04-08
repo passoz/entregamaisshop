@@ -1,0 +1,25 @@
+services:
+  backend:
+    ports: ["18080:8080"]
+  frontend:
+    ports: ["13000:3000"]
+  gateway:
+    ports: ["19080:9080", "19180:9180"]
+  keycloak:
+    ports: ["18081:8080"]
+  postgres:
+    ports: ["15432:5432"]
+  postgres-auth:
+    ports: ["15433:5432"]
+  redis:
+    ports: ["16379:6379"]
+  minio:
+    ports: ["19000:9000", "19001:9001"]
+  rabbitmq:
+    ports: ["15672:5672", "15673:15672"]
+  elasticsearch:
+    ports: ["19200:9200"]
+  logstash:
+    ports: ["15044:5044"]
+  kibana:
+    ports: ["15601:5601"]

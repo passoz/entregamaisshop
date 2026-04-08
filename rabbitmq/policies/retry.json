@@ -1,0 +1,1 @@
+{"name":"orders-retry","pattern":"^orders\\.lifecycle$","apply-to":"queues","definition":{"ha-mode":"all"},"priority":1}
