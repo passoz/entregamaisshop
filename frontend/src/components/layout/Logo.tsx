@@ -30,10 +30,10 @@ export function Logo({ className }: { className?: string }) {
         </svg>
       </div>
       <div className="flex flex-col leading-tight">
-        <span className="text-2xl font-black text-ze-black uppercase italic tracking-tighter">
+        <span className="text-xl md:text-2xl font-black text-ze-black uppercase italic tracking-tighter">
           Entrega<span className="text-ze-red">Mais</span>
         </span>
-        <span className="text-[9px] font-black text-ze-black/40 tracking-[0.3em] uppercase italic">
+        <span className="hidden sm:block text-[9px] font-black text-ze-black/40 tracking-[0.3em] uppercase italic">
           Bebidas Geladas em Minutos
         </span>
       </div>

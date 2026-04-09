@@ -18,6 +18,16 @@ body {
   background: linear-gradient(180deg, var(--ze-yellow) 0%, #E9D216 100%);
 }
 
-.ze-card-hover {
-  @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-ze-yellow;
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-in {
+  animation-fill-mode: forwards;
+}
+
+.slide-in-from-right {
+  animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }

@@ -1,15 +1,17 @@
-FROM node:22-alpine AS deps
+FROM node:22-alpine AS base
 WORKDIR /app
 COPY package.json ./
 RUN npm install
 
-FROM node:22-alpine AS build
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+FROM base AS development
+COPY . .
+CMD ["npm", "run", "dev"]
+
+FROM base AS build
 COPY . .
 RUN npm run build
 
-FROM node:22-alpine
+FROM node:22-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app .

@@ -15,9 +15,9 @@ const MOCK_STORES = [
 
 export default function Home() {
   return (
-    <main className="container mx-auto px-4 py-8 pb-20">
+    <main className="container mx-auto px-4 py-6 md:py-8 pb-20">
       {/* Immersive Hero Section */}
-      <div className="relative w-full h-[500px] md:h-[700px] rounded-[3rem] md:rounded-[4rem] overflow-hidden border-8 border-ze-black shadow-[30px_30px_0px_0px_rgba(0,0,0,1)] bg-ze-yellow mb-20 group">
+      <div className="relative w-full min-h-[450px] md:h-[700px] rounded-[2rem] md:rounded-[4rem] overflow-hidden border-4 md:border-8 border-ze-black shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] md:shadow-[30px_30px_0px_0px_rgba(0,0,0,1)] bg-ze-yellow mb-12 md:mb-20 group">
         <Image 
           src="/assets/hero-beverage.png" 
           alt="Bebidas Geladas" 
@@ -29,34 +29,34 @@ export default function Home() {
         {/* Deep Gradient Overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-ze-black/90 via-ze-black/40 to-transparent" />
         
-        <div className="absolute inset-0 flex flex-col justify-center p-8 md:p-20 space-y-6 max-w-4xl">
-          <Badge className="bg-ze-yellow text-ze-black font-black uppercase tracking-[0.4em] px-6 py-2 w-fit text-sm animate-bounce">
+        <div className="absolute inset-0 flex flex-col justify-center p-6 md:p-20 space-y-4 md:space-y-6 max-w-4xl">
+          <Badge className="bg-ze-yellow text-ze-black font-black uppercase tracking-[0.2em] md:tracking-[0.4em] px-3 md:px-6 py-1 md:py-2 w-fit text-[10px] md:text-sm animate-bounce">
             Sua Bebida em Minutos
           </Badge>
           
-          <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.85] drop-shadow-2xl">
-            Bebida gelada, <br />
-            <span className="text-ze-yellow">
-              preço de supermercado.
+          <h1 className="text-3xl sm:text-5xl md:text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.9] md:leading-[0.85] drop-shadow-2xl">
+            Bebida gelada, <br className="hidden sm:block" />
+            <span className="text-ze-yellow inline-block mt-2 sm:mt-0">
+              preço de mercado.
             </span>
           </h1>
           
-          <p className="text-white/90 max-w-xl text-xl md:text-2xl font-black uppercase tracking-tight drop-shadow-lg">
-            Cervejas, vinhos, destilados e muito mais. <br/>
+          <p className="text-white/90 max-w-xl text-base md:text-2xl font-black uppercase tracking-tight drop-shadow-lg leading-tight">
+            Cervejas, vinhos e muito mais. <br className="hidden sm:block"/>
             Sem sair de casa, sem estresse.
           </p>
 
-          <div className="pt-8">
-             <form action="/search" className="max-w-2xl relative flex items-center bg-white rounded-3xl shadow-2xl hover:shadow-ze-yellow/40 transition-all p-3 border-4 border-ze-black transform -rotate-1 hover:rotate-0">
-              <div className="pl-4 pr-2 text-ze-black">
-                <Search className="h-8 w-8" />
+          <div className="pt-4 md:pt-8 w-full">
+             <form action="/search" className="max-w-2xl relative flex items-center bg-white rounded-2xl md:rounded-3xl shadow-2xl hover:shadow-ze-yellow/40 transition-all p-2 md:p-3 border-4 border-ze-black transform -rotate-1 hover:rotate-0">
+              <div className="pl-2 md:pl-4 pr-1 md:pr-2 text-ze-black">
+                <Search className="h-6 w-6 md:h-8 md:w-8" />
               </div>
               <Input 
                 name="q"
-                className="border-0 shadow-none focus-visible:ring-0 px-4 h-14 text-xl rounded-none font-black placeholder:text-ze-black/20 uppercase italic w-full" 
-                placeholder="O que vamos beber hoje?" 
+                className="border-0 shadow-none focus-visible:ring-0 px-2 md:px-4 h-10 md:h-14 text-sm md:text-xl rounded-none font-black placeholder:text-ze-black/20 uppercase italic w-full" 
+                placeholder="O que vamos beber?" 
               />
-              <Button type="submit" variant="ze-dark" className="rounded-2xl px-12 h-14 ml-2 text-lg shadow-xl shrink-0">
+              <Button type="submit" variant="ze-dark" className="rounded-xl md:rounded-2xl px-4 md:px-12 h-10 md:h-14 ml-1 md:ml-2 text-sm md:text-lg shadow-xl shrink-0">
                 Buscar
               </Button>
             </form>

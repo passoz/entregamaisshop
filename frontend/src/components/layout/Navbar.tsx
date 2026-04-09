@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react"
 import Link from "next/link"
 import { ShoppingCart, Menu } from "lucide-react"
@@ -5,8 +7,11 @@ import { ShoppingCart, Menu } from "lucide-react"
 import { Button } from "../ui/Button"
 import { Badge } from "../ui/Badge"
 import { Logo } from "./Logo"
+import { useCart } from "@/lib/CartContext"
 
 export function Navbar() {
+  const { totalItems } = useCart()
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-ze-black/10 bg-ze-yellow shadow-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -30,16 +35,18 @@ export function Navbar() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative text-ze-black hover:bg-ze-black/5">
+            <Button variant="ghost" size="icon" className="relative text-ze-black hover:bg-ze-black/5 h-10 w-10">
               <ShoppingCart className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-ze-red text-white border-2 border-ze-yellow">
-                3
-              </Badge>
+              {totalItems > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-ze-red text-white border-2 border-ze-yellow">
+                  {totalItems}
+                </Badge>
+              )}
             </Button>
           </Link>
-          <div className="hidden sm:block">
+          <div className="hidden lg:flex items-center">
             <Link href="/auth/login/vendedor">
               <Button variant="outline" className="mr-2 border-ze-black/20 text-ze-black hover:bg-ze-black/5 rounded-xl font-bold">
                 Entrar
@@ -51,8 +58,8 @@ export function Navbar() {
               </Button>
             </Link>
           </div>
-          <Button variant="ghost" size="icon" className="md:hidden text-ze-black">
-            <Menu className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="md:hidden text-ze-black h-10 w-10">
+            <Menu className="h-6 w-6" />
           </Button>
         </div>
       </div>

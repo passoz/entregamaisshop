@@ -14,11 +14,12 @@ export interface CartItem {
 
 interface CartContextProps {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   removeItem: (product_id: string) => void;
   updateQuantity: (product_id: string, delta: number) => void;
   clearCart: () => void;
   subtotal: number;
+  totalItems: number;
 }
 
 const CartContext = createContext<CartContextProps | undefined>(undefined);
@@ -41,15 +42,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, mounted]);
 
-  const addItem = (item: Omit<CartItem, "quantity">) => {
+  const addItem = (item: Omit<CartItem, "quantity">, quantity = 1) => {
     setItems((prev) => {
       const exists = prev.find((i) => i.product_id === item.product_id);
       if (exists) {
         return prev.map((i) =>
-          i.product_id === item.product_id ? { ...i, quantity: i.quantity + 1 } : i
+          i.product_id === item.product_id ? { ...i, quantity: i.quantity + quantity } : i
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { ...item, quantity }];
     });
   };
 
@@ -72,9 +73,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const clearCart = () => setItems([]);
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
+  const isCartEmpty = totalItems === 0;
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, subtotal }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, subtotal, totalItems }}>
       {children}
     </CartContext.Provider>
   );

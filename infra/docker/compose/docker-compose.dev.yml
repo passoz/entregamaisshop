@@ -24,9 +24,7 @@ services:
     ports: ["9000:9000", "9001:9001"]
   rabbitmq:
     ports: ["5672:5672", "15672:15672"]
-  elasticsearch:
-    ports: ["9200:9200"]
-  logstash:
-    ports: ["5044:5044"]
-  kibana:
-    ports: ["5601:5601"]
+  loki:
+    ports: ["3100:3100"]
+  grafana:
+    ports: ["3001:3000"]
