@@ -3,19 +3,47 @@ import { http, HttpResponse } from 'msw'
 // In-memory "database" for mocks
 const db = {
   sellers: [
-    { id: 'seller-1', name: 'Adega Centro', email: 'vendedor@teste.com' }
+    { id: '1', name: 'Depósito do Zé', email: 'ze@teste.com', category: 'Cervejas e Gelo', rating: 4.9, time: '15-25 min', fee: 'Grátis' },
+    { id: '2', name: 'Conveniência 24h', email: 'conv24@teste.com', category: 'Bebidas Variadas', rating: 4.5, time: '20-35 min', fee: 'R$ 4,90' },
+    { id: '3', name: 'Distribuidora Imperial', email: 'imperial@teste.com', category: 'Vinhos e Destilados', rating: 4.7, time: '30-50 min', fee: 'R$ 6,90' },
+    { id: '4', name: 'Gelo e Carvão Express', email: 'gelo@teste.com', category: 'Essenciais', rating: 4.8, time: '10-20 min', fee: 'R$ 3,00' }
   ],
   products: [
-    { id: 'prod-1', seller_id: 'seller-1', name: 'Cerveja Pilsen 600ml', price: 12.5, status: 'active' },
-    { id: 'prod-2', seller_id: 'seller-1', name: 'Vinho Tinto Seco', price: 45.0, status: 'active' }
+    // Depósito do Zé
+    { id: 'prod-1', seller_id: '1', name: 'Cerveja Pilsen Lata 350ml - Pack 12', price: 34.9, category: 'Cervejas', status: 'active', image: '/assets/beverage-mock.png' },
+    { id: 'prod-2', seller_id: '1', name: 'Gelo Cubo 5kg', price: 9.9, category: 'Gelo e Carvão', status: 'active', image: '/assets/ice-mock.png' },
+    { id: 'prod-3', seller_id: '1', name: 'Cerveja IPA Garrafa 600ml', price: 12.5, category: 'Cervejas', status: 'active' },
+    
+    // Conveniência 24h
+    { id: 'prod-4', seller_id: '2', name: 'Refrigerante Cola 2L', price: 8.5, category: 'Refrigerantes', status: 'active' },
+    { id: 'prod-5', seller_id: '2', name: 'Energético Lata 250ml', price: 7.9, category: 'Energéticos', status: 'active' },
+    { id: 'prod-6', seller_id: '2', name: 'Vodka Básica 1L', price: 35.0, category: 'Destilados', status: 'active' },
+    { id: 'prod-7', seller_id: '2', name: 'Salgadinho de Batata 100g', price: 14.5, category: 'Petiscos', status: 'active' },
+
+    // Distribuidora Imperial
+    { id: 'prod-8', seller_id: '3', name: 'Vinho Tinto Seco Reservado', price: 45.0, category: 'Vinhos', status: 'active' },
+    { id: 'prod-9', seller_id: '3', name: 'Whisky 12 Anos 750ml', price: 189.9, category: 'Destilados', status: 'active' },
+    { id: 'prod-10', seller_id: '3', name: 'Gin Premium 700ml', price: 110.0, category: 'Destilados', status: 'active' },
+
+    // Gelo e Carvão Express
+    { id: 'prod-11', seller_id: '4', name: 'Gelo Moído 10kg', price: 15.0, category: 'Gelo e Carvão', status: 'active' },
+    { id: 'prod-12', seller_id: '4', name: 'Carvão Vegetal 3kg', price: 19.9, category: 'Gelo e Carvão', status: 'active' },
   ],
   drivers: [
-    { id: 'driver-1', name: 'João Entregador', email: 'entregador@teste.com', status: 'available' }
+    { id: 'driver-1', name: 'João Entregador', email: 'joao.entregador@teste.com', status: 'available' },
+    { id: 'driver-2', name: 'Carlos Motoboy', email: 'carlos@teste.com', status: 'busy' },
+    { id: 'driver-3', name: 'Ana Entrega', email: 'ana@teste.com', status: 'offline' }
   ],
   customers: [
-    { id: 'cust-1', name: 'Maria Cliente', email: 'cliente@teste.com' }
+    { id: 'cust-1', name: 'Maria Cliente', email: 'maria@teste.com' },
+    { id: 'cust-2', name: 'José Cliente', email: 'jose@teste.com' },
+    { id: 'cust-3', name: 'Pedro Cliente', email: 'pedro@teste.com' }
   ],
-  orders: [] as any[],
+  orders: [
+    { id: 'order-101', customer_id: 'cust-1', seller_id: '1', items: [{ product_id: 'prod-1', quantity: 1 }], total_amount: 34.9, status: 'delivered', driver_id: 'driver-1', created_at: new Date(Date.now() - 86400000).toISOString() },
+    { id: 'order-102', customer_id: 'cust-2', seller_id: '3', items: [{ product_id: 'prod-9', quantity: 1 }], total_amount: 189.9, status: 'pending', driver_id: null, created_at: new Date().toISOString() },
+    { id: 'order-103', customer_id: 'cust-3', seller_id: '2', items: [{ product_id: 'prod-4', quantity: 2 }, { product_id: 'prod-7', quantity: 1 }], total_amount: 31.5, status: 'accepted', driver_id: 'driver-2', created_at: new Date(Date.now() - 1000000).toISOString() }
+  ] as any[],
   currentUser: null as any
 }
 
@@ -46,7 +74,7 @@ export const handlers = [
 
   http.post('*/api/auth/login', async ({ request }) => {
     const { email, role } = await request.json() as any
-    // Simple mock logic: any login is successful if it has an email and role
+    // Simple mock logic
     db.currentUser = { id: `mock-${role}-1`, email, name: `Teste ${role}`, roles: [role] }
     return HttpResponse.json({ 
       user: db.currentUser,
@@ -64,16 +92,16 @@ export const handlers = [
 
   // --- SELLER MOCKS ---
   http.get('*/api/v1/vendedor/profile', () => {
-    return HttpResponse.json({ seller_id: 'seller-1', name: 'Adega Centro' })
+    return HttpResponse.json(db.sellers[0])
   }),
 
   http.get('*/api/v1/vendedor/products', () => {
-    return HttpResponse.json(db.products.filter(p => p.seller_id === 'seller-1'))
+    return HttpResponse.json(db.products.filter(p => p.seller_id === db.sellers[0].id))
   }),
 
   http.post('*/api/v1/vendedor/products', async ({ request }) => {
     const nextProduct = await request.json() as any
-    const newProduct = { ...nextProduct, id: `prod-${Date.now()}`, seller_id: 'seller-1', status: 'active' }
+    const newProduct = { ...nextProduct, id: `prod-${Date.now()}`, seller_id: db.sellers[0].id, status: 'active' }
     db.products.push(newProduct)
     return HttpResponse.json(newProduct, { status: 201 })
   }),
@@ -95,13 +123,48 @@ export const handlers = [
     return HttpResponse.json({ success: true })
   }),
 
-  // --- CUSTOMER MOCKS ---
+  // --- PUBLIC/CUSTOMER MOCKS ---
   http.get('*/api/v1/sellers', () => {
     return HttpResponse.json(db.sellers)
   }),
 
-  http.get('*/api/v1/products', () => {
-    return HttpResponse.json(db.products)
+  // Customer Orders
+  http.get('*/api/v1/customers/orders', () => {
+    return HttpResponse.json(db.orders.filter(o => o.customer_id === 'cust-1').sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+  }),
+
+  // Store Public Profile
+  http.get('*/api/v1/sellers/:id', ({ params }) => {
+    const { id } = params
+    const seller = db.sellers.find(s => s.id === id)
+    if (seller) {
+      return HttpResponse.json(seller)
+    }
+    return new HttpResponse(null, { status: 404 })
+  }),
+
+  // Public Store Products
+  http.get('*/api/v1/sellers/:id/products', ({ params }) => {
+    const { id } = params
+    const storeProducts = db.products.filter(p => p.seller_id === id && p.status === 'active')
+    return HttpResponse.json(storeProducts)
+  }),
+
+  http.get('*/api/v1/products', ({ request }) => {
+    const url = new URL(request.url)
+    const query = url.searchParams.get('q')?.toLowerCase()
+    const category = url.searchParams.get('category')?.toLowerCase()
+    
+    let filtered = db.products.filter(p => p.status === 'active')
+    
+    if (query) {
+      filtered = filtered.filter(p => p.name.toLowerCase().includes(query))
+    }
+    if (category) {
+      filtered = filtered.filter(p => p.category?.toLowerCase() === category)
+    }
+
+    return HttpResponse.json(filtered)
   }),
 
   http.post('*/api/v1/orders', async ({ request }) => {

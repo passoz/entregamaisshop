@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Search, Star, Clock, MapPin, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -46,18 +47,19 @@ export default function Home() {
           </p>
 
           <div className="pt-8">
-             <div className="max-w-2xl relative flex items-center bg-white rounded-3xl shadow-2xl hover:shadow-ze-yellow/40 transition-all p-3 border-4 border-ze-black transform -rotate-1 hover:rotate-0">
+             <form action="/search" className="max-w-2xl relative flex items-center bg-white rounded-3xl shadow-2xl hover:shadow-ze-yellow/40 transition-all p-3 border-4 border-ze-black transform -rotate-1 hover:rotate-0">
               <div className="pl-4 pr-2 text-ze-black">
                 <Search className="h-8 w-8" />
               </div>
               <Input 
-                className="border-0 shadow-none focus-visible:ring-0 px-4 h-14 text-xl rounded-none font-black placeholder:text-ze-black/20 uppercase italic" 
+                name="q"
+                className="border-0 shadow-none focus-visible:ring-0 px-4 h-14 text-xl rounded-none font-black placeholder:text-ze-black/20 uppercase italic w-full" 
                 placeholder="O que vamos beber hoje?" 
               />
-              <Button variant="ze-dark" className="rounded-2xl px-12 h-14 ml-2 text-lg shadow-xl shrink-0">
+              <Button type="submit" variant="ze-dark" className="rounded-2xl px-12 h-14 ml-2 text-lg shadow-xl shrink-0">
                 Buscar
               </Button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -68,7 +70,7 @@ export default function Home() {
         </div>
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide py-1">
           {["Cervejas", "Vinhos", "Destilados", "Refrigerantes", "Gelo e Carvão", "Energéticos", "Sucos", "Petiscos"].map((item, i) => (
-            <div key={i} className="flex-shrink-0 flex flex-col items-center gap-3 group cursor-pointer">
+            <Link href={`/search?category=${encodeURIComponent(item)}`} key={i} className="flex-shrink-0 flex flex-col items-center gap-3 group cursor-pointer hover:no-underline">
               <div className="w-20 h-20 rounded-3xl bg-white shadow-sm border-2 border-ze-black/5 flex items-center justify-center group-hover:border-ze-yellow group-hover:shadow-lg transition-all group-hover:-translate-y-2">
                 <div className="w-12 h-12 rounded-full bg-ze-yellow/20 flex items-center justify-center">
                   <span className="text-2xl">🍺</span>
@@ -77,7 +79,7 @@ export default function Home() {
               <span className="text-sm font-black text-ze-black/70 group-hover:text-ze-black transition-colors uppercase tracking-tight">
                 {item}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -85,49 +87,53 @@ export default function Home() {
       <div>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black text-ze-black uppercase tracking-tighter">Depósitos Próximos</h2>
-          <Button variant="ghost" className="text-ze-black hover:text-ze-black/80 font-bold uppercase text-xs tracking-widest">
-            Ver todos <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
+          <Link href="/search" className="hover:no-underline">
+            <Button variant="ghost" className="text-ze-black hover:text-ze-black/80 font-bold uppercase text-xs tracking-widest">
+              Ver todos <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </Link>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {MOCK_STORES.map((store) => (
-            <Card key={store.id} className="cursor-pointer group overflow-hidden border-2 border-ze-black/5 rounded-3xl ze-card-hover bg-white">
-              <div className="h-40 bg-ze-gray w-full relative">
-                {/* Mock image banner with beverage color overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-ze-black/80 to-transparent flex items-end p-6">
-                  <Badge className="bg-ze-yellow text-ze-black font-black uppercase text-[10px] tracking-widest">
-                    {store.category}
-                  </Badge>
-                </div>
-              </div>
-              <CardContent className="p-6 pt-8 relative">
-                <div className="absolute -top-12 right-6 w-20 h-20 bg-white rounded-3xl shadow-xl border-4 border-ze-yellow flex items-center justify-center transform rotate-3 group-hover:rotate-0 transition-transform">
-                  <div className="w-16 h-16 bg-ze-gray rounded-2xl flex items-center justify-center text-3xl">
-                    🏪
+            <Link href={`/store/${store.id}`} key={store.id} className="hover:no-underline">
+              <Card className="cursor-pointer group overflow-hidden border-2 border-ze-black/5 rounded-3xl ze-card-hover bg-white h-full">
+                <div className="h-40 bg-ze-gray w-full relative">
+                  {/* Mock image banner with beverage color overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-ze-black/80 to-transparent flex items-end p-6">
+                    <Badge className="bg-ze-yellow text-ze-black font-black uppercase text-[10px] tracking-widest">
+                      {store.category}
+                    </Badge>
                   </div>
                 </div>
-                <h3 className="font-black text-xl text-ze-black mb-1 group-hover:text-ze-red transition-colors uppercase tracking-tighter">
-                  {store.name}
-                </h3>
-                <div className="flex items-center gap-4 text-sm text-ze-black/60 mb-4 font-bold">
-                  <div className="flex items-center text-ze-yellow bg-ze-black px-2 py-0.5 rounded-md">
-                    <Star className="w-4 h-4 mr-1 fill-current" /> {store.rating}
+                <CardContent className="p-6 pt-8 relative">
+                  <div className="absolute -top-12 right-6 w-20 h-20 bg-white rounded-3xl shadow-xl border-4 border-ze-yellow flex items-center justify-center transform rotate-3 group-hover:rotate-0 transition-transform">
+                    <div className="w-16 h-16 bg-ze-gray rounded-2xl flex items-center justify-center text-3xl">
+                      🏪
+                    </div>
                   </div>
-                  <span>•</span>
-                  <span>{store.category}</span>
-                </div>
-                
-                <div className="flex items-center justify-between text-xs font-black text-ze-black/80 bg-ze-gray rounded-2xl p-4 border border-ze-black/5">
-                  <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-2" /> {store.time}
+                  <h3 className="font-black text-xl text-ze-black mb-1 group-hover:text-ze-red transition-colors uppercase tracking-tighter">
+                    {store.name}
+                  </h3>
+                  <div className="flex items-center gap-4 text-sm text-ze-black/60 mb-4 font-bold">
+                    <div className="flex items-center text-ze-yellow bg-ze-black px-2 py-0.5 rounded-md">
+                      <Star className="w-4 h-4 mr-1 fill-current" /> {store.rating}
+                    </div>
+                    <span>•</span>
+                    <span>{store.category}</span>
                   </div>
-                  <div className="flex items-center text-ze-red uppercase tracking-widest">
-                    {store.fee === "Grátis" ? "Frete ZERO" : store.fee}
+                  
+                  <div className="flex items-center justify-between text-xs font-black text-ze-black/80 bg-ze-gray rounded-2xl p-4 border border-ze-black/5 mt-4">
+                    <div className="flex items-center">
+                      <Clock className="w-4 h-4 mr-2" /> {store.time}
+                    </div>
+                    <div className="flex items-center text-ze-red uppercase tracking-widest">
+                      {store.fee === "Grátis" ? "Frete ZERO" : store.fee}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>

@@ -7,8 +7,11 @@ export function MSWProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function initMsw() {
-      console.log('MSW: Initializing...', process.env.NEXT_PUBLIC_API_MOCKING)
-      if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled' && typeof window !== 'undefined') {
+      // Force mock to true to ensure it works inside the docker container
+      const shouldMock = true 
+      console.log('MSW: Initializing...', { shouldMock })
+      
+      if (shouldMock && typeof window !== 'undefined') {
         process.env.NEXT_PUBLIC_MSW_ACTIVE = 'true'
         const { worker } = await import('@/mocks/browser')
         await worker.start({
@@ -22,7 +25,8 @@ export function MSWProvider({ children }: { children: React.ReactNode }) {
     initMsw()
   }, [])
 
-  if (!mswReady && process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
+  const shouldMock = true
+  if (!mswReady && shouldMock) {
     return null
   }
 
