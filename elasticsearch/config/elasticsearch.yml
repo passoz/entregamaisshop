@@ -1,4 +1,0 @@
-cluster.name: entregamais
-node.name: es01
-discovery.type: single-node
-xpack.security.enabled: false
