@@ -1,0 +1,10 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/auth/login/vendedor/page": "app/auth/login/vendedor/page.js",
+  "/auth/login/entregador/page": "app/auth/login/entregador/page.js",
+  "/terms/page": "app/terms/page.js",
+  "/privacy/page": "app/privacy/page.js",
+  "/auth/signup/vendedor/page": "app/auth/signup/vendedor/page.js",
+  "/auth/signup/entregador/page": "app/auth/signup/entregador/page.js"
+}

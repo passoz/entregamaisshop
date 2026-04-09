@@ -7,20 +7,64 @@ import { Label } from "@/components/ui/Label"
 import { ArrowRight, Github } from "lucide-react"
 import Link from "next/link"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
+import { signIn } from "next-auth/react"
+
 export default function SellerLogin() {
+  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        role: "vendedor",
+        redirect: false,
+      })
+      
+      if (result?.ok) {
+        router.push('/vendedor/dashboard')
+      } else {
+        setError('E-mail ou senha incorretos')
+      }
+    } catch (err) {
+      setError('Falha na conexão com o servidor de autenticação')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <AuthLayout 
       role="vendedor" 
       title="Login do Lojista" 
       subtitle="Acesse seu painel para gerenciar sua loja."
     >
-      <form className="space-y-6" action={() => {}}>
+      <form className="space-y-6" onSubmit={handleLogin}>
+        {error && (
+          <div className="bg-red-50 text-red-500 p-3 rounded-xl text-sm font-bold border border-red-100">
+            {error}
+          </div>
+        )}
         <div className="space-y-2">
           <Label htmlFor="email">E-mail Corporativo</Label>
           <Input 
             id="email" 
             type="email" 
             placeholder="vendas@sualoja.com" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
             className="h-12 px-4 rounded-xl border-slate-200 shadow-sm focus:border-brand-teal focus:ring-brand-teal/10"
           />
         </div>
@@ -35,12 +79,19 @@ export default function SellerLogin() {
             id="password" 
             type="password" 
             placeholder="••••••••" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
             className="h-12 px-4 rounded-xl border-slate-200 shadow-sm focus:border-brand-teal focus:ring-brand-teal/10"
           />
         </div>
 
-        <Button className="w-full h-14 bg-brand-teal text-white font-black rounded-2xl shadow-lg shadow-brand-teal/20 hover:bg-brand-teal/90 transition-all text-lg group">
-          Entrar no Painel
+        <Button 
+          type="submit"
+          disabled={loading}
+          className="w-full h-14 bg-brand-teal text-white font-black rounded-2xl shadow-lg shadow-brand-teal/20 hover:bg-brand-teal/90 transition-all text-lg group"
+        >
+          {loading ? 'Entrando...' : 'Entrar no Painel'}
           <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>
 

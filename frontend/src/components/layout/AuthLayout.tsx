@@ -33,7 +33,6 @@ export function AuthLayout({
       {/* Left Side: Visual/Branding */}
       <div className={`hidden lg:flex flex-col justify-between p-12 ${roleStyles[role]} ${roleTextStyles[role]} relative overflow-hidden`}>
         <div className="relative z-10">
-          <Logo className={`mb-12 scale-125 origin-left ${role === 'admin' ? 'brightness-150' : ''}`} />
           <h1 className="text-6xl font-black leading-none mb-6 uppercase italic tracking-tighter">
             Entregando <br/>
             gelada no preço <br/>
@@ -72,9 +71,6 @@ export function AuthLayout({
       {/* Right Side: Auth Form */}
       <div className="flex items-center justify-center p-8 bg-ze-white">
         <div className="w-full max-w-md space-y-8">
-          <div className="lg:hidden text-center mb-8 bg-ze-yellow p-4 rounded-2xl">
-            <Logo />
-          </div>
           
           <div className="space-y-2">
             <h2 className="text-4xl font-black text-ze-black tracking-tighter uppercase italic">{title}</h2>

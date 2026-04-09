@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean
-  variant?: "default" | "outline" | "ghost" | "link" | "brand" | "ze-dark"
+  variant?: "default" | "outline" | "ghost" | "link" | "brand" | "ze-dark" | "destructive"
   size?: "default" | "sm" | "lg" | "icon"
 }
 
@@ -20,6 +20,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     if (variant === "link") variantStyles = "text-primary underline-offset-4 hover:underline"
     if (variant === "brand") variantStyles = "bg-ze-yellow text-ze-black shadow-sm font-black hover:bg-ze-yellow/90 transition-all active:scale-95"
     if (variant === "ze-dark") variantStyles = "bg-ze-black text-ze-yellow shadow-md font-black hover:bg-ze-black/90 transition-all active:scale-95"
+    if (variant === "destructive") variantStyles = "bg-destructive text-destructive-foreground hover:bg-destructive/90"
 
     let sizeStyles = "h-11 px-6"
     if (size === "sm") sizeStyles = "h-9 rounded-md px-3 text-xs"

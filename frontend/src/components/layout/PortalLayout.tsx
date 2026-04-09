@@ -54,9 +54,8 @@ export function PortalLayout({
     <div className="flex h-screen bg-ze-gray overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 bg-ze-white border-r border-ze-black/5 flex flex-col">
-        <div className="p-6 border-b border-ze-black/5 bg-ze-yellow shadow-sm">
-          <Logo />
-          <div className="mt-2 text-[10px] font-black text-ze-black/40 uppercase tracking-[0.2em] pl-1">
+        <div className="p-6 border-b border-ze-black/5 bg-ze-yellow shadow-sm flex items-center justify-center">
+          <div className="text-[10px] font-black text-ze-black/40 uppercase tracking-[0.2em]">
             Portal do {role === 'admin' ? 'Administrador' : role === 'vendedor' ? 'Dono de Depósito' : 'Entregador'}
           </div>
         </div>
