@@ -1,5 +1,9 @@
 name: observability-ci
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
 jobs:
   validate:
     runs-on: ubuntu-latest

@@ -1,5 +1,9 @@
 name: docker-build
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest

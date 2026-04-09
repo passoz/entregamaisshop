@@ -1,5 +1,9 @@
 name: backend-ci
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
 jobs:
   lint-and-security:
     runs-on: ubuntu-latest

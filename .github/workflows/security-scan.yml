@@ -1,5 +1,9 @@
 name: security-scan
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
 jobs:
   trivy:
     runs-on: ubuntu-latest

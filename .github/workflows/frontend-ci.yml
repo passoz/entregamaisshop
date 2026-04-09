@@ -1,5 +1,9 @@
 name: frontend-ci
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
 jobs:
   lint-and-quality:
     runs-on: ubuntu-latest

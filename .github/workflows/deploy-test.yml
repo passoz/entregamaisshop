@@ -1,5 +1,9 @@
 name: deploy-test
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
