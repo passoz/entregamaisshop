@@ -4,8 +4,25 @@ export interface Seller {
   email?: string;
   category?: string;
   rating?: number;
+  review_count?: number;
   time?: string;
   fee?: string;
+  fee_label?: string;
+  min_delivery_fee?: number;
+  delivery_areas?: Array<{
+    id: string;
+    label: string;
+    fee: number;
+    fee_label?: string;
+  }>;
+  reviews?: Array<{
+    id: string;
+    score: number;
+    comment?: string;
+    customer_id?: string;
+    customer_name?: string;
+    created_at?: string;
+  }>;
 }
 
 export interface CityOption {

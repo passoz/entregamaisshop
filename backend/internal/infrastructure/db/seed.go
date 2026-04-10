@@ -9,6 +9,9 @@ import (
 	"github.com/entregamais/platform/backend/ent/category"
 	"github.com/entregamais/platform/backend/ent/product"
 	"github.com/entregamais/platform/backend/ent/seller"
+	"github.com/entregamais/platform/backend/ent/sellerdeliveryarea"
+	"github.com/entregamais/platform/backend/ent/sellerreview"
+	"github.com/entregamais/platform/backend/ent/selleruser"
 	"github.com/entregamais/platform/backend/ent/user"
 )
 
@@ -38,16 +41,45 @@ func Seed(ctx context.Context, client *ent.Client) error {
 		}
 	}
 
-	// 2. Create User user-1
-	exists, _ := client.User.Query().Where(user.IDEQ("user-1")).Exist(ctx)
-	if !exists {
-		_, err := client.User.Create().
-			SetID("user-1").
-			SetEmail("ze@entregamais.com").
-			SetName("Zé Teste").
+	// 2. Create Users
+	users := []struct {
+		ID    string
+		Email string
+		Name  string
+	}{
+		{"user-1", "cliente@entregamais.com", "Cliente Teste"},
+		{"seller-owner-1", "dono@depositodoze.com", "Dono do Ze"},
+	}
+	for _, u := range users {
+		exists, _ := client.User.Query().Where(user.IDEQ(u.ID)).Exist(ctx)
+		if !exists {
+			_, err := client.User.Create().
+				SetID(u.ID).
+				SetEmail(u.Email).
+				SetName(u.Name).
+				Save(ctx)
+			if err != nil {
+				fmt.Printf("Error creating user %s: %v\n", u.ID, err)
+			}
+		}
+	}
+
+	// 2.1 Link seller owner to seller 1
+	linkExists, _ := client.SellerUser.Query().
+		Where(
+			selleruser.HasSellerWith(seller.IDEQ("1")),
+			selleruser.HasUserWith(user.IDEQ("seller-owner-1")),
+		).
+		Exist(ctx)
+	if !linkExists {
+		_, err := client.SellerUser.Create().
+			SetID("seller-user-1").
+			SetRole("owner").
+			SetSellerID("1").
+			SetUserID("seller-owner-1").
 			Save(ctx)
 		if err != nil {
-			fmt.Printf("Error creating user: %v\n", err)
+			fmt.Printf("Error linking seller owner: %v\n", err)
 		}
 	}
 
@@ -100,6 +132,62 @@ func Seed(ctx context.Context, client *ent.Client) error {
 				Save(ctx)
 			if err != nil {
 				fmt.Printf("Error creating product %s: %v\n", p.ID, err)
+			}
+		}
+	}
+
+	// 5. Seller delivery areas
+	deliveryAreas := []struct {
+		ID       string
+		SellerID string
+		Label    string
+		Fee      float64
+	}{
+		{"area-1", "1", "Cabo Frio", 0},
+		{"area-2", "1", "Arraial do Cabo", 4.90},
+		{"area-3", "1", "Buzios", 7.90},
+		{"area-4", "2", "Arraial do Cabo", 3.50},
+		{"area-5", "2", "Sao Pedro da Aldeia", 5.00},
+		{"area-6", "3", "Rio de Janeiro - Zona Sul", 8.90},
+	}
+	for _, area := range deliveryAreas {
+		exists, _ := client.SellerDeliveryArea.Query().Where(sellerdeliveryarea.IDEQ(area.ID)).Exist(ctx)
+		if !exists {
+			_, err := client.SellerDeliveryArea.Create().
+				SetID(area.ID).
+				SetSellerID(area.SellerID).
+				SetLabel(area.Label).
+				SetFee(area.Fee).
+				Save(ctx)
+			if err != nil {
+				fmt.Printf("Error creating delivery area %s: %v\n", area.ID, err)
+			}
+		}
+	}
+
+	// 6. Seller reviews
+	reviews := []struct {
+		ID         string
+		SellerID   string
+		CustomerID string
+		Score      int
+		Comment    string
+	}{
+		{"review-1", "2", "user-1", 4, "Entrega rapida e bebidas geladas."},
+		{"review-2", "3", "user-1", 5, "Atendimento excelente."},
+	}
+	for _, review := range reviews {
+		exists, _ := client.SellerReview.Query().Where(sellerreview.IDEQ(review.ID)).Exist(ctx)
+		if !exists {
+			_, err := client.SellerReview.Create().
+				SetID(review.ID).
+				SetSellerID(review.SellerID).
+				SetCustomerID(review.CustomerID).
+				SetScore(review.Score).
+				SetComment(review.Comment).
+				Save(ctx)
+			if err != nil {
+				fmt.Printf("Error creating review %s: %v\n", review.ID, err)
 			}
 		}
 	}

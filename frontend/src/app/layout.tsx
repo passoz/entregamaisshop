@@ -1,5 +1,25 @@
+import { Metadata, Viewport } from "next";
 import "../app.css";
 import type { ReactNode } from "react";
+
+export const metadata: Metadata = {
+  title: "EntregaMais | Sua bebida gelada em minutos",
+  description: "O jeito mais rápido de receber sua cerveja, destilado ou petiscos. Preço de mercado e entrega em até 25 minutos. Peça agora!",
+  keywords: ["entrega de bebidas", "cerveja gelada", "delivery de bebidas", "entregamais"],
+  openGraph: {
+    title: "EntregaMais | Sua bebida gelada em minutos",
+    description: "Sua gelada na porta de casa em tempo recorde.",
+    type: "website",
+    locale: "pt_BR",
+    siteName: "EntregaMais",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#FFC107",
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const dynamic = "force-dynamic";
 

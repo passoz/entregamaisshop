@@ -60,7 +60,7 @@ export default function CustomerLogin() {
           <Input 
             id="email" 
             type="email" 
-            placeholder="email@exemplo.com" 
+            placeholder="admin@entregamaisshop.com" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

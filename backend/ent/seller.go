@@ -45,9 +45,13 @@ type SellerEdges struct {
 	Inventory []*Inventory `json:"inventory,omitempty"`
 	// Orders holds the value of the orders edge.
 	Orders []*Order `json:"orders,omitempty"`
+	// DeliveryAreas holds the value of the delivery_areas edge.
+	DeliveryAreas []*SellerDeliveryArea `json:"delivery_areas,omitempty"`
+	// Reviews holds the value of the reviews edge.
+	Reviews []*SellerReview `json:"reviews,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [6]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -84,6 +88,24 @@ func (e SellerEdges) OrdersOrErr() ([]*Order, error) {
 		return e.Orders, nil
 	}
 	return nil, &NotLoadedError{edge: "orders"}
+}
+
+// DeliveryAreasOrErr returns the DeliveryAreas value or an error if the edge
+// was not loaded in eager-loading.
+func (e SellerEdges) DeliveryAreasOrErr() ([]*SellerDeliveryArea, error) {
+	if e.loadedTypes[4] {
+		return e.DeliveryAreas, nil
+	}
+	return nil, &NotLoadedError{edge: "delivery_areas"}
+}
+
+// ReviewsOrErr returns the Reviews value or an error if the edge
+// was not loaded in eager-loading.
+func (e SellerEdges) ReviewsOrErr() ([]*SellerReview, error) {
+	if e.loadedTypes[5] {
+		return e.Reviews, nil
+	}
+	return nil, &NotLoadedError{edge: "reviews"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -184,6 +206,16 @@ func (_m *Seller) QueryInventory() *InventoryQuery {
 // QueryOrders queries the "orders" edge of the Seller entity.
 func (_m *Seller) QueryOrders() *OrderQuery {
 	return NewSellerClient(_m.config).QueryOrders(_m)
+}
+
+// QueryDeliveryAreas queries the "delivery_areas" edge of the Seller entity.
+func (_m *Seller) QueryDeliveryAreas() *SellerDeliveryAreaQuery {
+	return NewSellerClient(_m.config).QueryDeliveryAreas(_m)
+}
+
+// QueryReviews queries the "reviews" edge of the Seller entity.
+func (_m *Seller) QueryReviews() *SellerReviewQuery {
+	return NewSellerClient(_m.config).QueryReviews(_m)
 }
 
 // Update returns a builder for updating this Seller.

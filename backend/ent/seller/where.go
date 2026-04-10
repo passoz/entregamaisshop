@@ -512,6 +512,52 @@ func HasOrdersWith(preds ...predicate.Order) predicate.Seller {
 	})
 }
 
+// HasDeliveryAreas applies the HasEdge predicate on the "delivery_areas" edge.
+func HasDeliveryAreas() predicate.Seller {
+	return predicate.Seller(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DeliveryAreasTable, DeliveryAreasColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDeliveryAreasWith applies the HasEdge predicate on the "delivery_areas" edge with a given conditions (other predicates).
+func HasDeliveryAreasWith(preds ...predicate.SellerDeliveryArea) predicate.Seller {
+	return predicate.Seller(func(s *sql.Selector) {
+		step := newDeliveryAreasStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasReviews applies the HasEdge predicate on the "reviews" edge.
+func HasReviews() predicate.Seller {
+	return predicate.Seller(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ReviewsTable, ReviewsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasReviewsWith applies the HasEdge predicate on the "reviews" edge with a given conditions (other predicates).
+func HasReviewsWith(preds ...predicate.SellerReview) predicate.Seller {
+	return predicate.Seller(func(s *sql.Selector) {
+		step := newReviewsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Seller) predicate.Seller {
 	return predicate.Seller(sql.AndPredicates(predicates...))

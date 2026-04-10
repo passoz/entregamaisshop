@@ -434,7 +434,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
 		{Name: "document", Type: field.TypeString, Unique: true},
-		{Name: "status", Type: field.TypeString, Default: "active"},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 	}
 	// SellersTable holds the schema information for the "sellers" table.
@@ -447,6 +447,59 @@ var (
 				Name:    "seller_status",
 				Unique:  false,
 				Columns: []*schema.Column{SellersColumns[5]},
+			},
+		},
+	}
+	// SellerDeliveryAreasColumns holds the columns for the "seller_delivery_areas" table.
+	SellerDeliveryAreasColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "label", Type: field.TypeString},
+		{Name: "fee", Type: field.TypeFloat64, Default: 0},
+		{Name: "seller_delivery_areas", Type: field.TypeString},
+	}
+	// SellerDeliveryAreasTable holds the schema information for the "seller_delivery_areas" table.
+	SellerDeliveryAreasTable = &schema.Table{
+		Name:       "seller_delivery_areas",
+		Columns:    SellerDeliveryAreasColumns,
+		PrimaryKey: []*schema.Column{SellerDeliveryAreasColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "seller_delivery_areas_sellers_delivery_areas",
+				Columns:    []*schema.Column{SellerDeliveryAreasColumns[5]},
+				RefColumns: []*schema.Column{SellersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// SellerReviewsColumns holds the columns for the "seller_reviews" table.
+	SellerReviewsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "score", Type: field.TypeInt},
+		{Name: "comment", Type: field.TypeString, Nullable: true},
+		{Name: "seller_reviews", Type: field.TypeString},
+		{Name: "user_seller_reviews", Type: field.TypeString},
+	}
+	// SellerReviewsTable holds the schema information for the "seller_reviews" table.
+	SellerReviewsTable = &schema.Table{
+		Name:       "seller_reviews",
+		Columns:    SellerReviewsColumns,
+		PrimaryKey: []*schema.Column{SellerReviewsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "seller_reviews_sellers_reviews",
+				Columns:    []*schema.Column{SellerReviewsColumns[5]},
+				RefColumns: []*schema.Column{SellersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "seller_reviews_users_seller_reviews",
+				Columns:    []*schema.Column{SellerReviewsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -557,6 +610,8 @@ var (
 		ProductsTable,
 		ProductImagesTable,
 		SellersTable,
+		SellerDeliveryAreasTable,
+		SellerReviewsTable,
 		SellerUsersTable,
 		UploadsTable,
 		UsersTable,
@@ -582,6 +637,9 @@ func init() {
 	ProductsTable.ForeignKeys[1].RefTable = SellersTable
 	ProductImagesTable.ForeignKeys[0].RefTable = AssetsTable
 	ProductImagesTable.ForeignKeys[1].RefTable = ProductsTable
+	SellerDeliveryAreasTable.ForeignKeys[0].RefTable = SellersTable
+	SellerReviewsTable.ForeignKeys[0].RefTable = SellersTable
+	SellerReviewsTable.ForeignKeys[1].RefTable = UsersTable
 	SellerUsersTable.ForeignKeys[0].RefTable = SellersTable
 	SellerUsersTable.ForeignKeys[1].RefTable = UsersTable
 	UploadsTable.ForeignKeys[0].RefTable = AssetsTable

@@ -1,6 +1,7 @@
 import { PortalLayout } from "@/components/layout/PortalLayout"
 import { Users, Truck, Store, DollarSign, ArrowUpRight, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/Card"
+import Link from "next/link"
 
 export default function AdminDashboard() {
   const stats = [
@@ -9,6 +10,8 @@ export default function AdminDashboard() {
     { label: "Lojistas Ativos", value: "45", icon: <Store className="w-6 h-6 text-brand-amber" />, trend: "+5%", color: "amber" },
     { label: "Entregadores", value: "86", icon: <Truck className="w-6 h-6 text-brand-teal" />, trend: "+18%", color: "teal" },
   ]
+
+  const sellersCount = 5
 
   return (
     <PortalLayout title="Dashboard Geral" role="admin">
@@ -56,16 +59,18 @@ export default function AdminDashboard() {
               <h3 className="font-bold text-slate-800 mb-6">Alertas do Sistema</h3>
               <div className="space-y-4">
                 {[
-                  { text: "5 novos lojistas aguardando aprovação", type: "warning" },
+                  { text: `${sellersCount} novos lojistas aguardando aprovação`, type: "warning", link: "/admin/credentialing" },
                   { text: "Servidor Keycloak operando em 85% de carga", type: "info" },
                   { text: "Erro detectado no serviço de entregas", type: "error" },
                 ].map((alert, i) => (
-                  <div key={i} className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                    <div className={`w-2 h-2 rounded-full ${
-                      alert.type === 'warning' ? 'bg-amber-400' : alert.type === 'error' ? 'bg-red-400' : 'bg-brand-sky'
-                    }`} />
-                    <span className="text-sm font-medium text-slate-600">{alert.text}</span>
-                  </div>
+                  <Link href={alert.link || "#"} key={i} className="block group/alert">
+                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100 group-hover/alert:border-brand-teal transition-all">
+                      <div className={`w-2 h-2 rounded-full ${
+                        alert.type === 'warning' ? 'bg-amber-400' : alert.type === 'error' ? 'bg-red-400' : 'bg-brand-sky'
+                      }`} />
+                      <span className="text-sm font-medium text-slate-600 group-hover/alert:text-brand-teal transition-colors">{alert.text}</span>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </CardContent>

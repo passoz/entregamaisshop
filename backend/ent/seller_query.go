@@ -17,20 +17,24 @@ import (
 	"github.com/entregamais/platform/backend/ent/predicate"
 	"github.com/entregamais/platform/backend/ent/product"
 	"github.com/entregamais/platform/backend/ent/seller"
+	"github.com/entregamais/platform/backend/ent/sellerdeliveryarea"
+	"github.com/entregamais/platform/backend/ent/sellerreview"
 	"github.com/entregamais/platform/backend/ent/selleruser"
 )
 
 // SellerQuery is the builder for querying Seller entities.
 type SellerQuery struct {
 	config
-	ctx           *QueryContext
-	order         []seller.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.Seller
-	withUsers     *SellerUserQuery
-	withProducts  *ProductQuery
-	withInventory *InventoryQuery
-	withOrders    *OrderQuery
+	ctx               *QueryContext
+	order             []seller.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.Seller
+	withUsers         *SellerUserQuery
+	withProducts      *ProductQuery
+	withInventory     *InventoryQuery
+	withOrders        *OrderQuery
+	withDeliveryAreas *SellerDeliveryAreaQuery
+	withReviews       *SellerReviewQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -148,6 +152,50 @@ func (_q *SellerQuery) QueryOrders() *OrderQuery {
 			sqlgraph.From(seller.Table, seller.FieldID, selector),
 			sqlgraph.To(order.Table, order.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, seller.OrdersTable, seller.OrdersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDeliveryAreas chains the current query on the "delivery_areas" edge.
+func (_q *SellerQuery) QueryDeliveryAreas() *SellerDeliveryAreaQuery {
+	query := (&SellerDeliveryAreaClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(seller.Table, seller.FieldID, selector),
+			sqlgraph.To(sellerdeliveryarea.Table, sellerdeliveryarea.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, seller.DeliveryAreasTable, seller.DeliveryAreasColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryReviews chains the current query on the "reviews" edge.
+func (_q *SellerQuery) QueryReviews() *SellerReviewQuery {
+	query := (&SellerReviewClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(seller.Table, seller.FieldID, selector),
+			sqlgraph.To(sellerreview.Table, sellerreview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, seller.ReviewsTable, seller.ReviewsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -342,15 +390,17 @@ func (_q *SellerQuery) Clone() *SellerQuery {
 		return nil
 	}
 	return &SellerQuery{
-		config:        _q.config,
-		ctx:           _q.ctx.Clone(),
-		order:         append([]seller.OrderOption{}, _q.order...),
-		inters:        append([]Interceptor{}, _q.inters...),
-		predicates:    append([]predicate.Seller{}, _q.predicates...),
-		withUsers:     _q.withUsers.Clone(),
-		withProducts:  _q.withProducts.Clone(),
-		withInventory: _q.withInventory.Clone(),
-		withOrders:    _q.withOrders.Clone(),
+		config:            _q.config,
+		ctx:               _q.ctx.Clone(),
+		order:             append([]seller.OrderOption{}, _q.order...),
+		inters:            append([]Interceptor{}, _q.inters...),
+		predicates:        append([]predicate.Seller{}, _q.predicates...),
+		withUsers:         _q.withUsers.Clone(),
+		withProducts:      _q.withProducts.Clone(),
+		withInventory:     _q.withInventory.Clone(),
+		withOrders:        _q.withOrders.Clone(),
+		withDeliveryAreas: _q.withDeliveryAreas.Clone(),
+		withReviews:       _q.withReviews.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -398,6 +448,28 @@ func (_q *SellerQuery) WithOrders(opts ...func(*OrderQuery)) *SellerQuery {
 		opt(query)
 	}
 	_q.withOrders = query
+	return _q
+}
+
+// WithDeliveryAreas tells the query-builder to eager-load the nodes that are connected to
+// the "delivery_areas" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *SellerQuery) WithDeliveryAreas(opts ...func(*SellerDeliveryAreaQuery)) *SellerQuery {
+	query := (&SellerDeliveryAreaClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withDeliveryAreas = query
+	return _q
+}
+
+// WithReviews tells the query-builder to eager-load the nodes that are connected to
+// the "reviews" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *SellerQuery) WithReviews(opts ...func(*SellerReviewQuery)) *SellerQuery {
+	query := (&SellerReviewClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withReviews = query
 	return _q
 }
 
@@ -479,11 +551,13 @@ func (_q *SellerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Selle
 	var (
 		nodes       = []*Seller{}
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [6]bool{
 			_q.withUsers != nil,
 			_q.withProducts != nil,
 			_q.withInventory != nil,
 			_q.withOrders != nil,
+			_q.withDeliveryAreas != nil,
+			_q.withReviews != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -529,6 +603,20 @@ func (_q *SellerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Selle
 		if err := _q.loadOrders(ctx, query, nodes,
 			func(n *Seller) { n.Edges.Orders = []*Order{} },
 			func(n *Seller, e *Order) { n.Edges.Orders = append(n.Edges.Orders, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withDeliveryAreas; query != nil {
+		if err := _q.loadDeliveryAreas(ctx, query, nodes,
+			func(n *Seller) { n.Edges.DeliveryAreas = []*SellerDeliveryArea{} },
+			func(n *Seller, e *SellerDeliveryArea) { n.Edges.DeliveryAreas = append(n.Edges.DeliveryAreas, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withReviews; query != nil {
+		if err := _q.loadReviews(ctx, query, nodes,
+			func(n *Seller) { n.Edges.Reviews = []*SellerReview{} },
+			func(n *Seller, e *SellerReview) { n.Edges.Reviews = append(n.Edges.Reviews, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -654,6 +742,68 @@ func (_q *SellerQuery) loadOrders(ctx context.Context, query *OrderQuery, nodes 
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "seller_orders" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *SellerQuery) loadDeliveryAreas(ctx context.Context, query *SellerDeliveryAreaQuery, nodes []*Seller, init func(*Seller), assign func(*Seller, *SellerDeliveryArea)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Seller)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.SellerDeliveryArea(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(seller.DeliveryAreasColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.seller_delivery_areas
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "seller_delivery_areas" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "seller_delivery_areas" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *SellerQuery) loadReviews(ctx context.Context, query *SellerReviewQuery, nodes []*Seller, init func(*Seller), assign func(*Seller, *SellerReview)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Seller)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.SellerReview(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(seller.ReviewsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.seller_reviews
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "seller_reviews" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "seller_reviews" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

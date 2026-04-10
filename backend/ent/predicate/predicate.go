@@ -54,6 +54,12 @@ type ProductImage func(*sql.Selector)
 // Seller is the predicate function for seller builders.
 type Seller func(*sql.Selector)
 
+// SellerDeliveryArea is the predicate function for sellerdeliveryarea builders.
+type SellerDeliveryArea func(*sql.Selector)
+
+// SellerReview is the predicate function for sellerreview builders.
+type SellerReview func(*sql.Selector)
+
 // SellerUser is the predicate function for selleruser builders.
 type SellerUser func(*sql.Selector)
 

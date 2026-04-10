@@ -14,6 +14,7 @@ import (
 	"github.com/entregamais/platform/backend/ent/cart"
 	"github.com/entregamais/platform/backend/ent/entregador"
 	"github.com/entregamais/platform/backend/ent/order"
+	"github.com/entregamais/platform/backend/ent/sellerreview"
 	"github.com/entregamais/platform/backend/ent/selleruser"
 	"github.com/entregamais/platform/backend/ent/upload"
 	"github.com/entregamais/platform/backend/ent/user"
@@ -142,6 +143,21 @@ func (_c *UserCreate) AddSellerLinks(v ...*SellerUser) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddSellerLinkIDs(ids...)
+}
+
+// AddSellerReviewIDs adds the "seller_reviews" edge to the SellerReview entity by IDs.
+func (_c *UserCreate) AddSellerReviewIDs(ids ...string) *UserCreate {
+	_c.mutation.AddSellerReviewIDs(ids...)
+	return _c
+}
+
+// AddSellerReviews adds the "seller_reviews" edges to the SellerReview entity.
+func (_c *UserCreate) AddSellerReviews(v ...*SellerReview) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSellerReviewIDs(ids...)
 }
 
 // AddOrderIDs adds the "orders" edge to the Order entity by IDs.
@@ -381,6 +397,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(selleruser.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SellerReviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SellerReviewsTable,
+			Columns: []string{user.SellerReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerreview.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

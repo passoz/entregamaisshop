@@ -44,6 +44,10 @@ type Tx struct {
 	ProductImage *ProductImageClient
 	// Seller is the client for interacting with the Seller builders.
 	Seller *SellerClient
+	// SellerDeliveryArea is the client for interacting with the SellerDeliveryArea builders.
+	SellerDeliveryArea *SellerDeliveryAreaClient
+	// SellerReview is the client for interacting with the SellerReview builders.
+	SellerReview *SellerReviewClient
 	// SellerUser is the client for interacting with the SellerUser builders.
 	SellerUser *SellerUserClient
 	// Upload is the client for interacting with the Upload builders.
@@ -197,6 +201,8 @@ func (tx *Tx) init() {
 	tx.Product = NewProductClient(tx.config)
 	tx.ProductImage = NewProductImageClient(tx.config)
 	tx.Seller = NewSellerClient(tx.config)
+	tx.SellerDeliveryArea = NewSellerDeliveryAreaClient(tx.config)
+	tx.SellerReview = NewSellerReviewClient(tx.config)
 	tx.SellerUser = NewSellerUserClient(tx.config)
 	tx.Upload = NewUploadClient(tx.config)
 	tx.User = NewUserClient(tx.config)

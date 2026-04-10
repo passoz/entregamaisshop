@@ -16,6 +16,8 @@ import (
 	"github.com/entregamais/platform/backend/ent/predicate"
 	"github.com/entregamais/platform/backend/ent/product"
 	"github.com/entregamais/platform/backend/ent/seller"
+	"github.com/entregamais/platform/backend/ent/sellerdeliveryarea"
+	"github.com/entregamais/platform/backend/ent/sellerreview"
 	"github.com/entregamais/platform/backend/ent/selleruser"
 )
 
@@ -160,6 +162,36 @@ func (_u *SellerUpdate) AddOrders(v ...*Order) *SellerUpdate {
 	return _u.AddOrderIDs(ids...)
 }
 
+// AddDeliveryAreaIDs adds the "delivery_areas" edge to the SellerDeliveryArea entity by IDs.
+func (_u *SellerUpdate) AddDeliveryAreaIDs(ids ...string) *SellerUpdate {
+	_u.mutation.AddDeliveryAreaIDs(ids...)
+	return _u
+}
+
+// AddDeliveryAreas adds the "delivery_areas" edges to the SellerDeliveryArea entity.
+func (_u *SellerUpdate) AddDeliveryAreas(v ...*SellerDeliveryArea) *SellerUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDeliveryAreaIDs(ids...)
+}
+
+// AddReviewIDs adds the "reviews" edge to the SellerReview entity by IDs.
+func (_u *SellerUpdate) AddReviewIDs(ids ...string) *SellerUpdate {
+	_u.mutation.AddReviewIDs(ids...)
+	return _u
+}
+
+// AddReviews adds the "reviews" edges to the SellerReview entity.
+func (_u *SellerUpdate) AddReviews(v ...*SellerReview) *SellerUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReviewIDs(ids...)
+}
+
 // Mutation returns the SellerMutation object of the builder.
 func (_u *SellerUpdate) Mutation() *SellerMutation {
 	return _u.mutation
@@ -247,6 +279,48 @@ func (_u *SellerUpdate) RemoveOrders(v ...*Order) *SellerUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveOrderIDs(ids...)
+}
+
+// ClearDeliveryAreas clears all "delivery_areas" edges to the SellerDeliveryArea entity.
+func (_u *SellerUpdate) ClearDeliveryAreas() *SellerUpdate {
+	_u.mutation.ClearDeliveryAreas()
+	return _u
+}
+
+// RemoveDeliveryAreaIDs removes the "delivery_areas" edge to SellerDeliveryArea entities by IDs.
+func (_u *SellerUpdate) RemoveDeliveryAreaIDs(ids ...string) *SellerUpdate {
+	_u.mutation.RemoveDeliveryAreaIDs(ids...)
+	return _u
+}
+
+// RemoveDeliveryAreas removes "delivery_areas" edges to SellerDeliveryArea entities.
+func (_u *SellerUpdate) RemoveDeliveryAreas(v ...*SellerDeliveryArea) *SellerUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDeliveryAreaIDs(ids...)
+}
+
+// ClearReviews clears all "reviews" edges to the SellerReview entity.
+func (_u *SellerUpdate) ClearReviews() *SellerUpdate {
+	_u.mutation.ClearReviews()
+	return _u
+}
+
+// RemoveReviewIDs removes the "reviews" edge to SellerReview entities by IDs.
+func (_u *SellerUpdate) RemoveReviewIDs(ids ...string) *SellerUpdate {
+	_u.mutation.RemoveReviewIDs(ids...)
+	return _u
+}
+
+// RemoveReviews removes "reviews" edges to SellerReview entities.
+func (_u *SellerUpdate) RemoveReviews(v ...*SellerReview) *SellerUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReviewIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -510,6 +584,96 @@ func (_u *SellerUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.DeliveryAreasCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.DeliveryAreasTable,
+			Columns: []string{seller.DeliveryAreasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerdeliveryarea.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDeliveryAreasIDs(); len(nodes) > 0 && !_u.mutation.DeliveryAreasCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.DeliveryAreasTable,
+			Columns: []string{seller.DeliveryAreasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerdeliveryarea.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DeliveryAreasIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.DeliveryAreasTable,
+			Columns: []string{seller.DeliveryAreasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerdeliveryarea.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.ReviewsTable,
+			Columns: []string{seller.ReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerreview.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReviewsIDs(); len(nodes) > 0 && !_u.mutation.ReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.ReviewsTable,
+			Columns: []string{seller.ReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerreview.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.ReviewsTable,
+			Columns: []string{seller.ReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerreview.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{seller.Label}
@@ -658,6 +822,36 @@ func (_u *SellerUpdateOne) AddOrders(v ...*Order) *SellerUpdateOne {
 	return _u.AddOrderIDs(ids...)
 }
 
+// AddDeliveryAreaIDs adds the "delivery_areas" edge to the SellerDeliveryArea entity by IDs.
+func (_u *SellerUpdateOne) AddDeliveryAreaIDs(ids ...string) *SellerUpdateOne {
+	_u.mutation.AddDeliveryAreaIDs(ids...)
+	return _u
+}
+
+// AddDeliveryAreas adds the "delivery_areas" edges to the SellerDeliveryArea entity.
+func (_u *SellerUpdateOne) AddDeliveryAreas(v ...*SellerDeliveryArea) *SellerUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDeliveryAreaIDs(ids...)
+}
+
+// AddReviewIDs adds the "reviews" edge to the SellerReview entity by IDs.
+func (_u *SellerUpdateOne) AddReviewIDs(ids ...string) *SellerUpdateOne {
+	_u.mutation.AddReviewIDs(ids...)
+	return _u
+}
+
+// AddReviews adds the "reviews" edges to the SellerReview entity.
+func (_u *SellerUpdateOne) AddReviews(v ...*SellerReview) *SellerUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReviewIDs(ids...)
+}
+
 // Mutation returns the SellerMutation object of the builder.
 func (_u *SellerUpdateOne) Mutation() *SellerMutation {
 	return _u.mutation
@@ -745,6 +939,48 @@ func (_u *SellerUpdateOne) RemoveOrders(v ...*Order) *SellerUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveOrderIDs(ids...)
+}
+
+// ClearDeliveryAreas clears all "delivery_areas" edges to the SellerDeliveryArea entity.
+func (_u *SellerUpdateOne) ClearDeliveryAreas() *SellerUpdateOne {
+	_u.mutation.ClearDeliveryAreas()
+	return _u
+}
+
+// RemoveDeliveryAreaIDs removes the "delivery_areas" edge to SellerDeliveryArea entities by IDs.
+func (_u *SellerUpdateOne) RemoveDeliveryAreaIDs(ids ...string) *SellerUpdateOne {
+	_u.mutation.RemoveDeliveryAreaIDs(ids...)
+	return _u
+}
+
+// RemoveDeliveryAreas removes "delivery_areas" edges to SellerDeliveryArea entities.
+func (_u *SellerUpdateOne) RemoveDeliveryAreas(v ...*SellerDeliveryArea) *SellerUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDeliveryAreaIDs(ids...)
+}
+
+// ClearReviews clears all "reviews" edges to the SellerReview entity.
+func (_u *SellerUpdateOne) ClearReviews() *SellerUpdateOne {
+	_u.mutation.ClearReviews()
+	return _u
+}
+
+// RemoveReviewIDs removes the "reviews" edge to SellerReview entities by IDs.
+func (_u *SellerUpdateOne) RemoveReviewIDs(ids ...string) *SellerUpdateOne {
+	_u.mutation.RemoveReviewIDs(ids...)
+	return _u
+}
+
+// RemoveReviews removes "reviews" edges to SellerReview entities.
+func (_u *SellerUpdateOne) RemoveReviews(v ...*SellerReview) *SellerUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReviewIDs(ids...)
 }
 
 // Where appends a list predicates to the SellerUpdate builder.
@@ -1031,6 +1267,96 @@ func (_u *SellerUpdateOne) sqlSave(ctx context.Context) (_node *Seller, err erro
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DeliveryAreasCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.DeliveryAreasTable,
+			Columns: []string{seller.DeliveryAreasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerdeliveryarea.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDeliveryAreasIDs(); len(nodes) > 0 && !_u.mutation.DeliveryAreasCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.DeliveryAreasTable,
+			Columns: []string{seller.DeliveryAreasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerdeliveryarea.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DeliveryAreasIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.DeliveryAreasTable,
+			Columns: []string{seller.DeliveryAreasColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerdeliveryarea.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.ReviewsTable,
+			Columns: []string{seller.ReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerreview.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReviewsIDs(); len(nodes) > 0 && !_u.mutation.ReviewsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.ReviewsTable,
+			Columns: []string{seller.ReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerreview.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReviewsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   seller.ReviewsTable,
+			Columns: []string{seller.ReviewsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sellerreview.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

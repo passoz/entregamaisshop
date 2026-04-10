@@ -31,6 +31,8 @@ import (
 	"github.com/entregamais/platform/backend/ent/product"
 	"github.com/entregamais/platform/backend/ent/productimage"
 	"github.com/entregamais/platform/backend/ent/seller"
+	"github.com/entregamais/platform/backend/ent/sellerdeliveryarea"
+	"github.com/entregamais/platform/backend/ent/sellerreview"
 	"github.com/entregamais/platform/backend/ent/selleruser"
 	"github.com/entregamais/platform/backend/ent/upload"
 	"github.com/entregamais/platform/backend/ent/user"
@@ -73,6 +75,10 @@ type Client struct {
 	ProductImage *ProductImageClient
 	// Seller is the client for interacting with the Seller builders.
 	Seller *SellerClient
+	// SellerDeliveryArea is the client for interacting with the SellerDeliveryArea builders.
+	SellerDeliveryArea *SellerDeliveryAreaClient
+	// SellerReview is the client for interacting with the SellerReview builders.
+	SellerReview *SellerReviewClient
 	// SellerUser is the client for interacting with the SellerUser builders.
 	SellerUser *SellerUserClient
 	// Upload is the client for interacting with the Upload builders.
@@ -106,6 +112,8 @@ func (c *Client) init() {
 	c.Product = NewProductClient(c.config)
 	c.ProductImage = NewProductImageClient(c.config)
 	c.Seller = NewSellerClient(c.config)
+	c.SellerDeliveryArea = NewSellerDeliveryAreaClient(c.config)
+	c.SellerReview = NewSellerReviewClient(c.config)
 	c.SellerUser = NewSellerUserClient(c.config)
 	c.Upload = NewUploadClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -217,6 +225,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Product:            NewProductClient(cfg),
 		ProductImage:       NewProductImageClient(cfg),
 		Seller:             NewSellerClient(cfg),
+		SellerDeliveryArea: NewSellerDeliveryAreaClient(cfg),
+		SellerReview:       NewSellerReviewClient(cfg),
 		SellerUser:         NewSellerUserClient(cfg),
 		Upload:             NewUploadClient(cfg),
 		User:               NewUserClient(cfg),
@@ -255,6 +265,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Product:            NewProductClient(cfg),
 		ProductImage:       NewProductImageClient(cfg),
 		Seller:             NewSellerClient(cfg),
+		SellerDeliveryArea: NewSellerDeliveryAreaClient(cfg),
+		SellerReview:       NewSellerReviewClient(cfg),
 		SellerUser:         NewSellerUserClient(cfg),
 		Upload:             NewUploadClient(cfg),
 		User:               NewUserClient(cfg),
@@ -289,7 +301,8 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Address, c.Asset, c.AuditLog, c.Cart, c.CartItem, c.Category, c.Entregador,
 		c.Inventory, c.Order, c.OrderItem, c.OrderStatusHistory, c.OutboxEvent,
-		c.Payment, c.Product, c.ProductImage, c.Seller, c.SellerUser, c.Upload, c.User,
+		c.Payment, c.Product, c.ProductImage, c.Seller, c.SellerDeliveryArea,
+		c.SellerReview, c.SellerUser, c.Upload, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -301,7 +314,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Address, c.Asset, c.AuditLog, c.Cart, c.CartItem, c.Category, c.Entregador,
 		c.Inventory, c.Order, c.OrderItem, c.OrderStatusHistory, c.OutboxEvent,
-		c.Payment, c.Product, c.ProductImage, c.Seller, c.SellerUser, c.Upload, c.User,
+		c.Payment, c.Product, c.ProductImage, c.Seller, c.SellerDeliveryArea,
+		c.SellerReview, c.SellerUser, c.Upload, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -342,6 +356,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ProductImage.mutate(ctx, m)
 	case *SellerMutation:
 		return c.Seller.mutate(ctx, m)
+	case *SellerDeliveryAreaMutation:
+		return c.SellerDeliveryArea.mutate(ctx, m)
+	case *SellerReviewMutation:
+		return c.SellerReview.mutate(ctx, m)
 	case *SellerUserMutation:
 		return c.SellerUser.mutate(ctx, m)
 	case *UploadMutation:
@@ -3000,6 +3018,38 @@ func (c *SellerClient) QueryOrders(_m *Seller) *OrderQuery {
 	return query
 }
 
+// QueryDeliveryAreas queries the delivery_areas edge of a Seller.
+func (c *SellerClient) QueryDeliveryAreas(_m *Seller) *SellerDeliveryAreaQuery {
+	query := (&SellerDeliveryAreaClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(seller.Table, seller.FieldID, id),
+			sqlgraph.To(sellerdeliveryarea.Table, sellerdeliveryarea.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, seller.DeliveryAreasTable, seller.DeliveryAreasColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReviews queries the reviews edge of a Seller.
+func (c *SellerClient) QueryReviews(_m *Seller) *SellerReviewQuery {
+	query := (&SellerReviewClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(seller.Table, seller.FieldID, id),
+			sqlgraph.To(sellerreview.Table, sellerreview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, seller.ReviewsTable, seller.ReviewsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *SellerClient) Hooks() []Hook {
 	return c.hooks.Seller
@@ -3022,6 +3072,320 @@ func (c *SellerClient) mutate(ctx context.Context, m *SellerMutation) (Value, er
 		return (&SellerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Seller mutation op: %q", m.Op())
+	}
+}
+
+// SellerDeliveryAreaClient is a client for the SellerDeliveryArea schema.
+type SellerDeliveryAreaClient struct {
+	config
+}
+
+// NewSellerDeliveryAreaClient returns a client for the SellerDeliveryArea from the given config.
+func NewSellerDeliveryAreaClient(c config) *SellerDeliveryAreaClient {
+	return &SellerDeliveryAreaClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sellerdeliveryarea.Hooks(f(g(h())))`.
+func (c *SellerDeliveryAreaClient) Use(hooks ...Hook) {
+	c.hooks.SellerDeliveryArea = append(c.hooks.SellerDeliveryArea, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sellerdeliveryarea.Intercept(f(g(h())))`.
+func (c *SellerDeliveryAreaClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SellerDeliveryArea = append(c.inters.SellerDeliveryArea, interceptors...)
+}
+
+// Create returns a builder for creating a SellerDeliveryArea entity.
+func (c *SellerDeliveryAreaClient) Create() *SellerDeliveryAreaCreate {
+	mutation := newSellerDeliveryAreaMutation(c.config, OpCreate)
+	return &SellerDeliveryAreaCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SellerDeliveryArea entities.
+func (c *SellerDeliveryAreaClient) CreateBulk(builders ...*SellerDeliveryAreaCreate) *SellerDeliveryAreaCreateBulk {
+	return &SellerDeliveryAreaCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SellerDeliveryAreaClient) MapCreateBulk(slice any, setFunc func(*SellerDeliveryAreaCreate, int)) *SellerDeliveryAreaCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SellerDeliveryAreaCreateBulk{err: fmt.Errorf("calling to SellerDeliveryAreaClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SellerDeliveryAreaCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SellerDeliveryAreaCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SellerDeliveryArea.
+func (c *SellerDeliveryAreaClient) Update() *SellerDeliveryAreaUpdate {
+	mutation := newSellerDeliveryAreaMutation(c.config, OpUpdate)
+	return &SellerDeliveryAreaUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SellerDeliveryAreaClient) UpdateOne(_m *SellerDeliveryArea) *SellerDeliveryAreaUpdateOne {
+	mutation := newSellerDeliveryAreaMutation(c.config, OpUpdateOne, withSellerDeliveryArea(_m))
+	return &SellerDeliveryAreaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SellerDeliveryAreaClient) UpdateOneID(id string) *SellerDeliveryAreaUpdateOne {
+	mutation := newSellerDeliveryAreaMutation(c.config, OpUpdateOne, withSellerDeliveryAreaID(id))
+	return &SellerDeliveryAreaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SellerDeliveryArea.
+func (c *SellerDeliveryAreaClient) Delete() *SellerDeliveryAreaDelete {
+	mutation := newSellerDeliveryAreaMutation(c.config, OpDelete)
+	return &SellerDeliveryAreaDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SellerDeliveryAreaClient) DeleteOne(_m *SellerDeliveryArea) *SellerDeliveryAreaDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SellerDeliveryAreaClient) DeleteOneID(id string) *SellerDeliveryAreaDeleteOne {
+	builder := c.Delete().Where(sellerdeliveryarea.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SellerDeliveryAreaDeleteOne{builder}
+}
+
+// Query returns a query builder for SellerDeliveryArea.
+func (c *SellerDeliveryAreaClient) Query() *SellerDeliveryAreaQuery {
+	return &SellerDeliveryAreaQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSellerDeliveryArea},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SellerDeliveryArea entity by its id.
+func (c *SellerDeliveryAreaClient) Get(ctx context.Context, id string) (*SellerDeliveryArea, error) {
+	return c.Query().Where(sellerdeliveryarea.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SellerDeliveryAreaClient) GetX(ctx context.Context, id string) *SellerDeliveryArea {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySeller queries the seller edge of a SellerDeliveryArea.
+func (c *SellerDeliveryAreaClient) QuerySeller(_m *SellerDeliveryArea) *SellerQuery {
+	query := (&SellerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sellerdeliveryarea.Table, sellerdeliveryarea.FieldID, id),
+			sqlgraph.To(seller.Table, seller.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, sellerdeliveryarea.SellerTable, sellerdeliveryarea.SellerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SellerDeliveryAreaClient) Hooks() []Hook {
+	return c.hooks.SellerDeliveryArea
+}
+
+// Interceptors returns the client interceptors.
+func (c *SellerDeliveryAreaClient) Interceptors() []Interceptor {
+	return c.inters.SellerDeliveryArea
+}
+
+func (c *SellerDeliveryAreaClient) mutate(ctx context.Context, m *SellerDeliveryAreaMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SellerDeliveryAreaCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SellerDeliveryAreaUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SellerDeliveryAreaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SellerDeliveryAreaDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SellerDeliveryArea mutation op: %q", m.Op())
+	}
+}
+
+// SellerReviewClient is a client for the SellerReview schema.
+type SellerReviewClient struct {
+	config
+}
+
+// NewSellerReviewClient returns a client for the SellerReview from the given config.
+func NewSellerReviewClient(c config) *SellerReviewClient {
+	return &SellerReviewClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sellerreview.Hooks(f(g(h())))`.
+func (c *SellerReviewClient) Use(hooks ...Hook) {
+	c.hooks.SellerReview = append(c.hooks.SellerReview, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sellerreview.Intercept(f(g(h())))`.
+func (c *SellerReviewClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SellerReview = append(c.inters.SellerReview, interceptors...)
+}
+
+// Create returns a builder for creating a SellerReview entity.
+func (c *SellerReviewClient) Create() *SellerReviewCreate {
+	mutation := newSellerReviewMutation(c.config, OpCreate)
+	return &SellerReviewCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SellerReview entities.
+func (c *SellerReviewClient) CreateBulk(builders ...*SellerReviewCreate) *SellerReviewCreateBulk {
+	return &SellerReviewCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SellerReviewClient) MapCreateBulk(slice any, setFunc func(*SellerReviewCreate, int)) *SellerReviewCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SellerReviewCreateBulk{err: fmt.Errorf("calling to SellerReviewClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SellerReviewCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SellerReviewCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SellerReview.
+func (c *SellerReviewClient) Update() *SellerReviewUpdate {
+	mutation := newSellerReviewMutation(c.config, OpUpdate)
+	return &SellerReviewUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SellerReviewClient) UpdateOne(_m *SellerReview) *SellerReviewUpdateOne {
+	mutation := newSellerReviewMutation(c.config, OpUpdateOne, withSellerReview(_m))
+	return &SellerReviewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SellerReviewClient) UpdateOneID(id string) *SellerReviewUpdateOne {
+	mutation := newSellerReviewMutation(c.config, OpUpdateOne, withSellerReviewID(id))
+	return &SellerReviewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SellerReview.
+func (c *SellerReviewClient) Delete() *SellerReviewDelete {
+	mutation := newSellerReviewMutation(c.config, OpDelete)
+	return &SellerReviewDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SellerReviewClient) DeleteOne(_m *SellerReview) *SellerReviewDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SellerReviewClient) DeleteOneID(id string) *SellerReviewDeleteOne {
+	builder := c.Delete().Where(sellerreview.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SellerReviewDeleteOne{builder}
+}
+
+// Query returns a query builder for SellerReview.
+func (c *SellerReviewClient) Query() *SellerReviewQuery {
+	return &SellerReviewQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSellerReview},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SellerReview entity by its id.
+func (c *SellerReviewClient) Get(ctx context.Context, id string) (*SellerReview, error) {
+	return c.Query().Where(sellerreview.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SellerReviewClient) GetX(ctx context.Context, id string) *SellerReview {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySeller queries the seller edge of a SellerReview.
+func (c *SellerReviewClient) QuerySeller(_m *SellerReview) *SellerQuery {
+	query := (&SellerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sellerreview.Table, sellerreview.FieldID, id),
+			sqlgraph.To(seller.Table, seller.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, sellerreview.SellerTable, sellerreview.SellerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCustomer queries the customer edge of a SellerReview.
+func (c *SellerReviewClient) QueryCustomer(_m *SellerReview) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sellerreview.Table, sellerreview.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, sellerreview.CustomerTable, sellerreview.CustomerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SellerReviewClient) Hooks() []Hook {
+	return c.hooks.SellerReview
+}
+
+// Interceptors returns the client interceptors.
+func (c *SellerReviewClient) Interceptors() []Interceptor {
+	return c.inters.SellerReview
+}
+
+func (c *SellerReviewClient) mutate(ctx context.Context, m *SellerReviewMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SellerReviewCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SellerReviewUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SellerReviewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SellerReviewDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SellerReview mutation op: %q", m.Op())
 	}
 }
 
@@ -3495,6 +3859,22 @@ func (c *UserClient) QuerySellerLinks(_m *User) *SellerUserQuery {
 	return query
 }
 
+// QuerySellerReviews queries the seller_reviews edge of a User.
+func (c *UserClient) QuerySellerReviews(_m *User) *SellerReviewQuery {
+	query := (&SellerReviewClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(sellerreview.Table, sellerreview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SellerReviewsTable, user.SellerReviewsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryOrders queries the orders edge of a User.
 func (c *UserClient) QueryOrders(_m *User) *OrderQuery {
 	query := (&OrderClient{config: c.config}).Query()
@@ -3589,11 +3969,13 @@ type (
 	hooks struct {
 		Address, Asset, AuditLog, Cart, CartItem, Category, Entregador, Inventory,
 		Order, OrderItem, OrderStatusHistory, OutboxEvent, Payment, Product,
-		ProductImage, Seller, SellerUser, Upload, User []ent.Hook
+		ProductImage, Seller, SellerDeliveryArea, SellerReview, SellerUser, Upload,
+		User []ent.Hook
 	}
 	inters struct {
 		Address, Asset, AuditLog, Cart, CartItem, Category, Entregador, Inventory,
 		Order, OrderItem, OrderStatusHistory, OutboxEvent, Payment, Product,
-		ProductImage, Seller, SellerUser, Upload, User []ent.Interceptor
+		ProductImage, Seller, SellerDeliveryArea, SellerReview, SellerUser, Upload,
+		User []ent.Interceptor
 	}
 )

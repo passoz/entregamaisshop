@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Home from "@/app/page";
 
+const apiFetchMock = vi.fn();
+
 vi.mock("next/image", () => ({
   default: ({ fill: _fill, priority: _priority, ...props }: any) => <img {...props} />,
 }));
@@ -14,6 +16,31 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+vi.mock("@/lib/api", () => ({
+  apiFetch: (...args: any[]) => apiFetchMock(...args),
+}));
+
+vi.mock("@/components/modals/LocationModal", () => ({
+  LocationModal: ({ isOpen, onClose, onSelect }: any) =>
+    isOpen ? (
+      <div role="dialog" aria-label="Escolher localização">
+        <p>Onde você está?</p>
+        <button type="button" onClick={() => onSelect("Sao Paulo, SP")}>
+          Sao Paulo, SP
+        </button>
+        <button type="button" onClick={() => onSelect("Rio de Janeiro, RJ")}>
+          Rio de Janeiro, RJ
+        </button>
+        <button type="button" onClick={() => onSelect("Cabo Frio, RJ")}>
+          Cabo Frio, RJ
+        </button>
+        <button type="button" onClick={onClose}>
+          Fechar localização
+        </button>
+      </div>
+    ) : null,
+}));
+
 const sellersResponse = [
   { id: "1", name: "Depósito do Zé", category: "Cervejas", rating: 4.9, time: "15-25 min", fee: "Frete zero" },
   { id: "2", name: "Conveniência 24h", category: "Bebidas Variadas", rating: 4.5, time: "20-35 min", fee: "R$ 4,90" },
@@ -22,11 +49,16 @@ const sellersResponse = [
 ];
 
 function mockFetch() {
+  apiFetchMock.mockResolvedValue(sellersResponse);
   vi.stubGlobal(
     "fetch",
     vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => sellersResponse,
+      json: async () => [
+        ["Centro", "Cabo Frio", "RJ", -22.88, -42.02],
+        ["Copacabana", "Rio de Janeiro", "RJ", -22.97, -43.18],
+        ["Centro", "Sao Paulo", "SP", -23.55, -46.63],
+      ],
     }),
   );
 }
@@ -79,7 +111,7 @@ describe("Home page nearby sellers", () => {
       expect(screen.getByText("Depósito do Zé")).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/Buscando em sua localizacao atual/i)).toBeInTheDocument();
+    expect(screen.getByText(/Buscando em Centro, Cabo Frio - RJ/i)).toBeInTheDocument();
     expect(screen.queryByText(/Nenhum depósito encontrado/i)).not.toBeInTheDocument();
   });
 
@@ -88,8 +120,8 @@ describe("Home page nearby sellers", () => {
 
     render(<Home />);
 
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText(/Nao foi possivel descobrir sua localizacao/i)).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: /Escolher localização/i })).toBeInTheDocument();
+    expect(screen.getByText(/Onde você está\?/i)).toBeInTheDocument();
   });
 
   it("permite informar manualmente a cidade e mostra estado vazio quando não encontra depósitos", async () => {
@@ -97,12 +129,10 @@ describe("Home page nearby sellers", () => {
 
     render(<Home />);
 
-    const input = await screen.findByPlaceholderText(/Digite sua cidade/i);
-    fireEvent.change(input, { target: { value: "Sao Paulo, SP" } });
-    fireEvent.click(screen.getByRole("button", { name: /Buscar depositos/i }));
+    fireEvent.click(await screen.findByRole("button", { name: "Sao Paulo, SP" }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Nenhum depósito foi encontrado para Sao Paulo, SP/i)).toBeInTheDocument();
+      expect(screen.getByText(/Nenhum depósito por aqui/i)).toBeInTheDocument();
     });
   });
 
@@ -113,9 +143,6 @@ describe("Home page nearby sellers", () => {
 
     await screen.findByText("Depósito do Zé");
     fireEvent.click(screen.getByRole("button", { name: /Alterar localização/i }));
-
-    const input = await screen.findByPlaceholderText(/Digite sua cidade/i);
-    fireEvent.change(input, { target: { value: "Rio de Janeiro, RJ" } });
     fireEvent.click(screen.getByRole("button", { name: "Rio de Janeiro, RJ" }));
 
     await waitFor(() => {

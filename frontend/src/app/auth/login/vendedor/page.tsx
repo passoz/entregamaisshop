@@ -106,7 +106,7 @@ export default function SellerLogin() {
 
         <Button variant="outline" className="w-full h-12 rounded-xl border-slate-200 text-slate-600 font-bold hover:bg-slate-50 gap-2">
           <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 11h8.5c.1.7.2 1.4.2 2.1 0 5.2-3.5 8.9-8.7 8.9C7.1 22 3 17.9 3 13s4.1-9 9-9c2.4 0 4.5.9 6.1 2.3l-2.7 2.7c-1-1-2.2-1.5-3.4-1.5-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5c3 0 4.7-2.1 5.1-3.6H12v-2.3z"/></svg>
-          Google Cloud
+          Google
         </Button>
 
         <div className="text-center pt-2">

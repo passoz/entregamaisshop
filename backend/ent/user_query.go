@@ -17,6 +17,7 @@ import (
 	"github.com/entregamais/platform/backend/ent/entregador"
 	"github.com/entregamais/platform/backend/ent/order"
 	"github.com/entregamais/platform/backend/ent/predicate"
+	"github.com/entregamais/platform/backend/ent/sellerreview"
 	"github.com/entregamais/platform/backend/ent/selleruser"
 	"github.com/entregamais/platform/backend/ent/upload"
 	"github.com/entregamais/platform/backend/ent/user"
@@ -31,6 +32,7 @@ type UserQuery struct {
 	predicates        []predicate.User
 	withAddresses     *AddressQuery
 	withSellerLinks   *SellerUserQuery
+	withSellerReviews *SellerReviewQuery
 	withOrders        *OrderQuery
 	withCart          *CartQuery
 	withDriverProfile *EntregadorQuery
@@ -108,6 +110,28 @@ func (_q *UserQuery) QuerySellerLinks() *SellerUserQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(selleruser.Table, selleruser.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SellerLinksTable, user.SellerLinksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySellerReviews chains the current query on the "seller_reviews" edge.
+func (_q *UserQuery) QuerySellerReviews() *SellerReviewQuery {
+	query := (&SellerReviewClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(sellerreview.Table, sellerreview.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SellerReviewsTable, user.SellerReviewsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -397,6 +421,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		predicates:        append([]predicate.User{}, _q.predicates...),
 		withAddresses:     _q.withAddresses.Clone(),
 		withSellerLinks:   _q.withSellerLinks.Clone(),
+		withSellerReviews: _q.withSellerReviews.Clone(),
 		withOrders:        _q.withOrders.Clone(),
 		withCart:          _q.withCart.Clone(),
 		withDriverProfile: _q.withDriverProfile.Clone(),
@@ -426,6 +451,17 @@ func (_q *UserQuery) WithSellerLinks(opts ...func(*SellerUserQuery)) *UserQuery 
 		opt(query)
 	}
 	_q.withSellerLinks = query
+	return _q
+}
+
+// WithSellerReviews tells the query-builder to eager-load the nodes that are connected to
+// the "seller_reviews" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithSellerReviews(opts ...func(*SellerReviewQuery)) *UserQuery {
+	query := (&SellerReviewClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSellerReviews = query
 	return _q
 }
 
@@ -551,9 +587,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			_q.withAddresses != nil,
 			_q.withSellerLinks != nil,
+			_q.withSellerReviews != nil,
 			_q.withOrders != nil,
 			_q.withCart != nil,
 			_q.withDriverProfile != nil,
@@ -589,6 +626,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadSellerLinks(ctx, query, nodes,
 			func(n *User) { n.Edges.SellerLinks = []*SellerUser{} },
 			func(n *User, e *SellerUser) { n.Edges.SellerLinks = append(n.Edges.SellerLinks, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSellerReviews; query != nil {
+		if err := _q.loadSellerReviews(ctx, query, nodes,
+			func(n *User) { n.Edges.SellerReviews = []*SellerReview{} },
+			func(n *User, e *SellerReview) { n.Edges.SellerReviews = append(n.Edges.SellerReviews, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -678,6 +722,37 @@ func (_q *UserQuery) loadSellerLinks(ctx context.Context, query *SellerUserQuery
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_seller_links" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadSellerReviews(ctx context.Context, query *SellerReviewQuery, nodes []*User, init func(*User), assign func(*User, *SellerReview)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.SellerReview(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.SellerReviewsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_seller_reviews
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_seller_reviews" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_seller_reviews" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

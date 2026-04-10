@@ -45,6 +45,8 @@ type UserEdges struct {
 	Addresses []*Address `json:"addresses,omitempty"`
 	// SellerLinks holds the value of the seller_links edge.
 	SellerLinks []*SellerUser `json:"seller_links,omitempty"`
+	// SellerReviews holds the value of the seller_reviews edge.
+	SellerReviews []*SellerReview `json:"seller_reviews,omitempty"`
 	// Orders holds the value of the orders edge.
 	Orders []*Order `json:"orders,omitempty"`
 	// Cart holds the value of the cart edge.
@@ -55,7 +57,7 @@ type UserEdges struct {
 	Uploads []*Upload `json:"uploads,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // AddressesOrErr returns the Addresses value or an error if the edge
@@ -76,10 +78,19 @@ func (e UserEdges) SellerLinksOrErr() ([]*SellerUser, error) {
 	return nil, &NotLoadedError{edge: "seller_links"}
 }
 
+// SellerReviewsOrErr returns the SellerReviews value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SellerReviewsOrErr() ([]*SellerReview, error) {
+	if e.loadedTypes[2] {
+		return e.SellerReviews, nil
+	}
+	return nil, &NotLoadedError{edge: "seller_reviews"}
+}
+
 // OrdersOrErr returns the Orders value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) OrdersOrErr() ([]*Order, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Orders, nil
 	}
 	return nil, &NotLoadedError{edge: "orders"}
@@ -90,7 +101,7 @@ func (e UserEdges) OrdersOrErr() ([]*Order, error) {
 func (e UserEdges) CartOrErr() (*Cart, error) {
 	if e.Cart != nil {
 		return e.Cart, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[4] {
 		return nil, &NotFoundError{label: cart.Label}
 	}
 	return nil, &NotLoadedError{edge: "cart"}
@@ -101,7 +112,7 @@ func (e UserEdges) CartOrErr() (*Cart, error) {
 func (e UserEdges) DriverProfileOrErr() (*Entregador, error) {
 	if e.DriverProfile != nil {
 		return e.DriverProfile, nil
-	} else if e.loadedTypes[4] {
+	} else if e.loadedTypes[5] {
 		return nil, &NotFoundError{label: entregador.Label}
 	}
 	return nil, &NotLoadedError{edge: "driver_profile"}
@@ -110,7 +121,7 @@ func (e UserEdges) DriverProfileOrErr() (*Entregador, error) {
 // UploadsOrErr returns the Uploads value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) UploadsOrErr() ([]*Upload, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.Uploads, nil
 	}
 	return nil, &NotLoadedError{edge: "uploads"}
@@ -210,6 +221,11 @@ func (_m *User) QueryAddresses() *AddressQuery {
 // QuerySellerLinks queries the "seller_links" edge of the User entity.
 func (_m *User) QuerySellerLinks() *SellerUserQuery {
 	return NewUserClient(_m.config).QuerySellerLinks(_m)
+}
+
+// QuerySellerReviews queries the "seller_reviews" edge of the User entity.
+func (_m *User) QuerySellerReviews() *SellerReviewQuery {
+	return NewUserClient(_m.config).QuerySellerReviews(_m)
 }
 
 // QueryOrders queries the "orders" edge of the User entity.

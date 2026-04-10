@@ -18,6 +18,7 @@ const (
 	requestIDKey     ctxKey = "request_id"
 	correlationIDKey ctxKey = "correlation_id"
 	userIDKey        ctxKey = "user_id"
+	preferredNameKey ctxKey = "preferred_username"
 	rolesKey         ctxKey = "roles"
 	roleKey          ctxKey = "role" // Legacy for single role check
 )
@@ -101,6 +102,7 @@ func (m *Middleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		ctx := context.WithValue(r.Context(), userIDKey, claims.Subject)
+		ctx = context.WithValue(ctx, preferredNameKey, claims.PreferredUsername)
 		ctx = context.WithValue(ctx, rolesKey, claims.RealmAccess.Roles)
 		next(w, r.WithContext(ctx))
 	}
@@ -157,6 +159,13 @@ func UserID(ctx context.Context) string {
 		return v
 	}
 	return "user-1"
+}
+
+func PreferredUsername(ctx context.Context) string {
+	if v, ok := ctx.Value(preferredNameKey).(string); ok {
+		return v
+	}
+	return ""
 }
 
 func RequestID(ctx context.Context) string {

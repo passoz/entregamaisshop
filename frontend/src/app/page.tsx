@@ -126,7 +126,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-ze-black/90 via-ze-black/40 to-transparent" />
         
         <div className="absolute inset-0 flex flex-col justify-center p-6 md:p-20 space-y-4 md:space-y-6 max-w-4xl">
-          <Badge className="bg-ze-yellow text-ze-black font-black uppercase tracking-[0.2em] md:tracking-[0.4em] px-3 md:px-6 py-1 md:py-2 w-fit text-[10px] md:text-sm animate-bounce">
+          <Badge className="bg-ze-yellow hover:bg-ze-yellow text-ze-black font-black uppercase tracking-[0.2em] md:tracking-[0.4em] px-3 md:px-6 py-1 md:py-2 w-fit text-[10px] md:text-sm animate-bounce cursor-default">
             Sua Bebida em Minutos
           </Badge>
           
@@ -202,6 +202,7 @@ export default function Home() {
               <h2 className="text-2xl md:text-3xl font-black text-ze-black uppercase tracking-tighter">Depósitos Próximos</h2>
               <button 
                 onClick={() => setIsLocationModalOpen(true)}
+                aria-label="Alterar localização"
                 className="w-10 h-10 rounded-xl bg-ze-gray flex items-center justify-center hover:bg-ze-yellow transition-all shadow-sm border border-ze-black/5"
               >
                 <MapPin className="w-5 h-5 text-ze-black" />
@@ -235,16 +236,18 @@ export default function Home() {
                   </div>
                   <CardContent className="p-6 pt-8 relative">
                     <div className="absolute -top-12 right-6 w-20 h-20 bg-white rounded-3xl shadow-xl border-4 border-ze-yellow flex items-center justify-center transform rotate-3 group-hover:rotate-0 transition-transform">
-                      <div className="w-16 h-16 bg-ze-gray rounded-2xl flex items-center justify-center text-3xl">
-                        🏪
-                      </div>
+                      <img 
+                        src="/branding/entregamais-shop/moto.png" 
+                        alt="Entrega" 
+                        className="w-12 h-12 object-contain"
+                      />
                     </div>
                     <h3 className="font-black text-xl text-ze-black mb-1 group-hover:text-ze-red transition-colors uppercase tracking-tighter">
                       {store.name}
                     </h3>
                     <div className="flex items-center gap-4 text-sm text-ze-black/60 mb-4 font-bold">
                       <div className="flex items-center text-ze-yellow bg-ze-black px-2 py-0.5 rounded-md">
-                        <Star className="w-4 h-4 mr-1 fill-current" /> {store.rating ?? 4.9}
+                        <Star className="w-4 h-4 mr-1 fill-current" /> {(store.rating ?? 5).toFixed(1)}
                       </div>
                       <span>•</span>
                       <span>{formatLocationLabel(store.city, store.state) || "Sem localizacao"}</span>
@@ -264,7 +267,7 @@ export default function Home() {
                         <Clock className="w-4 h-4 mr-2" /> {store.time || "15-25 min"}
                       </div>
                       <div className="flex items-center text-ze-red uppercase tracking-widest">
-                        {store.fee || "Frete zero"}
+                        {store.fee_label || `A partir de R$ ${(store.min_delivery_fee ?? 0).toFixed(2).replace(".", ",")}`}
                       </div>
                     </div>
                   </CardContent>

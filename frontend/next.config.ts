@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/v1/:path*',
-        destination: 'http://host.docker.internal:8080/api/v1/:path*',
+        destination: 'http://backend:8080/api/v1/:path*',
       },
     ];
   },

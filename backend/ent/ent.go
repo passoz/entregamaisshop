@@ -28,6 +28,8 @@ import (
 	"github.com/entregamais/platform/backend/ent/product"
 	"github.com/entregamais/platform/backend/ent/productimage"
 	"github.com/entregamais/platform/backend/ent/seller"
+	"github.com/entregamais/platform/backend/ent/sellerdeliveryarea"
+	"github.com/entregamais/platform/backend/ent/sellerreview"
 	"github.com/entregamais/platform/backend/ent/selleruser"
 	"github.com/entregamais/platform/backend/ent/upload"
 	"github.com/entregamais/platform/backend/ent/user"
@@ -107,6 +109,8 @@ func checkColumn(t, c string) error {
 			product.Table:            product.ValidColumn,
 			productimage.Table:       productimage.ValidColumn,
 			seller.Table:             seller.ValidColumn,
+			sellerdeliveryarea.Table: sellerdeliveryarea.ValidColumn,
+			sellerreview.Table:       sellerreview.ValidColumn,
 			selleruser.Table:         selleruser.ValidColumn,
 			upload.Table:             upload.ValidColumn,
 			user.Table:               user.ValidColumn,

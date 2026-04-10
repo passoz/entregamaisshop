@@ -3,10 +3,73 @@ import { http, HttpResponse } from 'msw'
 // In-memory "database" for mocks
 const db = {
   sellers: [
-    { id: '1', name: 'Depósito do Zé', email: 'ze@teste.com', category: 'Cervejas e Gelo', rating: 4.9, time: '15-25 min', fee: 'Grátis' },
-    { id: '2', name: 'Conveniência 24h', email: 'conv24@teste.com', category: 'Bebidas Variadas', rating: 4.5, time: '20-35 min', fee: 'R$ 4,90' },
-    { id: '3', name: 'Distribuidora Imperial', email: 'imperial@teste.com', category: 'Vinhos e Destilados', rating: 4.7, time: '30-50 min', fee: 'R$ 6,90' },
-    { id: '4', name: 'Gelo e Carvão Express', email: 'gelo@teste.com', category: 'Essenciais', rating: 4.8, time: '10-20 min', fee: 'R$ 3,00' }
+    {
+      id: '1',
+      name: 'Depósito do Zé',
+      email: 'ze@teste.com',
+      category: 'Cervejas e Gelo',
+      rating: 5,
+      review_count: 0,
+      time: '15-25 min',
+      min_delivery_fee: 0,
+      fee_label: 'A partir de R$ 0,00',
+      delivery_areas: [
+        { id: '1-area-1', label: 'Cabo Frio', fee: 0, fee_label: 'R$ 0,00' },
+        { id: '1-area-2', label: 'Arraial do Cabo', fee: 4.9, fee_label: 'R$ 4,90' },
+      ],
+      reviews: [],
+    },
+    {
+      id: '2',
+      name: 'Conveniência 24h',
+      email: 'conv24@teste.com',
+      category: 'Bebidas Variadas',
+      rating: 4.5,
+      review_count: 2,
+      time: '20-35 min',
+      min_delivery_fee: 3.5,
+      fee_label: 'A partir de R$ 3,50',
+      delivery_areas: [
+        { id: '2-area-1', label: 'Arraial do Cabo', fee: 3.5, fee_label: 'R$ 3,50' },
+        { id: '2-area-2', label: 'Sao Pedro da Aldeia', fee: 5, fee_label: 'R$ 5,00' },
+      ],
+      reviews: [
+        { id: '2-review-1', score: 4, customer_id: 'cust-1', customer_name: 'Maria Cliente', created_at: new Date().toISOString() },
+        { id: '2-review-2', score: 5, customer_id: 'cust-2', customer_name: 'José Cliente', created_at: new Date().toISOString() },
+      ],
+    },
+    {
+      id: '3',
+      name: 'Distribuidora Imperial',
+      email: 'imperial@teste.com',
+      category: 'Vinhos e Destilados',
+      rating: 5,
+      review_count: 1,
+      time: '30-50 min',
+      min_delivery_fee: 8.9,
+      fee_label: 'A partir de R$ 8,90',
+      delivery_areas: [
+        { id: '3-area-1', label: 'Rio de Janeiro - Zona Sul', fee: 8.9, fee_label: 'R$ 8,90' },
+      ],
+      reviews: [
+        { id: '3-review-1', score: 5, customer_id: 'cust-3', customer_name: 'Pedro Cliente', created_at: new Date().toISOString() },
+      ],
+    },
+    {
+      id: '4',
+      name: 'Gelo e Carvão Express',
+      email: 'gelo@teste.com',
+      category: 'Essenciais',
+      rating: 5,
+      review_count: 0,
+      time: '10-20 min',
+      min_delivery_fee: 2.5,
+      fee_label: 'A partir de R$ 2,50',
+      delivery_areas: [
+        { id: '4-area-1', label: 'Sao Pedro da Aldeia', fee: 2.5, fee_label: 'R$ 2,50' },
+      ],
+      reviews: [],
+    }
   ],
   products: [
     // Depósito do Zé
@@ -95,6 +158,29 @@ export const handlers = [
     return HttpResponse.json(db.sellers[0])
   }),
 
+  http.get('*/api/v1/vendedor/delivery-areas', () => {
+    return HttpResponse.json(db.sellers[0].delivery_areas)
+  }),
+
+  http.put('*/api/v1/vendedor/delivery-areas', async ({ request }) => {
+    const payload = await request.json() as any
+    const deliveryAreas = (payload.areas || []).map((area: any, index: number) => ({
+      id: `seller-area-${index + 1}`,
+      label: area.label,
+      fee: area.fee,
+      fee_label: `R$ ${Number(area.fee || 0).toFixed(2).replace('.', ',')}`,
+    }))
+
+    db.sellers[0] = {
+      ...db.sellers[0],
+      delivery_areas: deliveryAreas,
+      min_delivery_fee: deliveryAreas.length ? Math.min(...deliveryAreas.map((area: any) => area.fee)) : 0,
+      fee_label: `A partir de R$ ${(deliveryAreas.length ? Math.min(...deliveryAreas.map((area: any) => area.fee)) : 0).toFixed(2).replace('.', ',')}`,
+    }
+
+    return HttpResponse.json(db.sellers[0].delivery_areas)
+  }),
+
   http.get('*/api/v1/vendedor/products', () => {
     return HttpResponse.json(db.products.filter(p => p.seller_id === db.sellers[0].id))
   }),
@@ -148,6 +234,32 @@ export const handlers = [
     const { id } = params
     const storeProducts = db.products.filter(p => p.seller_id === id && p.status === 'active')
     return HttpResponse.json(storeProducts)
+  }),
+
+  http.post('*/api/v1/sellers/:id/reviews', async ({ params, request }) => {
+    const { id } = params
+    const seller = db.sellers.find((item) => item.id === id)
+    if (!seller) {
+      return new HttpResponse(null, { status: 404 })
+    }
+
+    const payload = await request.json() as any
+    const nextReview = {
+      id: `review-${Date.now()}`,
+      score: payload.score,
+      comment: payload.comment || '',
+      customer_id: 'cust-1',
+      customer_name: 'Maria Cliente',
+      created_at: new Date().toISOString(),
+    }
+
+    const reviews = [nextReview, ...(seller.reviews || [])]
+    const average = reviews.reduce((sum, review) => sum + review.score, 0) / reviews.length
+    seller.reviews = reviews
+    seller.review_count = reviews.length
+    seller.rating = average
+
+    return HttpResponse.json(nextReview, { status: 201 })
   }),
 
   http.get('*/api/v1/products', ({ request }) => {

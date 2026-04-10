@@ -22,6 +22,8 @@ import (
 	"github.com/entregamais/platform/backend/ent/productimage"
 	"github.com/entregamais/platform/backend/ent/schema"
 	"github.com/entregamais/platform/backend/ent/seller"
+	"github.com/entregamais/platform/backend/ent/sellerdeliveryarea"
+	"github.com/entregamais/platform/backend/ent/sellerreview"
 	"github.com/entregamais/platform/backend/ent/selleruser"
 	"github.com/entregamais/platform/backend/ent/upload"
 	"github.com/entregamais/platform/backend/ent/user"
@@ -551,6 +553,72 @@ func init() {
 	sellerDescID := sellerFields[0].Descriptor()
 	// seller.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	seller.IDValidator = sellerDescID.Validators[0].(func(string) error)
+	sellerdeliveryareaMixin := schema.SellerDeliveryArea{}.Mixin()
+	sellerdeliveryareaMixinFields0 := sellerdeliveryareaMixin[0].Fields()
+	_ = sellerdeliveryareaMixinFields0
+	sellerdeliveryareaFields := schema.SellerDeliveryArea{}.Fields()
+	_ = sellerdeliveryareaFields
+	// sellerdeliveryareaDescCreatedAt is the schema descriptor for created_at field.
+	sellerdeliveryareaDescCreatedAt := sellerdeliveryareaMixinFields0[0].Descriptor()
+	// sellerdeliveryarea.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sellerdeliveryarea.DefaultCreatedAt = sellerdeliveryareaDescCreatedAt.Default.(func() time.Time)
+	// sellerdeliveryareaDescUpdatedAt is the schema descriptor for updated_at field.
+	sellerdeliveryareaDescUpdatedAt := sellerdeliveryareaMixinFields0[1].Descriptor()
+	// sellerdeliveryarea.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	sellerdeliveryarea.DefaultUpdatedAt = sellerdeliveryareaDescUpdatedAt.Default.(func() time.Time)
+	// sellerdeliveryarea.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	sellerdeliveryarea.UpdateDefaultUpdatedAt = sellerdeliveryareaDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// sellerdeliveryareaDescLabel is the schema descriptor for label field.
+	sellerdeliveryareaDescLabel := sellerdeliveryareaFields[1].Descriptor()
+	// sellerdeliveryarea.LabelValidator is a validator for the "label" field. It is called by the builders before save.
+	sellerdeliveryarea.LabelValidator = sellerdeliveryareaDescLabel.Validators[0].(func(string) error)
+	// sellerdeliveryareaDescFee is the schema descriptor for fee field.
+	sellerdeliveryareaDescFee := sellerdeliveryareaFields[2].Descriptor()
+	// sellerdeliveryarea.DefaultFee holds the default value on creation for the fee field.
+	sellerdeliveryarea.DefaultFee = sellerdeliveryareaDescFee.Default.(float64)
+	// sellerdeliveryarea.FeeValidator is a validator for the "fee" field. It is called by the builders before save.
+	sellerdeliveryarea.FeeValidator = sellerdeliveryareaDescFee.Validators[0].(func(float64) error)
+	// sellerdeliveryareaDescID is the schema descriptor for id field.
+	sellerdeliveryareaDescID := sellerdeliveryareaFields[0].Descriptor()
+	// sellerdeliveryarea.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	sellerdeliveryarea.IDValidator = sellerdeliveryareaDescID.Validators[0].(func(string) error)
+	sellerreviewMixin := schema.SellerReview{}.Mixin()
+	sellerreviewMixinFields0 := sellerreviewMixin[0].Fields()
+	_ = sellerreviewMixinFields0
+	sellerreviewFields := schema.SellerReview{}.Fields()
+	_ = sellerreviewFields
+	// sellerreviewDescCreatedAt is the schema descriptor for created_at field.
+	sellerreviewDescCreatedAt := sellerreviewMixinFields0[0].Descriptor()
+	// sellerreview.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sellerreview.DefaultCreatedAt = sellerreviewDescCreatedAt.Default.(func() time.Time)
+	// sellerreviewDescUpdatedAt is the schema descriptor for updated_at field.
+	sellerreviewDescUpdatedAt := sellerreviewMixinFields0[1].Descriptor()
+	// sellerreview.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	sellerreview.DefaultUpdatedAt = sellerreviewDescUpdatedAt.Default.(func() time.Time)
+	// sellerreview.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	sellerreview.UpdateDefaultUpdatedAt = sellerreviewDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// sellerreviewDescScore is the schema descriptor for score field.
+	sellerreviewDescScore := sellerreviewFields[1].Descriptor()
+	// sellerreview.ScoreValidator is a validator for the "score" field. It is called by the builders before save.
+	sellerreview.ScoreValidator = func() func(int) error {
+		validators := sellerreviewDescScore.Validators
+		fns := [...]func(int) error{
+			validators[0].(func(int) error),
+			validators[1].(func(int) error),
+		}
+		return func(score int) error {
+			for _, fn := range fns {
+				if err := fn(score); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerreviewDescID is the schema descriptor for id field.
+	sellerreviewDescID := sellerreviewFields[0].Descriptor()
+	// sellerreview.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	sellerreview.IDValidator = sellerreviewDescID.Validators[0].(func(string) error)
 	selleruserMixin := schema.SellerUser{}.Mixin()
 	selleruserMixinFields0 := selleruserMixin[0].Fields()
 	_ = selleruserMixinFields0

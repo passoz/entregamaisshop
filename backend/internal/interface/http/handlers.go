@@ -15,6 +15,9 @@ import (
 	"github.com/entregamais/platform/backend/ent/order"
 	"github.com/entregamais/platform/backend/ent/product"
 	"github.com/entregamais/platform/backend/ent/seller"
+	"github.com/entregamais/platform/backend/ent/sellerdeliveryarea"
+	"github.com/entregamais/platform/backend/ent/sellerreview"
+	"github.com/entregamais/platform/backend/ent/selleruser"
 	"github.com/entregamais/platform/backend/ent/user"
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
@@ -50,23 +53,45 @@ func (h *Handlers) CategoriesList(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) SellersList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	list, err := h.DB.Seller.Query().All(ctx)
+	list, err := h.DB.Seller.Query().
+		Where(seller.StatusEQ("active")).
+		WithDeliveryAreas(func(q *ent.SellerDeliveryAreaQuery) {
+			q.Order(ent.Asc(sellerdeliveryarea.FieldFee))
+		}).
+		WithReviews(func(q *ent.SellerReviewQuery) {
+			q.WithCustomer()
+			q.Order(ent.Desc(sellerreview.FieldCreatedAt))
+		}).
+		All(ctx)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to query sellers"})
 		return
 	}
-	writeSuccess(w, http.StatusOK, list, nil)
+	response := make([]sellerResponse, 0, len(list))
+	for _, item := range list {
+		response = append(response, buildSellerResponse(item, false))
+	}
+	writeSuccess(w, http.StatusOK, response, nil)
 }
 
 func (h *Handlers) SellersGet(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
-	item, err := h.DB.Seller.Get(ctx, id)
+	item, err := h.DB.Seller.Query().
+		Where(seller.IDEQ(id)).
+		WithDeliveryAreas(func(q *ent.SellerDeliveryAreaQuery) {
+			q.Order(ent.Asc(sellerdeliveryarea.FieldFee))
+		}).
+		WithReviews(func(q *ent.SellerReviewQuery) {
+			q.WithCustomer()
+			q.Order(ent.Desc(sellerreview.FieldCreatedAt))
+		}).
+		Only(ctx)
 	if err != nil {
 		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "seller not found"})
 		return
 	}
-	writeSuccess(w, http.StatusOK, item, nil)
+	writeSuccess(w, http.StatusOK, buildSellerResponse(item, true), nil)
 }
 
 func (h *Handlers) SellersProducts(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +129,7 @@ func (h *Handlers) ProductsGet(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) CartGet(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	uid := UserID(ctx)
-	
+
 	// Create cart if not exists
 	c, err := h.DB.Cart.Query().Where(cart.HasUserWith(user.IDEQ(uid))).WithItems(func(q *ent.CartItemQuery) { q.WithProduct() }).Only(ctx)
 	if ent.IsNotFound(err) {
@@ -123,7 +148,7 @@ func (h *Handlers) CartGet(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) CartCreateItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	uid := UserID(ctx)
-	
+
 	var payload struct {
 		ProductID string `json:"product_id"`
 		Quantity  int    `json:"quantity"`
@@ -190,10 +215,10 @@ func (h *Handlers) CartDeleteItem(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) OrderCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	uid := UserID(ctx)
-	
+
 	var payload struct {
 		SellerID        string  `json:"seller_id"`
-		TotalAmount    float64 `json:"total_amount"`
+		TotalAmount     float64 `json:"total_amount"`
 		DeliveryAddress string  `json:"delivery_address"`
 		Items           []struct {
 			ProductID string  `json:"product_id"`
@@ -254,7 +279,7 @@ func (h *Handlers) OrderCreate(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) OrderGet(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
-	item, err := h.DB.Order.Query().Where(order.IDEQ(id)).WithItems(func(q *ent.OrderItemQuery){ q.WithProduct() }).Only(ctx)
+	item, err := h.DB.Order.Query().Where(order.IDEQ(id)).WithItems(func(q *ent.OrderItemQuery) { q.WithProduct() }).Only(ctx)
 	if err != nil {
 		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "order not found"})
 		return
@@ -302,19 +327,28 @@ func (h *Handlers) WithTx(ctx context.Context, fn func(*ent.Tx) error) error {
 
 func (h *Handlers) SellerProfile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// Mock: find first seller this user belongs to if possible. 
-	// Real: check seller_users table.
-	item, err := h.DB.Seller.Query().First(ctx)
+	item, err := h.resolveSellerForUser(ctx)
 	if err != nil {
 		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "seller profile not found"})
 		return
 	}
-	writeSuccess(w, http.StatusOK, item, nil)
+	writeSuccess(w, http.StatusOK, buildSellerResponse(item, true), nil)
 }
 
 func (h *Handlers) SellerProductsList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	sid := r.URL.Query().Get("seller_id")
+	if sid == "" {
+		item, err := h.DB.SellerUser.Query().
+			Where(selleruser.HasUserWith(user.IDEQ(UserID(ctx)))).
+			QuerySeller().
+			Only(ctx)
+		if err != nil {
+			writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "seller profile not found"})
+			return
+		}
+		sid = item.ID
+	}
 	list, err := h.DB.Product.Query().Where(product.HasSellerWith(seller.IDEQ(sid))).All(ctx)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to query products"})
@@ -326,10 +360,10 @@ func (h *Handlers) SellerProductsList(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) SellerProductsCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var payload struct {
-		Name        string  `json:"name"`
-		Price       float64 `json:"price"`
-		SellerID    string  `json:"seller_id"`
-		CategoryID  string  `json:"category_id"`
+		Name       string  `json:"name"`
+		Price      float64 `json:"price"`
+		SellerID   string  `json:"seller_id"`
+		CategoryID string  `json:"category_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		writeError(w, http.StatusBadRequest, APIError{Code: "bad_request", Message: "invalid payload"})
@@ -469,6 +503,19 @@ func (h *Handlers) DriverOrderDeliver(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) DriverStatus(w http.ResponseWriter, r *http.Request) {
 	writeSuccess(w, http.StatusOK, map[string]any{"status": "online"}, nil)
+}
+
+func (h *Handlers) AdminSellerApprove(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := r.PathValue("id")
+
+	s, err := h.DB.Seller.UpdateOneID(id).SetStatus("active").Save(ctx)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to approve seller"})
+		return
+	}
+
+	writeSuccess(w, http.StatusOK, s, nil)
 }
 
 func (h *Handlers) AdminDashboard(w http.ResponseWriter, r *http.Request) {

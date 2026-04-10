@@ -85,8 +85,8 @@ export function ProductCard({ product, showStoreLink = false }: ProductCardProps
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-            <div className="flex items-center border-2 border-ze-black rounded-2xl bg-white overflow-hidden shadow-sm h-12">
+          <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-[110px_minmax(0,1fr)] mt-2">
+            <div className="flex items-center border-2 border-ze-black rounded-2xl bg-white overflow-hidden shadow-sm h-12 min-w-0">
               <button 
                 onClick={handleDecrement} 
                 className="flex-1 h-full font-black text-ze-black hover:bg-ze-yellow transition-colors text-xl focus:outline-none border-none disabled:opacity-10"
@@ -94,7 +94,7 @@ export function ProductCard({ product, showStoreLink = false }: ProductCardProps
               >
                 -
               </button>
-              <span className="flex-1 h-full flex items-center justify-center font-black text-ze-black bg-ze-yellow border-x-2 border-ze-black text-lg">
+              <span className="flex-[0.5] h-full flex items-center justify-center font-black text-ze-black bg-ze-yellow border-x-2 border-ze-black text-base">
                 {quantity}
               </span>
               <button 
@@ -109,10 +109,10 @@ export function ProductCard({ product, showStoreLink = false }: ProductCardProps
               onClick={handleAddToCart}
               variant="brand"
               type="button"
-              className="h-12 !rounded-2xl shadow-lg font-black uppercase text-[10px] tracking-widest border-2 border-ze-black"
+              className="h-12 min-w-0 !rounded-2xl shadow-lg font-black uppercase text-[10px] tracking-[0.18em] border-2 border-ze-black w-full"
             >
-              <ShoppingBag className="w-4 h-4 mr-1.5" />
-              Adicionar
+              <ShoppingBag className="w-4 h-4 mr-1.5 shrink-0" />
+              <span className="whitespace-nowrap">Adicionar</span>
             </Button>
           </div>
         </div>

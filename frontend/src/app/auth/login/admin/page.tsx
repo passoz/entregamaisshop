@@ -59,7 +59,7 @@ export default function AdminLogin() {
           <Input 
             id="email" 
             type="email"
-            placeholder="admin@entregamais.com" 
+            placeholder="admin@entregamaisshop.com" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

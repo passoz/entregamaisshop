@@ -71,7 +71,12 @@ export function LocationModal({ isOpen, onClose, onSelect }: LocationModalProps)
       />
 
       {/* Modal Card */}
-      <div className={`relative w-full max-w-lg bg-white rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-500 delay-75 ${isOpen ? "translate-y-0 scale-100" : "translate-y-8 scale-95"}`}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Escolher localização"
+        className={`relative w-full max-w-lg bg-white rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-500 delay-75 ${isOpen ? "translate-y-0 scale-100" : "translate-y-8 scale-95"}`}
+      >
         
         {/* Header decoration */}
         <div className="bg-ze-yellow p-8 text-center relative overflow-hidden">
@@ -84,6 +89,7 @@ export function LocationModal({ isOpen, onClose, onSelect }: LocationModalProps)
           
           <button 
             onClick={onClose}
+            aria-label="Fechar localização"
             className="absolute top-6 right-6 p-2 rounded-xl bg-ze-black/5 hover:bg-ze-black/10 transition-colors"
           >
             <X className="w-5 h-5 text-ze-black" />

@@ -201,6 +201,30 @@ func (f SellerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SellerMutation", m)
 }
 
+// The SellerDeliveryAreaFunc type is an adapter to allow the use of ordinary
+// function as SellerDeliveryArea mutator.
+type SellerDeliveryAreaFunc func(context.Context, *ent.SellerDeliveryAreaMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SellerDeliveryAreaFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SellerDeliveryAreaMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SellerDeliveryAreaMutation", m)
+}
+
+// The SellerReviewFunc type is an adapter to allow the use of ordinary
+// function as SellerReview mutator.
+type SellerReviewFunc func(context.Context, *ent.SellerReviewMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SellerReviewFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SellerReviewMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SellerReviewMutation", m)
+}
+
 // The SellerUserFunc type is an adapter to allow the use of ordinary
 // function as SellerUser mutator.
 type SellerUserFunc func(context.Context, *ent.SellerUserMutation) (ent.Value, error)

@@ -3,8 +3,8 @@ package http
 import (
 	"net/http"
 
-	"github.com/entregamais/platform/backend/ent"
 	"github.com/entregamais/platform/backend/api/openapi"
+	"github.com/entregamais/platform/backend/ent"
 	"github.com/entregamais/platform/backend/internal/infrastructure/auth"
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
@@ -24,6 +24,7 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *a
 	mux.HandleFunc("GET /api/v1/sellers", h.SellersList)
 	mux.HandleFunc("GET /api/v1/sellers/{id}", h.SellersGet)
 	mux.HandleFunc("GET /api/v1/sellers/{id}/products", h.SellersProducts)
+	mux.HandleFunc("POST /api/v1/sellers/{id}/reviews", mw.RequireRole("customer", h.SellerReviewCreate))
 	mux.HandleFunc("GET /api/v1/products", h.ProductsList)
 	mux.HandleFunc("GET /api/v1/products/{id}", h.ProductsGet)
 
@@ -37,6 +38,8 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *a
 	mux.HandleFunc("GET /api/v1/orders/me", mw.RequireAuth(h.OrderMine))
 
 	mux.HandleFunc("GET /api/v1/vendedor/profile", mw.RequireRole("vendedor", h.SellerProfile))
+	mux.HandleFunc("GET /api/v1/vendedor/delivery-areas", mw.RequireRole("vendedor", h.SellerDeliveryAreasGet))
+	mux.HandleFunc("PUT /api/v1/vendedor/delivery-areas", mw.RequireRole("vendedor", h.SellerDeliveryAreasUpdate))
 	mux.HandleFunc("GET /api/v1/vendedor/products", mw.RequireRole("vendedor", h.SellerProductsList))
 	mux.HandleFunc("POST /api/v1/vendedor/products", mw.RequireRole("vendedor", h.SellerProductsCreate))
 	mux.HandleFunc("GET /api/v1/vendedor/products/{id}", mw.RequireRole("vendedor", h.SellerProductsGet))
@@ -63,6 +66,7 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *a
 
 	mux.HandleFunc("GET /api/v1/admin/dashboard", mw.RequireRole("admin", h.AdminDashboard))
 	mux.HandleFunc("GET /api/v1/admin/sellers", mw.RequireRole("admin", h.AdminSellersList))
+	mux.HandleFunc("POST /api/v1/admin/sellers/{id}/approve", mw.RequireRole("admin", h.AdminSellerApprove))
 	mux.HandleFunc("POST /api/v1/admin/sellers", mw.RequireRole("admin", h.AdminSellersCreate))
 	mux.HandleFunc("GET /api/v1/admin/drivers", mw.RequireRole("admin", h.AdminDriversList))
 	mux.HandleFunc("POST /api/v1/admin/drivers", mw.RequireRole("admin", h.AdminDriversCreate))

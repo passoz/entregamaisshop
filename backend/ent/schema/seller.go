@@ -15,7 +15,7 @@ func (Seller) Fields() []ent.Field {
 		field.String("id").NotEmpty().Unique(),
 		field.String("name").NotEmpty(),
 		field.String("document").NotEmpty().Unique(),
-		field.String("status").Default("active"),
+		field.String("status").Default("pending"),
 		field.Time("deleted_at").Optional().Nillable(),
 	}
 }
@@ -25,6 +25,8 @@ func (Seller) Edges() []ent.Edge {
 		edge.To("products", Product.Type),
 		edge.To("inventory", Inventory.Type),
 		edge.To("orders", Order.Type),
+		edge.To("delivery_areas", SellerDeliveryArea.Type),
+		edge.To("reviews", SellerReview.Type),
 	}
 }
-func (Seller) Indexes() []ent.Index { return []ent.Index{index.Fields("status")}}
+func (Seller) Indexes() []ent.Index { return []ent.Index{index.Fields("status")} }

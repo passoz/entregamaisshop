@@ -34,6 +34,10 @@ const (
 	EdgeInventory = "inventory"
 	// EdgeOrders holds the string denoting the orders edge name in mutations.
 	EdgeOrders = "orders"
+	// EdgeDeliveryAreas holds the string denoting the delivery_areas edge name in mutations.
+	EdgeDeliveryAreas = "delivery_areas"
+	// EdgeReviews holds the string denoting the reviews edge name in mutations.
+	EdgeReviews = "reviews"
 	// Table holds the table name of the seller in the database.
 	Table = "sellers"
 	// UsersTable is the table that holds the users relation/edge.
@@ -64,6 +68,20 @@ const (
 	OrdersInverseTable = "orders"
 	// OrdersColumn is the table column denoting the orders relation/edge.
 	OrdersColumn = "seller_orders"
+	// DeliveryAreasTable is the table that holds the delivery_areas relation/edge.
+	DeliveryAreasTable = "seller_delivery_areas"
+	// DeliveryAreasInverseTable is the table name for the SellerDeliveryArea entity.
+	// It exists in this package in order to avoid circular dependency with the "sellerdeliveryarea" package.
+	DeliveryAreasInverseTable = "seller_delivery_areas"
+	// DeliveryAreasColumn is the table column denoting the delivery_areas relation/edge.
+	DeliveryAreasColumn = "seller_delivery_areas"
+	// ReviewsTable is the table that holds the reviews relation/edge.
+	ReviewsTable = "seller_reviews"
+	// ReviewsInverseTable is the table name for the SellerReview entity.
+	// It exists in this package in order to avoid circular dependency with the "sellerreview" package.
+	ReviewsInverseTable = "seller_reviews"
+	// ReviewsColumn is the table column denoting the reviews relation/edge.
+	ReviewsColumn = "seller_reviews"
 )
 
 // Columns holds all SQL columns for seller fields.
@@ -197,6 +215,34 @@ func ByOrders(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newOrdersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByDeliveryAreasCount orders the results by delivery_areas count.
+func ByDeliveryAreasCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDeliveryAreasStep(), opts...)
+	}
+}
+
+// ByDeliveryAreas orders the results by delivery_areas terms.
+func ByDeliveryAreas(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDeliveryAreasStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByReviewsCount orders the results by reviews count.
+func ByReviewsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newReviewsStep(), opts...)
+	}
+}
+
+// ByReviews orders the results by reviews terms.
+func ByReviews(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newReviewsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -223,5 +269,19 @@ func newOrdersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(OrdersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, OrdersTable, OrdersColumn),
+	)
+}
+func newDeliveryAreasStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DeliveryAreasInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DeliveryAreasTable, DeliveryAreasColumn),
+	)
+}
+func newReviewsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ReviewsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ReviewsTable, ReviewsColumn),
 	)
 }
