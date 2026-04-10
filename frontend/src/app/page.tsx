@@ -2,20 +2,114 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Star, Clock, MapPin, ChevronRight } from "lucide-react";
+import {
+  Search,
+  Star,
+  Clock,
+  MapPin,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
+import { LocationModal } from "@/components/modals/LocationModal";
+import {
+  findCityOption,
+  findNearbySellers,
+  formatLocationLabel,
+  SellerWithLocation,
+  type Seller,
+  findClosestNeighborhood
+} from "@/lib/nearbySellers";
 
 export default function Home() {
-  const [sellers, setSellers] = useState<any[]>([]);
+  const [allSellers, setAllSellers] = useState<Seller[]>([]);
+  const [nearbySellers, setNearbySellers] = useState<SellerWithLocation[]>([]);
+  const [locationLabel, setLocationLabel] = useState<string>("");
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isLoadingNearby, setIsLoadingNearby] = useState(true);
 
   useEffect(() => {
-    apiFetch<any[]>("/api/v1/sellers").then(setSellers).catch(console.error);
+    let isMounted = true;
+
+    const loadNearbySellers = async () => {
+      setIsLoadingNearby(true);
+
+      try {
+        const sellers = await apiFetch<Seller[]>("/api/v1/sellers");
+        if (!isMounted) return;
+
+        setAllSellers(sellers);
+
+        // Try automatic geolocation
+        if (typeof window !== "undefined" && "geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              if (!isMounted) return;
+              
+              const { latitude: lat, longitude: lng } = position.coords;
+
+              const sellersByDistance = findNearbySellers(sellers, { lat, lng });
+              setNearbySellers(sellersByDistance);
+
+              // Find closest neighborhood for label
+              try {
+                const res = await fetch("/data/neighborhoods.json");
+                const neighborhoods = await res.json();
+                const name = findClosestNeighborhood(lat, lng, neighborhoods);
+                setLocationLabel(name || "Sua localização");
+              } catch (e) {
+                console.error("Erro ao identificar bairro:", e);
+                setLocationLabel("Sua localização atual");
+              }
+              
+              setIsLoadingNearby(false);
+            },
+            () => {
+              if (!isMounted) return;
+              setIsLocationModalOpen(true);
+              setIsLoadingNearby(false);
+            },
+            { enableHighAccuracy: true, timeout: 5000 }
+          );
+        } else {
+          setIsLocationModalOpen(true);
+          setIsLoadingNearby(false);
+        }
+      } catch (error) {
+        console.error(error);
+        setIsLoadingNearby(false);
+      }
+    };
+
+    loadNearbySellers();
+    return () => { isMounted = false; };
   }, []);
+
+  const handleLocationSelect = (selectedLabel: string, coords?: { lat: number, lng: number }) => {
+    let locationToUse: { lat: number, lng: number, label: string } | undefined;
+
+    if (coords) {
+      locationToUse = { ...coords, label: selectedLabel };
+    } else {
+      const selectedCity = findCityOption(selectedLabel);
+      if (selectedCity) {
+        locationToUse = { ...selectedCity, label: selectedCity.label };
+      }
+    }
+
+    if (locationToUse) {
+      const sellersByDistance = findNearbySellers(allSellers, locationToUse);
+      setNearbySellers(sellersByDistance);
+      setLocationLabel(locationToUse.label);
+    }
+    
+    setIsLocationModalOpen(false);
+  };
+
   return (
     <main className="container mx-auto px-4 py-6 md:py-8 pb-20">
       {/* Immersive Hero Section */}
@@ -28,7 +122,7 @@ export default function Home() {
           priority
         />
         
-        {/* Deep Gradient Overlay for better text readability */}
+        {/* Deep Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-ze-black/90 via-ze-black/40 to-transparent" />
         
         <div className="absolute inset-0 flex flex-col justify-center p-6 md:p-20 space-y-4 md:space-y-6 max-w-4xl">
@@ -68,18 +162,33 @@ export default function Home() {
 
       <div className="mb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">Categorias</h2>
+          <h2 className="text-2xl font-black text-ze-black uppercase tracking-tighter">Categorias</h2>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide py-1">
-          {["Cervejas", "Vinhos", "Destilados", "Refrigerantes", "Gelo e Carvão", "Energéticos", "Sucos", "Petiscos"].map((item, i) => (
-            <Link href={`/search?category=${encodeURIComponent(item)}`} key={i} className="flex-shrink-0 flex flex-col items-center gap-3 group cursor-pointer hover:no-underline">
-              <div className="w-20 h-20 rounded-3xl bg-white shadow-sm border-2 border-ze-black/5 flex items-center justify-center group-hover:border-ze-yellow group-hover:shadow-lg transition-all group-hover:-translate-y-2">
-                <div className="w-12 h-12 rounded-full bg-ze-yellow/20 flex items-center justify-center">
-                  <span className="text-2xl">🍺</span>
+        <div className="flex gap-2 min-[400px]:gap-4 overflow-x-auto pb-4 pt-4 scrollbar-hide">
+          {[
+            { name: "Cervejas", emoji: "🍺" },
+            { name: "Vinhos", emoji: "🍷" },
+            { name: "Destilados", emoji: "🥃" },
+            { name: "Refrigerantes", emoji: "🥤" },
+            { name: "Gelo e Carvão", emoji: "🧊" },
+            { name: "Energéticos", emoji: "⚡" },
+            { name: "Sucos", emoji: "🧃" },
+            { name: "Petiscos", emoji: "🥨" }
+          ].map((item, i) => (
+            <Link 
+              href={`/search?category=${encodeURIComponent(item.name)}`} 
+              key={i} 
+              className="flex-shrink-0 flex flex-col items-center gap-3 group cursor-pointer hover:no-underline w-24"
+            >
+              <div className="w-20 h-20 rounded-[2rem] bg-white shadow-sm border-2 border-ze-black/5 flex items-center justify-center group-hover:border-ze-yellow group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:rotate-3 shadow-black/5">
+                <div className="w-14 h-14 rounded-full bg-ze-yellow/10 flex items-center justify-center group-hover:bg-ze-yellow/20 transition-colors">
+                  <span className="text-3xl filter drop-shadow-sm group-hover:scale-110 transition-transform">
+                    {item.emoji}
+                  </span>
                 </div>
               </div>
-              <span className="text-sm font-black text-ze-black/70 group-hover:text-ze-black transition-colors uppercase tracking-tight">
-                {item}
+              <span className="text-[10px] font-black text-ze-black/60 group-hover:text-ze-black transition-colors uppercase tracking-widest text-center px-1">
+                {item.name}
               </span>
             </Link>
           ))}
@@ -87,58 +196,120 @@ export default function Home() {
       </div>
 
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black text-ze-black uppercase tracking-tighter">Depósitos Próximos</h2>
-          <Link href="/search" className="hover:no-underline">
-            <Button variant="ghost" className="text-ze-black hover:text-ze-black/80 font-bold uppercase text-xs tracking-widest">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl md:text-3xl font-black text-ze-black uppercase tracking-tighter">Depósitos Próximos</h2>
+              <button 
+                onClick={() => setIsLocationModalOpen(true)}
+                className="w-10 h-10 rounded-xl bg-ze-gray flex items-center justify-center hover:bg-ze-yellow transition-all shadow-sm border border-ze-black/5"
+              >
+                <MapPin className="w-5 h-5 text-ze-black" />
+              </button>
+            </div>
+            {locationLabel && (
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-ze-black/40 mt-2 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-ze-yellow animate-pulse" />
+                Buscando em {locationLabel}
+              </p>
+            )}
+          </div>
+          <Link href="/search" className="hover:no-underline hidden sm:block">
+            <Button variant="ghost" className="text-ze-black hover:text-ze-black/80 font-black uppercase text-xs tracking-[0.2em]">
               Ver todos <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </Link>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {sellers.map((store) => (
-            <Link href={`/store/${store.id}`} key={store.id} className="hover:no-underline">
-              <Card className="cursor-pointer group overflow-hidden border-2 border-ze-black/5 rounded-3xl ze-card-hover bg-white h-full">
-                <div className="h-40 bg-ze-gray w-full relative">
-                  {/* Mock image banner with beverage color overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-ze-black/80 to-transparent flex items-end p-6">
-                    <Badge className="bg-ze-yellow text-ze-black font-black uppercase text-[10px] tracking-widest">
-                      Bebidas
-                    </Badge>
+          {!isLoadingNearby &&
+            nearbySellers.map((store) => (
+              <Link href={`/store/${store.id}`} key={store.id} className="hover:no-underline">
+                <Card className="cursor-pointer group overflow-hidden border-2 border-ze-black/5 rounded-3xl ze-card-hover bg-white h-full">
+                  <div className="h-40 bg-ze-gray w-full relative">
+                    <div className="absolute inset-0 bg-gradient-to-t from-ze-black/80 to-transparent flex items-end p-6">
+                      <Badge className="bg-ze-yellow text-ze-black font-black uppercase text-[10px] tracking-widest">
+                        {store.category || "Bebidas"}
+                      </Badge>
+                    </div>
                   </div>
+                  <CardContent className="p-6 pt-8 relative">
+                    <div className="absolute -top-12 right-6 w-20 h-20 bg-white rounded-3xl shadow-xl border-4 border-ze-yellow flex items-center justify-center transform rotate-3 group-hover:rotate-0 transition-transform">
+                      <div className="w-16 h-16 bg-ze-gray rounded-2xl flex items-center justify-center text-3xl">
+                        🏪
+                      </div>
+                    </div>
+                    <h3 className="font-black text-xl text-ze-black mb-1 group-hover:text-ze-red transition-colors uppercase tracking-tighter">
+                      {store.name}
+                    </h3>
+                    <div className="flex items-center gap-4 text-sm text-ze-black/60 mb-4 font-bold">
+                      <div className="flex items-center text-ze-yellow bg-ze-black px-2 py-0.5 rounded-md">
+                        <Star className="w-4 h-4 mr-1 fill-current" /> {store.rating ?? 4.9}
+                      </div>
+                      <span>•</span>
+                      <span>{formatLocationLabel(store.city, store.state) || "Sem localizacao"}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs font-black text-ze-black/80 bg-ze-gray rounded-2xl px-4 py-3 border border-ze-black/5">
+                      <MapPin className="w-4 h-4 text-ze-red" />
+                      <span>
+                        {store.distanceKm != null
+                          ? `${store.distanceKm.toFixed(1)} km de distancia`
+                          : "Distancia indisponivel"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs font-black text-ze-black/80 bg-ze-gray rounded-2xl p-4 border border-ze-black/5 mt-4">
+                      <div className="flex items-center">
+                        <Clock className="w-4 h-4 mr-2" /> {store.time || "15-25 min"}
+                      </div>
+                      <div className="flex items-center text-ze-red uppercase tracking-widest">
+                        {store.fee || "Frete zero"}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+
+          {!isLoadingNearby && nearbySellers.length === 0 && (
+            <Card className="md:col-span-2 lg:col-span-4 rounded-[2.5rem] border-4 border border-ze-black border-dashed bg-white shadow-[12px_12px_0px_0px_rgba(34,34,34,0.05)]">
+              <CardContent className="p-12 text-center space-y-6">
+                <div className="w-24 h-24 bg-ze-gray rounded-[2rem] flex items-center justify-center mx-auto text-5xl grayscale opacity-50">
+                  📍
                 </div>
-                <CardContent className="p-6 pt-8 relative">
-                  <div className="absolute -top-12 right-6 w-20 h-20 bg-white rounded-3xl shadow-xl border-4 border-ze-yellow flex items-center justify-center transform rotate-3 group-hover:rotate-0 transition-transform">
-                    <div className="w-16 h-16 bg-ze-gray rounded-2xl flex items-center justify-center text-3xl">
-                      🏪
-                    </div>
-                  </div>
-                  <h3 className="font-black text-xl text-ze-black mb-1 group-hover:text-ze-red transition-colors uppercase tracking-tighter">
-                    {store.name}
-                  </h3>
-                  <div className="flex items-center gap-4 text-sm text-ze-black/60 mb-4 font-bold">
-                    <div className="flex items-center text-ze-yellow bg-ze-black px-2 py-0.5 rounded-md">
-                      <Star className="w-4 h-4 mr-1 fill-current" /> 4.9
-                    </div>
-                    <span>•</span>
-                    <span>Bebidas</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-xs font-black text-ze-black/80 bg-ze-gray rounded-2xl p-4 border border-ze-black/5 mt-4">
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 mr-2" /> 15-25 min
-                    </div>
-                    <div className="flex items-center text-ze-red uppercase tracking-widest">
-                      Frete ZERO
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                <div className="space-y-2">
+                  <h3 className="text-3xl font-black uppercase tracking-tighter text-ze-black">Nenhum depósito por aqui...</h3>
+                  <p className="text-ze-black/60 font-bold uppercase text-xs tracking-widest">
+                    Não encontramos lojas próximas a {locationLabel || "sua localização"}.
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => setIsLocationModalOpen(true)}
+                  variant="ze-dark" 
+                  className="px-10 h-14 rounded-2xl font-black uppercase tracking-widest shadow-xl transform hover:-rotate-1 transition-transform"
+                >
+                  Alterar Localização
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {isLoadingNearby && (
+            <div className="md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="h-80 bg-ze-gray rounded-3xl" />
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
+      <LocationModal 
+        isOpen={isLocationModalOpen} 
+        onClose={() => setIsLocationModalOpen(false)} 
+        onSelect={handleLocationSelect}
+      />
     </main>
   );
 }

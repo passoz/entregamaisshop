@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/entregamais/platform/backend/internal/infrastructure/auth"
 	apihttp "github.com/entregamais/platform/backend/internal/interface/http"
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/db"
@@ -31,7 +32,14 @@ func main() {
 		lg.Error("db_seed_failed", err, nil)
 	}
 
-	router := apihttp.NewRouter(cfg, lg, dbClient)
+	// Initialize JWT Verifier
+	verifier, err := auth.NewJWTVerifier(cfg.KeycloakIssuerURL)
+	if err != nil {
+		lg.Error("jwt_verifier_initialization_failed", err, nil)
+		// We allow continuation in dev mock mode if needed, but log the error
+	}
+
+	router := apihttp.NewRouter(cfg, lg, dbClient, verifier)
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,

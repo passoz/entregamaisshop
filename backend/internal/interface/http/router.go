@@ -5,13 +5,15 @@ import (
 
 	"github.com/entregamais/platform/backend/ent"
 	"github.com/entregamais/platform/backend/api/openapi"
+	"github.com/entregamais/platform/backend/internal/infrastructure/auth"
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
 )
 
-func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client) http.Handler {
+func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *auth.JWTVerifier) http.Handler {
 	mux := http.NewServeMux()
 
+	mw := NewMiddleware(lg, verifier)
 	h := &Handlers{Config: cfg, Logger: lg, DB: db}
 
 	mux.HandleFunc("GET /api/v1/health", h.Health)
@@ -25,47 +27,47 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client) http.Handle
 	mux.HandleFunc("GET /api/v1/products", h.ProductsList)
 	mux.HandleFunc("GET /api/v1/products/{id}", h.ProductsGet)
 
-	mux.HandleFunc("GET /api/v1/cart", requireAuth(h.CartGet))
-	mux.HandleFunc("POST /api/v1/cart/items", requireAuth(h.CartCreateItem))
-	mux.HandleFunc("PUT /api/v1/cart/items/{id}", requireAuth(h.CartUpdateItem))
-	mux.HandleFunc("DELETE /api/v1/cart/items/{id}", requireAuth(h.CartDeleteItem))
+	mux.HandleFunc("GET /api/v1/cart", mw.RequireAuth(h.CartGet))
+	mux.HandleFunc("POST /api/v1/cart/items", mw.RequireAuth(h.CartCreateItem))
+	mux.HandleFunc("PUT /api/v1/cart/items/{id}", mw.RequireAuth(h.CartUpdateItem))
+	mux.HandleFunc("DELETE /api/v1/cart/items/{id}", mw.RequireAuth(h.CartDeleteItem))
 
-	mux.HandleFunc("POST /api/v1/orders", requireAuth(h.OrderCreate))
-	mux.HandleFunc("GET /api/v1/orders/{id}", requireAuth(h.OrderGet))
-	mux.HandleFunc("GET /api/v1/orders/me", requireAuth(h.OrderMine))
+	mux.HandleFunc("POST /api/v1/orders", mw.RequireAuth(h.OrderCreate))
+	mux.HandleFunc("GET /api/v1/orders/{id}", mw.RequireAuth(h.OrderGet))
+	mux.HandleFunc("GET /api/v1/orders/me", mw.RequireAuth(h.OrderMine))
 
-	mux.HandleFunc("GET /api/v1/vendedor/profile", requireRole("vendedor", h.SellerProfile))
-	mux.HandleFunc("GET /api/v1/vendedor/products", requireRole("vendedor", h.SellerProductsList))
-	mux.HandleFunc("POST /api/v1/vendedor/products", requireRole("vendedor", h.SellerProductsCreate))
-	mux.HandleFunc("GET /api/v1/vendedor/products/{id}", requireRole("vendedor", h.SellerProductsGet))
-	mux.HandleFunc("PUT /api/v1/vendedor/products/{id}", requireRole("vendedor", h.SellerProductsUpdate))
-	mux.HandleFunc("DELETE /api/v1/vendedor/products/{id}", requireRole("vendedor", h.SellerProductsDelete))
-	mux.HandleFunc("GET /api/v1/vendedor/inventory", requireRole("vendedor", h.SellerInventoryList))
-	mux.HandleFunc("PUT /api/v1/vendedor/inventory/{productId}", requireRole("vendedor", h.SellerInventoryUpdate))
-	mux.HandleFunc("GET /api/v1/vendedor/orders", requireRole("vendedor", h.SellerOrdersList))
-	mux.HandleFunc("GET /api/v1/vendedor/orders/{id}", requireRole("vendedor", h.SellerOrdersGet))
-	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/confirm", requireRole("vendedor", h.SellerOrderConfirm))
-	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/prepare", requireRole("vendedor", h.SellerOrderPrepare))
-	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/ready", requireRole("vendedor", h.SellerOrderReady))
+	mux.HandleFunc("GET /api/v1/vendedor/profile", mw.RequireRole("vendedor", h.SellerProfile))
+	mux.HandleFunc("GET /api/v1/vendedor/products", mw.RequireRole("vendedor", h.SellerProductsList))
+	mux.HandleFunc("POST /api/v1/vendedor/products", mw.RequireRole("vendedor", h.SellerProductsCreate))
+	mux.HandleFunc("GET /api/v1/vendedor/products/{id}", mw.RequireRole("vendedor", h.SellerProductsGet))
+	mux.HandleFunc("PUT /api/v1/vendedor/products/{id}", mw.RequireRole("vendedor", h.SellerProductsUpdate))
+	mux.HandleFunc("DELETE /api/v1/vendedor/products/{id}", mw.RequireRole("vendedor", h.SellerProductsDelete))
+	mux.HandleFunc("GET /api/v1/vendedor/inventory", mw.RequireRole("vendedor", h.SellerInventoryList))
+	mux.HandleFunc("PUT /api/v1/vendedor/inventory/{productId}", mw.RequireRole("vendedor", h.SellerInventoryUpdate))
+	mux.HandleFunc("GET /api/v1/vendedor/orders", mw.RequireRole("vendedor", h.SellerOrdersList))
+	mux.HandleFunc("GET /api/v1/vendedor/orders/{id}", mw.RequireRole("vendedor", h.SellerOrdersGet))
+	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/confirm", mw.RequireRole("vendedor", h.SellerOrderConfirm))
+	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/prepare", mw.RequireRole("vendedor", h.SellerOrderPrepare))
+	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/ready", mw.RequireRole("vendedor", h.SellerOrderReady))
 
-	mux.HandleFunc("GET /api/v1/entregador/profile", requireRole("entregador", h.DriverProfile))
-	mux.HandleFunc("GET /api/v1/entregador/orders", requireRole("entregador", h.DriverOrdersList))
-	mux.HandleFunc("GET /api/v1/entregador/orders/{id}", requireRole("entregador", h.DriverOrdersGet))
-	mux.HandleFunc("POST /api/v1/entregador/orders/{id}/accept", requireRole("entregador", h.DriverOrderAccept))
-	mux.HandleFunc("POST /api/v1/entregador/orders/{id}/pickup", requireRole("entregador", h.DriverOrderPickup))
-	mux.HandleFunc("POST /api/v1/entregador/orders/{id}/deliver", requireRole("entregador", h.DriverOrderDeliver))
-	mux.HandleFunc("POST /api/v1/entregador/status", requireRole("entregador", h.DriverStatus))
+	mux.HandleFunc("GET /api/v1/entregador/profile", mw.RequireRole("entregador", h.DriverProfile))
+	mux.HandleFunc("GET /api/v1/entregador/orders", mw.RequireRole("entregador", h.DriverOrdersList))
+	mux.HandleFunc("GET /api/v1/entregador/orders/{id}", mw.RequireRole("entregador", h.DriverOrdersGet))
+	mux.HandleFunc("POST /api/v1/entregador/orders/{id}/accept", mw.RequireRole("entregador", h.DriverOrderAccept))
+	mux.HandleFunc("POST /api/v1/entregador/orders/{id}/pickup", mw.RequireRole("entregador", h.DriverOrderPickup))
+	mux.HandleFunc("POST /api/v1/entregador/orders/{id}/deliver", mw.RequireRole("entregador", h.DriverOrderDeliver))
+	mux.HandleFunc("POST /api/v1/entregador/status", mw.RequireRole("entregador", h.DriverStatus))
 
-	mux.HandleFunc("POST /api/v1/uploads", requireAuth(h.UploadCreate))
-	mux.HandleFunc("GET /api/v1/uploads/{id}", requireAuth(h.UploadGet))
+	mux.HandleFunc("POST /api/v1/uploads", mw.RequireAuth(h.UploadCreate))
+	mux.HandleFunc("GET /api/v1/uploads/{id}", mw.RequireAuth(h.UploadGet))
 
-	mux.HandleFunc("GET /api/v1/admin/dashboard", requireRole("admin", h.AdminDashboard))
-	mux.HandleFunc("GET /api/v1/admin/sellers", requireRole("admin", h.AdminSellersList))
-	mux.HandleFunc("POST /api/v1/admin/sellers", requireRole("admin", h.AdminSellersCreate))
-	mux.HandleFunc("GET /api/v1/admin/drivers", requireRole("admin", h.AdminDriversList))
-	mux.HandleFunc("POST /api/v1/admin/drivers", requireRole("admin", h.AdminDriversCreate))
-	mux.HandleFunc("GET /api/v1/admin/orders", requireRole("admin", h.AdminOrdersList))
-	mux.HandleFunc("GET /api/v1/admin/users", requireRole("admin", h.AdminUsersList))
+	mux.HandleFunc("GET /api/v1/admin/dashboard", mw.RequireRole("admin", h.AdminDashboard))
+	mux.HandleFunc("GET /api/v1/admin/sellers", mw.RequireRole("admin", h.AdminSellersList))
+	mux.HandleFunc("POST /api/v1/admin/sellers", mw.RequireRole("admin", h.AdminSellersCreate))
+	mux.HandleFunc("GET /api/v1/admin/drivers", mw.RequireRole("admin", h.AdminDriversList))
+	mux.HandleFunc("POST /api/v1/admin/drivers", mw.RequireRole("admin", h.AdminDriversCreate))
+	mux.HandleFunc("GET /api/v1/admin/orders", mw.RequireRole("admin", h.AdminOrdersList))
+	mux.HandleFunc("GET /api/v1/admin/users", mw.RequireRole("admin", h.AdminUsersList))
 
 	mux.HandleFunc("GET /openapi.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -76,5 +78,5 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client) http.Handle
 		_, _ = w.Write([]byte(`<html><body><h1>EntregaMais API Docs</h1><p>Download <a href="/openapi.json">openapi.json</a>.</p></body></html>`))
 	})
 
-	return chain(mux, loggingMiddleware(lg), requestContextMiddleware)
+	return chain(mux, mw.Logging, mw.RequestContext)
 }

@@ -2,4 +2,4 @@
 description: Gerar testes a cada nova feature
 ---
 
-Tuda nova feature e novo caso de uso, tanto no frontend quento no backend devem vir acompanhadas de testes com m[axima cobertura.
+Toda nova feature e todo novo caso de uso, tanto no frontend quanto no backend, devem vir acompanhados de testes com cobertura maxima.

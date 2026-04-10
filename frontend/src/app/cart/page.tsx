@@ -10,39 +10,15 @@ import { useState } from "react";
 import { apiFetch } from "@/lib/api";
 
 export default function CartPage() {
-  const { items, subtotal, updateQuantity, removeItem, clearCart } = useCart();
+  const { items, subtotal, updateQuantity, removeItem } = useCart();
   const router = useRouter();
-  const [isFinishing, setIsFinishing] = useState(false);
 
   const fee = items.length > 0 ? 7.90 : 0;
   const total = subtotal + fee;
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (items.length === 0) return;
-    setIsFinishing(true);
-
-    try {
-      // Group items by seller mapping (Assume one seller for demo simplicity)
-      const sellerId = items[0]?.seller_id || "1";
-      
-      const payload = {
-        seller_id: sellerId,
-        items: items.map(i => ({ product_id: i.product_id, quantity: i.quantity, price: i.price })),
-        total_amount: total
-      };
-
-      await apiFetch("/api/v1/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      clearCart();
-      router.push("/orders");
-    } catch(e) {
-      console.error(e);
-      setIsFinishing(false);
-    }
+    router.push("/checkout");
   };
 
   return (
@@ -128,11 +104,11 @@ export default function CartPage() {
 
               <Button 
                 onClick={handleCheckout} 
-                disabled={items.length === 0 || isFinishing}
+                disabled={items.length === 0}
                 variant="ze-dark" 
                 size="lg" 
                 className="w-full h-14 md:h-16 text-base md:text-lg font-black uppercase italic tracking-tighter shadow-xl group border-2 border-ze-black rounded-xl md:rounded-2xl disabled:opacity-50">
-                {isFinishing ? "Processando..." : "Finalizar"}
+                Finalizar
                 <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6 group-hover:translate-x-2 transition-transform" />
               </Button>
             </CardContent>

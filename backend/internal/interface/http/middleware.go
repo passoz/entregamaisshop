@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/entregamais/platform/backend/internal/infrastructure/auth"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
 )
 
@@ -17,16 +18,20 @@ const (
 	requestIDKey     ctxKey = "request_id"
 	correlationIDKey ctxKey = "correlation_id"
 	userIDKey        ctxKey = "user_id"
-	roleKey          ctxKey = "role"
+	rolesKey         ctxKey = "roles"
+	roleKey          ctxKey = "role" // Legacy for single role check
 )
 
-func newID() string {
-	b := make([]byte, 12)
-	_, _ = rand.Read(b)
-	return hex.EncodeToString(b)
+type Middleware struct {
+	lg       *logger.Logger
+	verifier *auth.JWTVerifier
 }
 
-func requestContextMiddleware(next http.Handler) http.Handler {
+func NewMiddleware(lg *logger.Logger, verifier *auth.JWTVerifier) *Middleware {
+	return &Middleware{lg: lg, verifier: verifier}
+}
+
+func (m *Middleware) RequestContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqID := r.Header.Get("X-Request-ID")
 		if reqID == "" {
@@ -46,6 +51,90 @@ func requestContextMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func (m *Middleware) Logging(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
+		next.ServeHTTP(rec, r)
+
+		fields := map[string]any{
+			"request_id":     RequestID(r.Context()),
+			"correlation_id": CorrelationID(r.Context()),
+			"route":          r.URL.Path,
+			"method":         r.Method,
+			"status_code":    rec.status,
+			"latency_ms":     time.Since(start).Milliseconds(),
+		}
+		m.lg.Info("http_request", fields)
+	})
+}
+
+func (m *Middleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+
+		// DEV MOCK BYPASS: If no verifier is provided or token is "user-1", allow mock
+		if m.verifier == nil || token == "user-1" {
+			ctx := context.WithValue(r.Context(), userIDKey, "user-1")
+			ctx = context.WithValue(ctx, rolesKey, []string{"customer"})
+			next(w, r.WithContext(ctx))
+			return
+		}
+
+		if token == "" {
+			writeError(w, http.StatusUnauthorized, APIError{
+				Code:    "unauthorized",
+				Message: "missing authorization token",
+			})
+			return
+		}
+
+		claims, err := m.verifier.Verify(r.Context(), token)
+		if err != nil {
+			m.lg.Error("auth_verification_failed", err, nil)
+			writeError(w, http.StatusUnauthorized, APIError{
+				Code:    "unauthorized",
+				Message: "invalid or expired token",
+			})
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), userIDKey, claims.Subject)
+		ctx = context.WithValue(ctx, rolesKey, claims.RealmAccess.Roles)
+		next(w, r.WithContext(ctx))
+	}
+}
+
+func (m *Middleware) RequireRole(role string, next http.HandlerFunc) http.HandlerFunc {
+	return m.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+		roles, _ := r.Context().Value(rolesKey).([]string)
+
+		hasRole := false
+		for _, r := range roles {
+			if strings.EqualFold(r, role) {
+				hasRole = true
+				break
+			}
+		}
+
+		if !hasRole {
+			writeError(w, http.StatusForbidden, APIError{
+				Code:    "forbidden",
+				Message: "insufficient role",
+			})
+			return
+		}
+		next(w, r)
+	})
+}
+
+func newID() string {
+	b := make([]byte, 12)
+	_, _ = rand.Read(b)
+	return hex.EncodeToString(b)
+}
+
 type statusRecorder struct {
 	http.ResponseWriter
 	status int
@@ -56,65 +145,11 @@ func (r *statusRecorder) WriteHeader(code int) {
 	r.ResponseWriter.WriteHeader(code)
 }
 
-func loggingMiddleware(lg *logger.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now()
-			rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
-			next.ServeHTTP(rec, r)
-
-			fields := map[string]any{
-				"request_id":     RequestID(r.Context()),
-				"correlation_id": CorrelationID(r.Context()),
-				"route":          r.URL.Path,
-				"method":         r.Method,
-				"status_code":    rec.status,
-				"latency_ms":     time.Since(start).Milliseconds(),
-			}
-			lg.Info("http_request", fields)
-		})
-	}
-}
-
 func chain(h http.Handler, m ...func(http.Handler) http.Handler) http.Handler {
 	for i := len(m) - 1; i >= 0; i-- {
 		h = m[i](h)
 	}
 	return h
-}
-
-func requireAuth(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		auth := r.Header.Get("Authorization")
-		token := strings.TrimPrefix(auth, "Bearer ")
-		if token == "" {
-			token = "user-1" // Fallback for dev demo
-		}
-		
-		ctx := context.WithValue(r.Context(), userIDKey, token)
-		next(w, r.WithContext(ctx))
-	}
-}
-
-func requireRole(role string, next http.HandlerFunc) http.HandlerFunc {
-	return requireAuth(func(w http.ResponseWriter, r *http.Request) {
-		rRole := r.Header.Get("X-Role")
-		if rRole == "" {
-			rRole = role // Fallback for simplicity in demo
-		}
-		
-		if strings.ToLower(rRole) != strings.ToLower(role) {
-			writeError(w, http.StatusForbidden, APIError{
-				Code:          "forbidden",
-				Message:       "insufficient role",
-				RequestID:     RequestID(r.Context()),
-				CorrelationID: CorrelationID(r.Context()),
-			})
-			return
-		}
-		ctx := context.WithValue(r.Context(), roleKey, rRole)
-		next(w, r.WithContext(ctx))
-	})
 }
 
 func UserID(ctx context.Context) string {

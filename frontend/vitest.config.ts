@@ -4,6 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  cacheDir: '/tmp/entregamais-frontend-vite',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

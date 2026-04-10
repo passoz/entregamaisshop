@@ -8,6 +8,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { CartProvider } from "@/lib/CartContext";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -17,10 +18,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <AuthProvider>
             <CartProvider>
               <ToastProvider>
-                <div className="min-h-screen bg-slate-50 relative selection:bg-brand-sky selection:text-white">
+                <div className="min-h-screen bg-slate-50 relative selection:bg-brand-sky selection:text-white flex flex-col">
                   <div className="absolute top-0 w-full h-[500px] bg-gradient-to-b from-brand-teal/5 to-transparent -z-10 pointer-events-none" />
                   <Navbar />
-                  {children}
+                  <main className="flex-1">
+                    {children}
+                  </main>
+                  <Footer />
                 </div>
               </ToastProvider>
             </CartProvider>

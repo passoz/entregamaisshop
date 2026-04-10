@@ -77,16 +77,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, account, user, profile }) {
-      if (user) {
+      // Initial sign in
+      if (account && user) {
+        token.accessToken = account.access_token
+        token.refreshToken = account.refresh_token
+        token.expiresAt = account.expires_at
         token.roles = (user as any).roles || []
-      }
-      if (account && profile) {
+      } else if (profile) {
         token.roles = (profile as any).realm_access?.roles || []
       }
       return token
     },
     async session({ session, token }) {
-      (session as any).roles = token.roles || []
+      (session as any).accessToken = token.accessToken
+      (session as any).refreshToken = token.refreshToken
+      (session as any).roles = (token as any).roles || []
       return session
     },
   },

@@ -192,9 +192,10 @@ func (h *Handlers) OrderCreate(w http.ResponseWriter, r *http.Request) {
 	uid := UserID(ctx)
 	
 	var payload struct {
-		SellerID     string `json:"seller_id"`
-		TotalAmount float64 `json:"total_amount"`
-		Items        []struct {
+		SellerID        string  `json:"seller_id"`
+		TotalAmount    float64 `json:"total_amount"`
+		DeliveryAddress string  `json:"delivery_address"`
+		Items           []struct {
 			ProductID string  `json:"product_id"`
 			Quantity  int     `json:"quantity"`
 			Price     float64 `json:"price"`
@@ -207,12 +208,17 @@ func (h *Handlers) OrderCreate(w http.ResponseWriter, r *http.Request) {
 
 	// Transaction to create order and items
 	err := h.WithTx(ctx, func(tx *ent.Tx) error {
+		addressJSON := "{}"
+		if payload.DeliveryAddress != "" {
+			addressJSON = fmt.Sprintf(`{"raw": "%s"}`, payload.DeliveryAddress)
+		}
+
 		ord, err := tx.Order.Create().
 			SetID(newID()).
 			SetCustomerID(uid).
 			SetSellerID(payload.SellerID).
 			SetTotalAmount(payload.TotalAmount).
-			SetDeliveryAddressJSON("{}"). // Mock for now
+			SetDeliveryAddressJSON(addressJSON).
 			Save(ctx)
 		if err != nil {
 			return err
@@ -259,7 +265,14 @@ func (h *Handlers) OrderGet(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) OrderMine(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	uid := UserID(ctx)
-	list, err := h.DB.Order.Query().Where(order.HasCustomerWith(user.IDEQ(uid))).WithItems().Order(ent.Desc(order.FieldCreatedAt)).All(ctx)
+	list, err := h.DB.Order.Query().
+		Where(order.HasCustomerWith(user.IDEQ(uid))).
+		WithSeller().
+		WithItems(func(q *ent.OrderItemQuery) {
+			q.WithProduct()
+		}).
+		Order(ent.Desc(order.FieldCreatedAt)).
+		All(ctx)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to query orders"})
 		return
@@ -372,7 +385,13 @@ func (h *Handlers) SellerInventoryUpdate(w http.ResponseWriter, r *http.Request)
 func (h *Handlers) SellerOrdersList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	sid := r.URL.Query().Get("seller_id")
-	list, err := h.DB.Order.Query().Where(order.HasSellerWith(seller.IDEQ(sid))).WithItems().All(ctx)
+	list, err := h.DB.Order.Query().
+		Where(order.HasSellerWith(seller.IDEQ(sid))).
+		WithItems(func(q *ent.OrderItemQuery) {
+			q.WithProduct()
+		}).
+		Order(ent.Desc(order.FieldCreatedAt)).
+		All(ctx)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to query orders"})
 		return
@@ -413,8 +432,13 @@ func (h *Handlers) DriverProfile(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) DriverOrdersList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// Show ready orders or orders accepted by this driver
-	list, err := h.DB.Order.Query().Where(order.StatusIn("ready", "accepted", "picked_up")).All(ctx)
+	// Show ready orders (available to pick up) or orders already handled by this driver
+	list, err := h.DB.Order.Query().
+		Where(order.StatusIn("ready", "accepted", "picked_up")).
+		WithSeller().
+		WithCustomer().
+		Order(ent.Desc(order.FieldCreatedAt)).
+		All(ctx)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to query orders"})
 		return

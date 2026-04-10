@@ -1,3 +1,6 @@
+import { auth } from "@/auth";
+import { getSession } from "next-auth/react";
+
 export interface APIResponse<T> {
   success: boolean;
   data: T;
@@ -9,13 +12,48 @@ export interface APIResponse<T> {
   meta?: any;
 }
 
-export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, options);
-  const json: APIResponse<T> = await res.json();
+export async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+  let token: string | undefined;
   
-  if (!res.ok || !json.success) {
-    throw new Error(json.error?.message || "API Request failed");
+  try {
+    if (typeof window !== "undefined") {
+      // Client Side
+      const session = await getSession();
+      token = (session as any)?.accessToken;
+    } else {
+      // Server Side
+      const session = await auth();
+      token = (session as any)?.accessToken;
+    }
+  } catch (e) {
+    // Fail silently - if token is needed, the backend will return 401
   }
-  
-  return json.data;
+
+  const headers = new Headers(options.headers);
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const res = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  const json = await res.json();
+
+  if ("success" in json) {
+    const typedJson = json as APIResponse<T>;
+
+    if (!res.ok || !typedJson.success) {
+      throw new Error(typedJson.error?.message || "API Request failed");
+    }
+
+    return typedJson.data;
+  }
+
+  if (!res.ok) {
+    throw new Error("API Request failed");
+  }
+
+  return json as T;
 }
