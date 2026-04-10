@@ -12,6 +12,7 @@ import (
 
 	apihttp "github.com/entregamais/platform/backend/internal/interface/http"
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
+	"github.com/entregamais/platform/backend/internal/infrastructure/db"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
 )
 
@@ -19,7 +20,18 @@ func main() {
 	cfg := config.Load()
 	lg := logger.New(cfg.AppName, cfg.Environment)
 
-	router := apihttp.NewRouter(cfg, lg)
+	dbClient, err := db.NewClient(cfg)
+	if err != nil {
+		lg.Error("db_connection_failed", err, nil)
+		log.Fatal(err)
+	}
+	defer dbClient.Close()
+
+	if err := db.Seed(context.Background(), dbClient); err != nil {
+		lg.Error("db_seed_failed", err, nil)
+	}
+
+	router := apihttp.NewRouter(cfg, lg, dbClient)
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,

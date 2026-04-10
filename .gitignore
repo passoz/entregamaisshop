@@ -18,8 +18,10 @@ coverage/
 # Go
 bin/
 backend/bin/
+backend/main
 *.test
 backend/coverage.out
+*.db
 
 # Python
 __pycache__/

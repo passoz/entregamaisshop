@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Search, Star, Clock, MapPin, ChevronRight } from "lucide-react";
@@ -5,15 +7,15 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-
-const MOCK_STORES = [
-  { id: 1, name: "Depósito do Zé", category: "Cervejas e Gelo", rating: 4.9, time: "15-25 min", fee: "Grátis" },
-  { id: 2, name: "Conveniência 24h", category: "Bebidas Variadas", rating: 4.5, time: "20-35 min", fee: "R$ 4,90" },
-  { id: 3, name: "Distribuidora Imperial", category: "Vinhos e Destilados", rating: 4.7, time: "30-50 min", fee: "R$ 6,90" },
-  { id: 4, name: "Gelo e Carvão Express", category: "Essenciais", rating: 4.8, time: "10-20 min", fee: "R$ 3,00" },
-];
+import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 export default function Home() {
+  const [sellers, setSellers] = useState<any[]>([]);
+
+  useEffect(() => {
+    apiFetch<any[]>("/api/v1/sellers").then(setSellers).catch(console.error);
+  }, []);
   return (
     <main className="container mx-auto px-4 py-6 md:py-8 pb-20">
       {/* Immersive Hero Section */}
@@ -95,14 +97,14 @@ export default function Home() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {MOCK_STORES.map((store) => (
+          {sellers.map((store) => (
             <Link href={`/store/${store.id}`} key={store.id} className="hover:no-underline">
               <Card className="cursor-pointer group overflow-hidden border-2 border-ze-black/5 rounded-3xl ze-card-hover bg-white h-full">
                 <div className="h-40 bg-ze-gray w-full relative">
                   {/* Mock image banner with beverage color overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-ze-black/80 to-transparent flex items-end p-6">
                     <Badge className="bg-ze-yellow text-ze-black font-black uppercase text-[10px] tracking-widest">
-                      {store.category}
+                      Bebidas
                     </Badge>
                   </div>
                 </div>
@@ -117,18 +119,18 @@ export default function Home() {
                   </h3>
                   <div className="flex items-center gap-4 text-sm text-ze-black/60 mb-4 font-bold">
                     <div className="flex items-center text-ze-yellow bg-ze-black px-2 py-0.5 rounded-md">
-                      <Star className="w-4 h-4 mr-1 fill-current" /> {store.rating}
+                      <Star className="w-4 h-4 mr-1 fill-current" /> 4.9
                     </div>
                     <span>•</span>
-                    <span>{store.category}</span>
+                    <span>Bebidas</span>
                   </div>
                   
                   <div className="flex items-center justify-between text-xs font-black text-ze-black/80 bg-ze-gray rounded-2xl p-4 border border-ze-black/5 mt-4">
                     <div className="flex items-center">
-                      <Clock className="w-4 h-4 mr-2" /> {store.time}
+                      <Clock className="w-4 h-4 mr-2" /> 15-25 min
                     </div>
                     <div className="flex items-center text-ze-red uppercase tracking-widest">
-                      {store.fee === "Grátis" ? "Frete ZERO" : store.fee}
+                      Frete ZERO
                     </div>
                   </div>
                 </CardContent>

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { apiFetch } from "@/lib/api";
+
 export default function CustomerOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,18 +16,8 @@ export default function CustomerOrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      // Temporarily use MSW global delivery endpoint and filter customer_id.
-      // A dedicated /api/v1/customers/orders should be implemented in proper backend
-      // Right now the only public DB hook we have access to without making new MSW endpoints is fetching from /api/v1/entregador/orders and filtering,
-      // Or Wait: Let's create an endpoint GET /api/v1/orders in MSW? I will just use MSW endpoint `GET /api/v1/entregador/orders` that returns 'all' for now if I don't modify MSW.
-      // Wait, let's fetch from the generic MSW /api/v1/orders if it exists, or just use the local db. 
-      // Actually, since I didn't add /api/v1/customers/orders to handlers.js, let's fetch /api/v1/entregador/orders (which I previously hooked).
-      // Wait, I will just call the missing endpoint and if it fails, I'll show it empty. I should really update handlers.ts or just add it here.
-      // Let's assume I will update handlers.ts to support GET /api/v1/orders for the customer.
-      const res = await fetch("/api/v1/customers/orders"); 
-      if (res.ok) {
-        setOrders(await res.json());
-      }
+      const data = await apiFetch<any[]>("/api/v1/orders/me");
+      setOrders(data);
     } catch(e) {
       console.error(e);
     } finally {
@@ -93,7 +85,7 @@ export default function CustomerOrdersPage() {
               <CardContent className="pt-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="text-ze-black/60 font-bold text-sm max-w-xl">
-                    {order.items.map((it:any) => `${it.quantity}x Prod [${it.product_id}]`).join(', ')}
+                    {(order.edges?.items || []).map((it:any) => `${it.quantity}x Prod [${it.product_id}]`).join(', ')}
                   </div>
                   <div className="flex flex-col sm:items-end w-full sm:w-auto bg-ze-gray p-3 rounded-2xl border-2 border-ze-black/5">
                     <div className="text-[10px] font-black text-ze-black/40 uppercase tracking-widest mb-1">Total pago</div>

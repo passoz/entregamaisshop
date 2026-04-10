@@ -12,7 +12,6 @@ func (Address) Mixin() []ent.Mixin { return []ent.Mixin{TimeMixin{}} }
 func (Address) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty().Unique(),
-		field.String("user_id").NotEmpty(),
 		field.String("label").Default("home"),
 		field.String("street").NotEmpty(),
 		field.String("number").NotEmpty(),
@@ -25,5 +24,5 @@ func (Address) Fields() []ent.Field {
 	}
 }
 func (Address) Edges() []ent.Edge {
-	return []ent.Edge{edge.From("user", User.Type).Ref("addresses").Field("user_id").Required()}
+	return []ent.Edge{edge.From("user", User.Type).Ref("addresses").Unique().Required()}
 }

@@ -6,6 +6,7 @@ type Config struct {
 	AppName     string
 	Environment string
 	Port        string
+	DatabaseURL string
 }
 
 func getEnv(key, fallback string) string {
@@ -20,5 +21,6 @@ func Load() Config {
 		AppName:     getEnv("APP_NAME", "backend-api"),
 		Environment: getEnv("ENVIRONMENT", "dev"),
 		Port:        getEnv("PORT", "8080"),
+		DatabaseURL: getEnv("DATABASE_URL", "postgres://user:pass@localhost:5432/entregamais?sslmode=disable"),
 	}
 }

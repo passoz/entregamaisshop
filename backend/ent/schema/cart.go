@@ -12,14 +12,13 @@ func (Cart) Mixin() []ent.Mixin { return []ent.Mixin{TimeMixin{}} }
 func (Cart) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty().Unique(),
-		field.String("user_id").NotEmpty().Unique(),
 		field.String("seller_id").Optional(),
 		field.String("status").Default("open"),
 	}
 }
 func (Cart) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("cart").Field("user_id").Unique().Required(),
+		edge.From("user", User.Type).Ref("cart").Unique().Required(),
 		edge.To("items", CartItem.Type),
 	}
 }

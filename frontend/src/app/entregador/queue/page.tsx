@@ -1,10 +1,9 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { PortalLayout } from "@/components/layout/PortalLayout";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { MapPin } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 export default function DriverQueue() {
   const [deliveries, setDeliveries] = useState<any[]>([]);
@@ -12,11 +11,8 @@ export default function DriverQueue() {
 
   const fetchDeliveries = async () => {
     try {
-      // In MSW: /api/v1/entregador/orders returns pending and accepted by driver-1
-      const res = await fetch("/api/v1/entregador/orders");
-      if (res.ok) {
-        setDeliveries(await res.json());
-      }
+      const data = await apiFetch<any[]>("/api/v1/entregador/orders");
+      setDeliveries(data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -26,7 +22,7 @@ export default function DriverQueue() {
 
   useEffect(() => {
     fetchDeliveries();
-    const interval = setInterval(fetchDeliveries, 5000);
+    const interval = setInterval(fetchDeliveries, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -36,10 +32,8 @@ export default function DriverQueue() {
         ? `/api/v1/entregador/orders/${id}/accept`
         : `/api/v1/entregador/orders/${id}/deliver`;
         
-      const res = await fetch(endpoint, { method: "POST" });
-      if (res.ok) {
-        fetchDeliveries();
-      }
+      await apiFetch(endpoint, { method: "POST" });
+      fetchDeliveries();
     } catch (e) {
       console.error(e);
     }

@@ -12,7 +12,6 @@ func (Payment) Mixin() []ent.Mixin { return []ent.Mixin{TimeMixin{}} }
 func (Payment) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty().Unique(),
-		field.String("order_id").NotEmpty(),
 		field.String("provider").Default("internal"),
 		field.String("status").Default("pending"),
 		field.Float("amount").Positive(),
@@ -21,5 +20,5 @@ func (Payment) Fields() []ent.Field {
 	}
 }
 func (Payment) Edges() []ent.Edge {
-	return []ent.Edge{edge.From("order", Order.Type).Ref("payments").Field("order_id").Required()}
+	return []ent.Edge{edge.From("order", Order.Type).Ref("payments").Unique().Required()}
 }

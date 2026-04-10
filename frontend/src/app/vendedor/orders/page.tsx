@@ -1,9 +1,8 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { PortalLayout } from "@/components/layout/PortalLayout";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { apiFetch } from "@/lib/api";
 
 export default function SellerOrders() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -11,14 +10,8 @@ export default function SellerOrders() {
 
   const fetchOrders = async () => {
     try {
-      // In MSW, getting /api/v1/vendedor/orders would be nice, but we can just use /api/v1/entregador/orders as a mock hook, 
-      // or we can mock a dedicated one. Our current MSW has: db.orders... Let's rely on MSW /api/v1/entregador/orders which returns pending ones,
-      // or we can just fetch all orders if we build a robust mock. Wait, our handlers don't have GET /api/v1/vendedor/orders yet.
-      // I will add a simple poll for now falling back to local state if missing.
-      const res = await fetch('/api/v1/entregador/orders'); // Temporarily reuse the same mock since it returns pending orders across the board
-      if (res.ok) {
-        setOrders(await res.json());
-      }
+      const data = await apiFetch<any[]>('/api/v1/vendedor/orders?seller_id=seller-1'); // mock seller_id for now
+      setOrders(data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -28,20 +21,21 @@ export default function SellerOrders() {
 
   useEffect(() => {
     fetchOrders();
-    const int = setInterval(fetchOrders, 5000);
+    const int = setInterval(fetchOrders, 3000);
     return () => clearInterval(int);
   }, []);
 
   const handleStatus = async (id: string, action: string) => {
-    // We will simulate the accept/ready flow by just updating state locally for the demo if the specific mock doesn't exist,
-    // but we know entregador/orders/:id/accept exists. We'll use local state mutation for speed and smoothness in the demo.
-    setOrders(prev => prev.map(o => {
-      if (o.id === id) {
-        if (action === "accept") return { ...o, status: "accepted" };
-        if (action === "ready") return { ...o, status: "ready" };
+    try {
+      if (action === "accept") {
+        await apiFetch(`/api/v1/vendedor/orders/${id}/confirm`, { method: "POST" });
+      } else if (action === "ready") {
+        await apiFetch(`/api/v1/vendedor/orders/${id}/ready`, { method: "POST" });
       }
-      return o;
-    }));
+      fetchOrders();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -68,7 +62,7 @@ export default function SellerOrders() {
                 </div>
                 <p className="text-sm font-bold text-ze-black/60 mb-2">Cliente: <span className="text-ze-black">{order.customer_id}</span></p>
                 <div className="bg-ze-gray p-3 rounded-xl mb-3">
-                  {order.items?.map((item:any, idx:number) => (
+                  {(order.edges?.items || []).map((item:any, idx:number) => (
                     <div key={idx} className="text-sm font-bold text-ze-black flex justify-between">
                       <span>{item.quantity}x Produto ID: {item.product_id}</span>
                     </div>

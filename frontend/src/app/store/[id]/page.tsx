@@ -6,6 +6,8 @@ import { Star, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { ProductCard } from "@/components/product/ProductCard";
 
+import { apiFetch } from "@/lib/api";
+
 export default function StorePage() {
   const params = useParams();
   const id = params.id as string;
@@ -17,13 +19,13 @@ export default function StorePage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [storeRes, productsRes] = await Promise.all([
-          fetch(`/api/v1/sellers/${id}`),
-          fetch(`/api/v1/sellers/${id}/products`)
+        const [storeData, productsData] = await Promise.all([
+          apiFetch<any>(`/api/v1/sellers/${id}`),
+          apiFetch<any[]>(`/api/v1/sellers/${id}/products`)
         ]);
         
-        if (storeRes.ok) setStore(await storeRes.json());
-        if (productsRes.ok) setProducts(await productsRes.json());
+        setStore(storeData);
+        setProducts(productsData);
       } catch (e) {
         console.error(e);
       } finally {

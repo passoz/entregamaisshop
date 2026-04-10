@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { useCart } from "@/lib/CartContext";
 import { useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 export default function CartPage() {
   const { items, subtotal, updateQuantity, removeItem, clearCart } = useCart();
@@ -21,25 +22,23 @@ export default function CartPage() {
     setIsFinishing(true);
 
     try {
-      // Group items by seller mapping (Assume one seller for demo simplicity or send generic array)
+      // Group items by seller mapping (Assume one seller for demo simplicity)
       const sellerId = items[0]?.seller_id || "1";
       
       const payload = {
         seller_id: sellerId,
-        items: items.map(i => ({ product_id: i.product_id, quantity: i.quantity })),
+        items: items.map(i => ({ product_id: i.product_id, quantity: i.quantity, price: i.price })),
         total_amount: total
       };
 
-      const res = await fetch("/api/v1/orders", {
+      await apiFetch("/api/v1/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        clearCart();
-        router.push("/orders");
-      }
+      clearCart();
+      router.push("/orders");
     } catch(e) {
       console.error(e);
       setIsFinishing(false);

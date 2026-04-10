@@ -7,8 +7,8 @@ export function MSWProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function initMsw() {
-      // Force mock to true to ensure it works inside the docker container
-      const shouldMock = true 
+      // Disable mock to use real backend
+      const shouldMock = false 
       console.log('MSW: Initializing...', { shouldMock })
       
       if (shouldMock && typeof window !== 'undefined') {
@@ -25,7 +25,7 @@ export function MSWProvider({ children }: { children: React.ReactNode }) {
     initMsw()
   }, [])
 
-  const shouldMock = true
+  const shouldMock = false
   if (!mswReady && shouldMock) {
     return null
   }

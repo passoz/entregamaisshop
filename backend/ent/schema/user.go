@@ -26,7 +26,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("seller_links", SellerUser.Type),
 		edge.To("orders", Order.Type),
 		edge.To("cart", Cart.Type).Unique(),
-		edge.To("driver_profile", Driver.Type).Unique(),
+		edge.To("driver_profile", Entregador.Type).Unique(),
 		edge.To("uploads", Upload.Type),
 	}
 }

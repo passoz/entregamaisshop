@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestHealthHandler(t *testing.T) {
@@ -29,16 +31,18 @@ func TestHealthHandler(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	var response map[string]any
+	var response struct {
+		Data map[string]any `json:"data"`
+	}
 	if err := json.Unmarshal(rr.Body.Bytes(), &response); err != nil {
-		t.Fatalf("failed to unmarshal response: %v", err)
+		t.Fatalf("failed to unmarshal response: %v: %s", err, rr.Body.String())
 	}
 
-	if response["status"] != "ok" {
-		t.Errorf("expected status ok, got %v", response["status"])
+	if response.Data["status"] != "ok" {
+		t.Errorf("expected status ok, got %v", response.Data["status"])
 	}
-	if response["service"] != "test-app" {
-		t.Errorf("expected service test-app, got %v", response["service"])
+	if response.Data["service"] != "test-app" {
+		t.Errorf("expected service test-app, got %v", response.Data["service"])
 	}
 }
 
@@ -54,13 +58,19 @@ func TestReadyHandler(t *testing.T) {
 }
 
 func TestCategoriesList(t *testing.T) {
-	h := &Handlers{}
+	client := prepareTestDB(t)
+	defer client.Close()
+	
+	h := &Handlers{DB: client}
+	// Add a category
+	client.Category.Create().SetID("cat-1").SetName("Food").SetSlug("food").Save(context.Background())
+
 	req, _ := http.NewRequest("GET", "/api/v1/categories", nil)
 	rr := httptest.NewRecorder()
 	http.HandlerFunc(h.CategoriesList).ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
-		t.Errorf("expected 200, got %v", rr.Code)
+		t.Errorf("expected 200, got %v: %s", rr.Code, rr.Body.String())
 	}
 
 	var response struct {

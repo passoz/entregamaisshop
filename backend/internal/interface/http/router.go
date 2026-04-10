@@ -3,15 +3,16 @@ package http
 import (
 	"net/http"
 
+	"github.com/entregamais/platform/backend/ent"
 	"github.com/entregamais/platform/backend/api/openapi"
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
 )
 
-func NewRouter(cfg config.Config, lg *logger.Logger) http.Handler {
+func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client) http.Handler {
 	mux := http.NewServeMux()
 
-	h := &Handlers{Config: cfg, Logger: lg}
+	h := &Handlers{Config: cfg, Logger: lg, DB: db}
 
 	mux.HandleFunc("GET /api/v1/health", h.Health)
 	mux.HandleFunc("GET /api/v1/ready", h.Ready)
