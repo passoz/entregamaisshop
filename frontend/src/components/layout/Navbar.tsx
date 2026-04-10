@@ -30,9 +30,6 @@ export function Navbar() {
           <Link href="/auth/login/entregador" className="text-sm font-black text-ze-black/80 hover:text-ze-black transition-colors uppercase tracking-wider">
             Sou Entregador
           </Link>
-          <Link href="/auth/login/admin" className="text-[10px] font-black uppercase text-ze-black/40 hover:text-ze-black transition-colors tracking-widest border border-ze-black/10 px-2 py-0.5 rounded">
-            Admin
-          </Link>
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
@@ -47,7 +44,7 @@ export function Navbar() {
             </Button>
           </Link>
           <div className="hidden lg:flex items-center">
-            <Link href="/auth/login/vendedor">
+            <Link href="/auth/login/customer">
               <Button variant="outline" className="mr-2 border-ze-black/20 text-ze-black hover:bg-ze-black/5 rounded-xl font-bold">
                 Entrar
               </Button>

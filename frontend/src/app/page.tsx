@@ -44,6 +44,19 @@ export default function Home() {
 
         setAllSellers(sellers);
 
+        const savedLocation =
+          typeof window !== "undefined"
+            ? localStorage.getItem("last_selected_location")
+            : null;
+
+        if (savedLocation) {
+          // Keep previous manual selection across sessions.
+          setLocationLabel(savedLocation);
+          setNearbySellers(sellers);
+          setIsLoadingNearby(false);
+          return;
+        }
+
         // Try automatic geolocation
         if (typeof window !== "undefined" && "geolocation" in navigator) {
           navigator.geolocation.getCurrentPosition(
@@ -60,23 +73,27 @@ export default function Home() {
                 const res = await fetch("/data/neighborhoods.json");
                 const neighborhoods = await res.json();
                 const name = findClosestNeighborhood(lat, lng, neighborhoods);
-                setLocationLabel(name || "Sua localização");
+                const resolvedLocation = name || "Sua localização";
+                setLocationLabel(resolvedLocation);
+                localStorage.setItem("last_selected_location", resolvedLocation);
               } catch (e) {
                 console.error("Erro ao identificar bairro:", e);
-                setLocationLabel("Sua localização atual");
+                const fallbackLocation = "Sua localização atual";
+                setLocationLabel(fallbackLocation);
+                localStorage.setItem("last_selected_location", fallbackLocation);
               }
               
               setIsLoadingNearby(false);
             },
             () => {
               if (!isMounted) return;
-              setIsLocationModalOpen(true);
+              if (!savedLocation) setIsLocationModalOpen(true);
               setIsLoadingNearby(false);
             },
             { enableHighAccuracy: true, timeout: 5000 }
           );
         } else {
-          setIsLocationModalOpen(true);
+          if (!savedLocation) setIsLocationModalOpen(true);
           setIsLoadingNearby(false);
         }
       } catch (error) {
@@ -105,6 +122,7 @@ export default function Home() {
       const sellersByDistance = findNearbySellers(allSellers, locationToUse);
       setNearbySellers(sellersByDistance);
       setLocationLabel(locationToUse.label);
+      localStorage.setItem("last_selected_location", locationToUse.label);
     }
     
     setIsLocationModalOpen(false);

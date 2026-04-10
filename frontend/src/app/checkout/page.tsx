@@ -110,8 +110,8 @@ export default function CheckoutPage() {
             <ChevronLeft className="w-6 h-6 text-ze-black" />
           </button>
           <h1 className="text-xl font-black uppercase italic tracking-tighter text-ze-black">Pagamento</h1>
-          <div className="w-10 h-10 bg-ze-black text-white rounded-full flex items-center justify-center font-black text-sm border-2 border-white shadow-lg">
-            {totalItems}
+          <div className="min-w-[72px] h-10 px-3 bg-ze-red text-white rounded-full flex items-center justify-center font-black text-xs border-2 border-white shadow-lg uppercase tracking-wider">
+            {totalItems} itens
           </div>
         </div>
       </div>

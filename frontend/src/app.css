@@ -31,3 +31,59 @@ body {
 .slide-in-from-right {
   animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+nav.sticky > div.container {
+  height: 6rem;
+}
+
+nav.sticky > div.container > div.flex.items-center.gap-2 > a[href="/"] {
+  gap: 0.75rem;
+}
+
+nav.sticky > div.container > div.flex.items-center.gap-2 > a[href="/"] > div:first-child {
+  width: 60px;
+  height: 60px;
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+}
+
+nav.sticky > div.container > div.flex.items-center.gap-2 > a[href="/"] > div:first-child img {
+  width: 44px !important;
+  height: 44px !important;
+  object-fit: contain;
+}
+
+nav.sticky > div.container > div.flex.items-center.gap-2 > a[href="/"] > div:last-child > span:first-child {
+  font-size: 1.875rem;
+  line-height: 1;
+}
+
+nav.sticky > div.container > div.flex.items-center.gap-2 > a[href="/"] > div:last-child > span:last-child {
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+}
+
+@media (max-width: 767px) {
+  nav.sticky > div.container {
+    height: 5rem;
+  }
+
+  nav.sticky > div.container > div.flex.items-center.gap-2 > a[href="/"] {
+    gap: 0.6rem;
+  }
+
+  nav.sticky > div.container > div.flex.items-center.gap-2 > a[href="/"] > div:first-child {
+    width: 50px;
+    height: 50px;
+  }
+
+  nav.sticky > div.container > div.flex.items-center.gap-2 > a[href="/"] > div:first-child img {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  nav.sticky > div.container > div.flex.items-center.gap-2 > a[href="/"] > div:last-child > span:first-child {
+    font-size: 1.5rem;
+  }
+}

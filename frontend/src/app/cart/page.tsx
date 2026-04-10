@@ -2,22 +2,28 @@
 
 import { useRouter } from "next/navigation";
 import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { useCart } from "@/lib/CartContext";
-import { useState } from "react";
-import { apiFetch } from "@/lib/api";
 
 export default function CartPage() {
   const { items, subtotal, updateQuantity, removeItem } = useCart();
   const router = useRouter();
+  const { status } = useSession();
 
   const fee = items.length > 0 ? 7.90 : 0;
   const total = subtotal + fee;
 
   const handleCheckout = () => {
     if (items.length === 0) return;
+
+    if (status !== "authenticated") {
+      router.push(`/auth/login/customer?callbackUrl=${encodeURIComponent("/checkout")}`);
+      return;
+    }
+
     router.push("/checkout");
   };
 

@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/Label"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { signIn } from "next-auth/react"
 
 export default function CustomerLogin() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -32,7 +33,8 @@ export default function CustomerLogin() {
       })
       
       if (result?.ok) {
-        router.push('/')
+        const callbackUrl = searchParams.get("callbackUrl") || "/"
+        router.push(callbackUrl)
       } else {
         setError('E-mail ou senha incorretos')
       }

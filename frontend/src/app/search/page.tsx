@@ -9,6 +9,15 @@ import { Input } from "@/components/ui/Input";
 import { useCart } from "@/lib/CartContext";
 import { ProductCard } from "@/components/product/ProductCard";
 
+function normalizeProductsResponse(payload: unknown): any[] {
+  if (Array.isArray(payload)) return payload;
+  if (payload && typeof payload === "object") {
+    const candidate = (payload as { data?: unknown }).data;
+    if (Array.isArray(candidate)) return candidate;
+  }
+  return [];
+}
+
 function SearchResults() {
   const { addItem } = useCart();
   const searchParams = useSearchParams();
@@ -30,10 +39,14 @@ function SearchResults() {
         
         const res = await fetch(`/api/v1/products?${queryParams.toString()}`);
         if (res.ok) {
-          setProducts(await res.json());
+          const payload = await res.json();
+          setProducts(normalizeProductsResponse(payload));
+        } else {
+          setProducts([]);
         }
       } catch (err) {
         console.error(err);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
