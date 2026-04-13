@@ -1,5 +1,4 @@
-import { auth } from "@/auth";
-import { getSession } from "next-auth/react";
+import { getBrowserSession } from "@/lib/auth/browser";
 
 export interface APIResponse<T> {
   success: boolean;
@@ -17,13 +16,8 @@ export async function apiFetch<T>(url: string, options: RequestInit = {}): Promi
   
   try {
     if (typeof window !== "undefined") {
-      // Client Side
-      const session = await getSession();
-      token = (session as any)?.accessToken;
-    } else {
-      // Server Side
-      const session = await auth();
-      token = (session as any)?.accessToken;
+      const session = await getBrowserSession();
+      token = session?.accessToken;
     }
   } catch (e) {
     // Fail silently - if token is needed, the backend will return 401

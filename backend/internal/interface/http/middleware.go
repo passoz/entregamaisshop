@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/entregamais/platform/backend/ent"
+	"github.com/entregamais/platform/backend/ent/user"
 	"github.com/entregamais/platform/backend/internal/infrastructure/auth"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
 )
@@ -18,6 +20,8 @@ const (
 	requestIDKey     ctxKey = "request_id"
 	correlationIDKey ctxKey = "correlation_id"
 	userIDKey        ctxKey = "user_id"
+	userEmailKey     ctxKey = "user_email"
+	userNameKey      ctxKey = "user_name"
 	preferredNameKey ctxKey = "preferred_username"
 	rolesKey         ctxKey = "roles"
 	roleKey          ctxKey = "role" // Legacy for single role check
@@ -26,10 +30,11 @@ const (
 type Middleware struct {
 	lg       *logger.Logger
 	verifier *auth.JWTVerifier
+	db       *ent.Client
 }
 
-func NewMiddleware(lg *logger.Logger, verifier *auth.JWTVerifier) *Middleware {
-	return &Middleware{lg: lg, verifier: verifier}
+func NewMiddleware(lg *logger.Logger, verifier *auth.JWTVerifier, db *ent.Client) *Middleware {
+	return &Middleware{lg: lg, verifier: verifier, db: db}
 }
 
 func (m *Middleware) RequestContext(next http.Handler) http.Handler {
@@ -78,6 +83,9 @@ func (m *Middleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		// DEV MOCK BYPASS: If no verifier is provided or token is "user-1", allow mock
 		if m.verifier == nil || token == "user-1" {
 			ctx := context.WithValue(r.Context(), userIDKey, "user-1")
+			ctx = context.WithValue(ctx, userEmailKey, "cliente@entregamais.local")
+			ctx = context.WithValue(ctx, userNameKey, "Cliente Teste")
+			ctx = context.WithValue(ctx, preferredNameKey, "Cliente Teste")
 			ctx = context.WithValue(ctx, rolesKey, []string{"customer"})
 			next(w, r.WithContext(ctx))
 			return
@@ -102,19 +110,71 @@ func (m *Middleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		ctx := context.WithValue(r.Context(), userIDKey, claims.Subject)
+		ctx = context.WithValue(ctx, userEmailKey, claims.Email)
+		ctx = context.WithValue(ctx, userNameKey, claims.Name)
 		ctx = context.WithValue(ctx, preferredNameKey, claims.PreferredUsername)
 		ctx = context.WithValue(ctx, rolesKey, claims.RealmAccess.Roles)
+
+		if err := m.syncUser(ctx); err != nil {
+			m.lg.Error("auth_user_sync_failed", err, map[string]any{"user_id": claims.Subject})
+			writeError(w, http.StatusInternalServerError, APIError{
+				Code:    "internal_error",
+				Message: "failed to sync authenticated user",
+			})
+			return
+		}
+
 		next(w, r.WithContext(ctx))
 	}
+}
+
+func (m *Middleware) syncUser(ctx context.Context) error {
+	if m.db == nil {
+		return nil
+	}
+
+	uid := UserID(ctx)
+	if uid == "" {
+		return nil
+	}
+
+	exists, err := m.db.User.Query().Where(user.IDEQ(uid)).Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return nil
+	}
+
+	name := UserName(ctx)
+	if name == "" {
+		name = PreferredUsername(ctx)
+	}
+	if name == "" {
+		name = "Usuario"
+	}
+
+	email := UserEmail(ctx)
+	if email == "" {
+		email = uid + "@keycloak.local"
+	}
+
+	_, err = m.db.User.Create().
+		SetID(uid).
+		SetName(name).
+		SetEmail(email).
+		Save(ctx)
+	return err
 }
 
 func (m *Middleware) RequireRole(role string, next http.HandlerFunc) http.HandlerFunc {
 	return m.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
 		roles, _ := r.Context().Value(rolesKey).([]string)
+		requiredRole := canonicalRole(role)
 
 		hasRole := false
 		for _, r := range roles {
-			if strings.EqualFold(r, role) {
+			if canonicalRole(r) == requiredRole {
 				hasRole = true
 				break
 			}
@@ -129,6 +189,21 @@ func (m *Middleware) RequireRole(role string, next http.HandlerFunc) http.Handle
 		}
 		next(w, r)
 	})
+}
+
+func canonicalRole(role string) string {
+	switch strings.ToLower(strings.TrimSpace(role)) {
+	case "vendedor", "seller":
+		return "seller"
+	case "entregador", "driver":
+		return "driver"
+	case "cliente", "customer":
+		return "customer"
+	case "administrador", "admin":
+		return "admin"
+	default:
+		return strings.ToLower(strings.TrimSpace(role))
+	}
 }
 
 func newID() string {
@@ -163,6 +238,20 @@ func UserID(ctx context.Context) string {
 
 func PreferredUsername(ctx context.Context) string {
 	if v, ok := ctx.Value(preferredNameKey).(string); ok {
+		return v
+	}
+	return ""
+}
+
+func UserEmail(ctx context.Context) string {
+	if v, ok := ctx.Value(userEmailKey).(string); ok {
+		return v
+	}
+	return ""
+}
+
+func UserName(ctx context.Context) string {
+	if v, ok := ctx.Value(userNameKey).(string); ok {
 		return v
 	}
 	return ""

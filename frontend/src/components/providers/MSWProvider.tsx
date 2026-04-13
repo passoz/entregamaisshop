@@ -1,15 +1,14 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 export function MSWProvider({ children }: { children: React.ReactNode }) {
-  const [mswReady, setMswReady] = useState(false)
-
   useEffect(() => {
     async function initMsw() {
-      // Disable mock to use real backend
-      const shouldMock = false 
-      console.log('MSW: Initializing...', { shouldMock })
+      const isMockEnabledEnv = process.env.NEXT_PUBLIC_API_MOCKING === 'enabled'
+      const shouldMock = isMockEnabledEnv
+      
+      console.log('MSW: Initializing...', { shouldMock, isMockEnabledEnv })
       
       if (shouldMock && typeof window !== 'undefined') {
         process.env.NEXT_PUBLIC_MSW_ACTIVE = 'true'
@@ -19,16 +18,12 @@ export function MSWProvider({ children }: { children: React.ReactNode }) {
         })
         console.log('MSW: Worker started!')
       }
-      setMswReady(true)
     }
 
     initMsw()
   }, [])
 
-  const shouldMock = false
-  if (!mswReady && shouldMock) {
-    return null
-  }
-
+  // During SSR we don't know if mocking is enabled via localStorage,
+  // so we just render and let the client-side useEffect handle it.
   return <>{children}</>
 }

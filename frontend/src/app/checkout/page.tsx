@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/lib/CartContext";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { MapPin, CreditCard, Banknote, Smartphone, ChevronLeft, ShieldCheck, Clock, Check } from "lucide-react";
@@ -14,18 +14,26 @@ import Link from "next/link";
 
 export default function CheckoutPage() {
   const { items, subtotal, totalItems, clearCart, isLoading } = useCart();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card" | "cash">("pix");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [location, setLocation] = useState<string>("Buscando endereço...");
   const [isSuccess, setIsSuccess] = useState(false);
+  const emptyCartRedirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Redirect if cart is empty and not loading
+    if (emptyCartRedirectRef.current) {
+      clearTimeout(emptyCartRedirectRef.current);
+      emptyCartRedirectRef.current = null;
+    }
+
+    // Give the real cart a short window to finish hydrating before redirecting.
     if (!isLoading && items.length === 0 && !isSuccess) {
-      router.push("/");
+      emptyCartRedirectRef.current = setTimeout(() => {
+        router.push("/");
+      }, 1200);
     }
     
     // Get location from localStorage (saved from Home)
@@ -35,6 +43,13 @@ export default function CheckoutPage() {
     } else {
       setLocation("Endereço não selecionado");
     }
+
+    return () => {
+      if (emptyCartRedirectRef.current) {
+        clearTimeout(emptyCartRedirectRef.current);
+        emptyCartRedirectRef.current = null;
+      }
+    };
   }, [items, router, isLoading, isSuccess]);
 
   const handleConfirmOrder = async () => {

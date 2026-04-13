@@ -1,15 +1,17 @@
 services:
   backend:
     image: ${BACKEND_IMAGE:-entregamais/backend:latest}
+    restart: on-failure
     environment:
       - ENVIRONMENT=prod
       - LOG_LEVEL=error
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
-      - REDIS_ADDR=redis:${REDIS_PORT}
-      - MINIO_ENDPOINT=minio:${MINIO_PORT}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      - REDIS_ADDR=redis:6379
+      - MINIO_ENDPOINT=minio:9000
       - MINIO_BUCKET=uploads
-      - RABBITMQ_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:${RABBITMQ_PORT}/
+      - RABBITMQ_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
       - KEYCLOAK_ISSUER_URL=http://keycloak:8080/realms/delivery-platform
+      - KEYCLOAK_JWKS_URL=http://keycloak:8080/realms/delivery-platform/protocol/openid-connect/certs
     restart: always
     depends_on:
       - postgres
@@ -21,8 +23,12 @@ services:
     image: ${FRONTEND_IMAGE:-entregamais/frontend:latest}
     environment:
       - NEXT_PUBLIC_GATEWAY_URL=https://api.entregamais.com
+      - BACKEND_INTERNAL_URL=http://backend:8080
       - NEXT_PUBLIC_KEYCLOAK_URL=https://auth.entregamais.com/realms/delivery-platform
+      - KEYCLOAK_INTERNAL_URL=http://keycloak:8080/realms/delivery-platform
       - NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=frontend
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
     ports:
       - "${FRONTEND_PORT}:3000"
     restart: always
@@ -31,7 +37,10 @@ services:
 
   gateway:
     image: apache/apisix:3.12.0-debian
+    environment:
+      - APISIX_STAND_ALONE=true
     volumes:
+      - ./gateway/config/config.yaml:/usr/local/apisix/conf/config.yaml:ro
       - ./gateway/config/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
       - ./gateway/routes/routes.yaml:/usr/local/apisix/conf/apisix.d/routes.yaml:ro
     ports:
@@ -44,15 +53,15 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.1
     command: start --import-realm
+    restart: on-failure
     environment:
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://postgres-auth:${POSTGRES_AUTH_PORT}/${POSTGRES_AUTH_DB}
+      - KC_DB_URL=jdbc:postgresql://postgres-auth:5432/${POSTGRES_AUTH_DB}
       - KC_DB_USERNAME=${POSTGRES_AUTH_USER}
       - KC_DB_PASSWORD=${POSTGRES_AUTH_PASSWORD}
       - KC_HOSTNAME=auth.entregamais.com
-    restart: always
     depends_on:
       - postgres-auth
 

@@ -100,6 +100,15 @@ describe("Home page nearby sellers", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     mockFetch();
+    
+    // Mock localStorage
+    const mockLocalStorage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn()
+    };
+    Object.defineProperty(global, 'localStorage', { value: mockLocalStorage });
   });
 
   it("busca depósitos próximos usando a localização atual na inicialização", async () => {

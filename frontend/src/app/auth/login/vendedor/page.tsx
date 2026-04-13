@@ -4,13 +4,13 @@ import { AuthLayout } from "@/components/layout/AuthLayout"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
-import { ArrowRight, Github } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-import { signIn } from "next-auth/react"
+import { signIn } from "@/lib/auth/client"
 
 export default function SellerLogin() {
   const router = useRouter()
@@ -33,12 +33,18 @@ export default function SellerLogin() {
       })
       
       if (result?.ok) {
-        router.push('/vendedor/dashboard')
+        setTimeout(() => {
+          window.location.href = '/vendedor/dashboard'
+        }, 100)
       } else {
-        setError('E-mail ou senha incorretos')
+        if (email.includes('admin@')) {
+          setError('Contas administrativas devem acessar pelo Portal do Administrador.')
+        } else {
+          setError('Dados incorretos. Verifique e-mail e senha para gerenciar sua loja.')
+        }
       }
     } catch (err) {
-      setError('Falha na conexão com o servidor de autenticação')
+      setError('Erro ao conectar com a central de lojistas. Tente novamente em instantes.')
     } finally {
       setLoading(false)
     }
@@ -60,6 +66,7 @@ export default function SellerLogin() {
           <Label htmlFor="email">E-mail Corporativo</Label>
           <Input 
             id="email" 
+            name="email"
             type="email" 
             placeholder="vendas@sualoja.com" 
             value={email}
@@ -77,6 +84,7 @@ export default function SellerLogin() {
           </div>
           <Input 
             id="password" 
+            name="password"
             type="password" 
             placeholder="••••••••" 
             value={password}

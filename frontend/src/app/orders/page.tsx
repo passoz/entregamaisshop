@@ -114,14 +114,16 @@ export default function CustomerOrdersPage() {
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div className="flex-1 space-y-4">
                        <div className="space-y-2">
-                          {(order.edges?.items || []).map((it:any, idx:number) => (
+                          {(order.edges?.items || []).map((it:any, idx:number) => {
+                            const product = it.product || it.edges?.product;
+                            return (
                             <div key={idx} className="flex items-center text-sm font-bold text-ze-black/60 gap-2 uppercase tracking-tight">
                               <span className="w-5 h-5 bg-ze-yellow flex items-center justify-center rounded-md font-black text-[10px] border border-ze-black/10 shrink-0">
                                 {it.quantity}
                               </span>
-                              <span>{it.product?.name || "Produto"}</span>
+                              <span>{product?.name || "Produto"}</span>
                             </div>
-                          ))}
+                          )})}
                        </div>
                        
                        <div className="flex items-center gap-2 text-[10px] font-bold text-ze-black/30 uppercase tracking-widest pt-2">

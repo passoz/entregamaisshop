@@ -12,7 +12,7 @@ func (Entregador) Mixin() []ent.Mixin { return []ent.Mixin{TimeMixin{}} }
 func (Entregador) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty().Unique(),
-		field.String("status").Default("offline"),
+		field.String("status").Default("pending"),
 		field.String("vehicle_type").Optional(),
 		field.Bool("available").Default(false),
 	}

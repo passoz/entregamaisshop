@@ -31,8 +31,8 @@ export function ProductCard({ product, showStoreLink = false }: ProductCardProps
   const handleIncrement = () => setQuantity((prev) => prev + 1);
   const handleDecrement = () => setQuantity((prev) => Math.max(1, prev - 1));
 
-  const handleAddToCart = () => {
-    addItem({
+  const handleAddToCart = async () => {
+    await addItem({
       product_id: product.id,
       name: product.name,
       price: product.price,

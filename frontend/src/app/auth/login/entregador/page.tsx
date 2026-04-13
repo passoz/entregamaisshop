@@ -10,7 +10,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-import { signIn } from "next-auth/react"
+import { signIn } from "@/lib/auth/client"
 
 export default function DriverLogin() {
   const router = useRouter()
@@ -33,12 +33,18 @@ export default function DriverLogin() {
       })
       
       if (result?.ok) {
-        router.push('/entregador/dashboard')
+        setTimeout(() => {
+          window.location.href = '/entregador/dashboard'
+        }, 100)
       } else {
-        setError('E-mail ou senha incorretos')
+        if (email.includes('admin@')) {
+          setError('Contas administrativas devem acessar pelo Portal do Administrador.')
+        } else {
+          setError('Dados de acesso não conferem. Verifique seu e-mail de parceiro e sua senha.')
+        }
       }
     } catch (err) {
-      setError('Falha na conexão com o servidor de autenticação')
+      setError('Sem sinal com a central de rotas. Verifique sua conexão e tente logar novamente.')
     } finally {
       setLoading(false)
     }
@@ -60,6 +66,7 @@ export default function DriverLogin() {
           <Label htmlFor="email">E-mail</Label>
           <Input 
             id="email" 
+            name="email"
             type="email"
             placeholder="entregador@example.com" 
             value={email}
@@ -77,6 +84,7 @@ export default function DriverLogin() {
           </div>
           <Input 
             id="password" 
+            name="password"
             type="password" 
             placeholder="••••••••" 
             value={password}

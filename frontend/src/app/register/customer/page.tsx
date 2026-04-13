@@ -63,6 +63,7 @@ export default function CustomerRegistration() {
             <div>
               <label className="block text-xs font-black text-ze-black/40 mb-2 uppercase tracking-widest">Nome completo</label>
               <Input 
+                name="name"
                 placeholder="Seu Nome" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -73,6 +74,7 @@ export default function CustomerRegistration() {
             <div>
               <label className="block text-xs font-black text-ze-black/40 mb-2 uppercase tracking-widest">E-mail</label>
               <Input 
+                name="email"
                 type="email" 
                 placeholder="email@exemplo.com" 
                 value={email}
@@ -84,6 +86,7 @@ export default function CustomerRegistration() {
             <div>
               <label className="block text-xs font-black text-ze-black/40 mb-2 uppercase tracking-widest">CPF (Para validação de idade)</label>
               <Input 
+                name="cpf"
                 placeholder="000.000.000-00" 
                 value={cpf}
                 onChange={(e) => setCpf(e.target.value)}
@@ -94,6 +97,7 @@ export default function CustomerRegistration() {
             <div>
               <label className="block text-xs font-black text-ze-black/40 mb-2 uppercase tracking-widest">Senha</label>
               <Input 
+                name="password"
                 type="password" 
                 placeholder="••••••••" 
                 value={password}

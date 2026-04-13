@@ -11,14 +11,18 @@
     ]
   },
   "clients": [
-    {"clientId": "frontend", "publicClient": true, "redirectUris": ["http://localhost:3000/*"]},
+    {"clientId": "frontend", "publicClient": true, "directAccessGrantsEnabled": true, "redirectUris": ["http://localhost:3000/*"]},
     {"clientId": "gateway", "secret": "gateway-secret", "serviceAccountsEnabled": true, "protocol": "openid-connect"},
     {"clientId": "backend-service", "secret": "backend-secret", "serviceAccountsEnabled": true, "protocol": "openid-connect"}
   ],
   "users": [
-    {"username": "customer.demo", "enabled": true, "email": "customer@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["customer"]},
-    {"username": "seller.demo", "enabled": true, "email": "seller@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["seller", "operator"]},
-    {"username": "driver.demo", "enabled": true, "email": "driver@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["driver"]},
-    {"username": "admin.demo", "enabled": true, "email": "admin@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["admin"]}
+    {"username": "customer.demo", "enabled": true, "emailVerified": true, "requiredActions": [], "firstName": "Customer", "lastName": "Demo", "email": "customer@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["customer"]},
+    {"username": "seller.demo", "enabled": true, "emailVerified": true, "requiredActions": [], "firstName": "Seller", "lastName": "Demo", "email": "seller@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["seller", "operator"]},
+    {"username": "driver.demo", "enabled": true, "emailVerified": true, "requiredActions": [], "firstName": "Driver", "lastName": "Demo", "email": "driver@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["driver"]},
+    {"username": "admin.demo", "enabled": true, "emailVerified": true, "requiredActions": [], "firstName": "Admin", "lastName": "Demo", "email": "admin@demo.com", "credentials": [{"type": "password", "value": "123456", "temporary": false}], "realmRoles": ["admin"]},
+    {"username": "admin@entregamaisshop.com", "enabled": true, "emailVerified": true, "requiredActions": [], "firstName": "Admin", "lastName": "EntregaMais", "email": "admin@entregamaisshop.com", "credentials": [{"type": "password", "value": "admin123", "temporary": false}], "realmRoles": ["admin"]},
+    {"username": "cliente@cliente.com", "enabled": true, "emailVerified": true, "requiredActions": [], "firstName": "Cliente", "lastName": "Padrao", "email": "cliente@cliente.com", "credentials": [{"type": "password", "value": "cliente123", "temporary": false}], "realmRoles": ["customer"]},
+    {"username": "vendedor@vendedor.com", "enabled": true, "emailVerified": true, "requiredActions": [], "firstName": "Vendedor", "lastName": "Padrao", "email": "vendedor@vendedor.com", "credentials": [{"type": "password", "value": "vendedor123", "temporary": false}], "realmRoles": ["seller"]},
+    {"username": "entregador@entregador.com", "enabled": true, "emailVerified": true, "requiredActions": [], "firstName": "Entregador", "lastName": "Padrao", "email": "entregador@entregador.com", "credentials": [{"type": "password", "value": "driver123", "temporary": false}], "realmRoles": ["driver"]}
   ]
 }

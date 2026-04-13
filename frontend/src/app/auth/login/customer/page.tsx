@@ -9,7 +9,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
-import { signIn } from "next-auth/react"
+import { signIn } from "@/lib/auth/client"
 
 export default function CustomerLogin() {
   const router = useRouter()
@@ -34,12 +34,18 @@ export default function CustomerLogin() {
       
       if (result?.ok) {
         const callbackUrl = searchParams.get("callbackUrl") || "/"
-        router.push(callbackUrl)
+        setTimeout(() => {
+          window.location.href = callbackUrl
+        }, 100)
       } else {
-        setError('E-mail ou senha incorretos')
+        if (email.includes('admin@')) {
+          setError('Contas administrativas devem acessar pelo Portal do Administrador.')
+        } else {
+          setError('Ops! Credenciais inválidas. Verifique seu e-mail e senha para voltar à festa.')
+        }
       }
     } catch (err) {
-      setError('Falha na conexão com o servidor de autenticação')
+      setError('Parece que o freezer travou! Tivemos um problema técnico. Tente de novo.')
     } finally {
       setLoading(false)
     }
@@ -61,8 +67,9 @@ export default function CustomerLogin() {
           <Label htmlFor="email">E-mail</Label>
           <Input 
             id="email" 
+            name="email"
             type="email" 
-            placeholder="admin@entregamaisshop.com" 
+            placeholder="voce@exemplo.com" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -78,6 +85,7 @@ export default function CustomerLogin() {
           </div>
           <Input 
             id="password" 
+            name="password"
             type="password" 
             placeholder="••••••••" 
             value={password}

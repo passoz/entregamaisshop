@@ -20,3 +20,7 @@ export async function register() {
     }
   }
 }
+
+export function onRequestError(error: unknown) {
+  console.error("Request error:", error)
+}

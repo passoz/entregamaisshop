@@ -1,46 +1,47 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
 import SellerProducts from '@/app/vendedor/products/page'
 
-// Mock the Sidebar component as it uses Next.js navigation
-vi.mock('@/components/layout/Sidebar', () => ({
-  Sidebar: () => <div data-testid="sidebar" />
+vi.mock('@/components/layout/PortalLayout', () => ({
+  PortalLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
+vi.mock('@/components/providers/ToastProvider', () => ({
+  useToast: () => ({
+    showToast: vi.fn(),
+  }),
+}))
+
+vi.mock('@/lib/api', () => ({
+  apiFetch: vi.fn(),
+}))
+
+import { apiFetch } from '@/lib/api'
+
 describe('SellerProducts Page', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('renders products returned by the seller endpoint', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => [
-          { id: 1, name: 'Cerveja Pilsen Lata 350ml', price: 'R$ 12,90', stock: 18, status: 'Ativo' },
-          { id: 2, name: 'Refrigerante Cola 2L', price: 'R$ 9,90', stock: 9, status: 'Ativo' },
-        ],
-      }),
-    )
+    vi.mocked(apiFetch).mockResolvedValueOnce([
+      { id: '1', name: 'Cerveja Pilsen Lata 350ml', price: 12.9, status: 'active' },
+      { id: '2', name: 'Refrigerante Cola 2L', price: 9.9, status: 'active' },
+    ])
 
     render(<SellerProducts />)
 
-    expect(screen.getByText('Produtos e Estoque')).toBeDefined()
+    expect(screen.getByText('Cadastrar item')).toBeDefined()
     expect(await screen.findByText('Cerveja Pilsen Lata 350ml')).toBeDefined()
     expect(screen.getByText('Refrigerante Cola 2L')).toBeDefined()
   })
 
-  it('contains a "Novo Produto" button', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => [],
-      }),
-    )
+  it('contains the product creation form and empty state', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce([])
 
     render(<SellerProducts />)
-    const button = screen.getByRole('button', { name: /Novo Produto/i })
-    expect(button).toBeDefined()
-    await waitFor(() => {
-      expect(screen.getByText('Nenhum produto cadastrado.')).toBeDefined()
-    })
+
+    expect(screen.getByRole('button', { name: /Salvar produto/i })).toBeDefined()
+    expect(await screen.findByText('Nenhum produto cadastrado ainda')).toBeDefined()
   })
 })

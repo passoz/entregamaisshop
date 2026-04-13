@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/layout/Logo";
 import {
   Instagram,
   Twitter,
@@ -44,16 +45,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
           {/* Brand Section */}
           <div className="space-y-6">
-            <Link href="/" className="inline-block group">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-ze-yellow rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-500">
-                  <span className="text-ze-black font-black text-xl italic">E</span>
-                </div>
-                <span className="text-2xl font-black italic uppercase tracking-tighter text-white group-hover:text-ze-yellow transition-colors duration-500">
-                  Entrega<span className="text-ze-yellow group-hover:text-white">Mais</span>
-                </span>
-              </div>
-            </Link>
+            <Logo variant="footer" />
             <p className="text-white/90 text-sm leading-relaxed font-medium">
               A melhor e mais rápida forma de receber sua bebida gelada onde você estiver. Preço de mercado, rapidez de entrega.
             </p>

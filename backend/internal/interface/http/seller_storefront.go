@@ -37,6 +37,7 @@ type sellerResponse struct {
 	Name           string                       `json:"name"`
 	Document       string                       `json:"document"`
 	Status         string                       `json:"status"`
+	CreatedAt      string                       `json:"created_at"`
 	Rating         float64                      `json:"rating"`
 	ReviewCount    int                          `json:"review_count"`
 	MinDeliveryFee float64                      `json:"min_delivery_fee"`
@@ -93,6 +94,7 @@ func buildSellerResponse(item *ent.Seller, includeReviews bool) sellerResponse {
 		Name:           item.Name,
 		Document:       item.Document,
 		Status:         item.Status,
+		CreatedAt:      item.CreatedAt.Format(time.RFC3339),
 		Rating:         rating,
 		ReviewCount:    len(reviews),
 		MinDeliveryFee: minDeliveryFee,
@@ -257,15 +259,23 @@ func (h *Handlers) ensureUserExists(ctx context.Context) error {
 		return nil
 	}
 
-	name := PreferredUsername(ctx)
+	name := UserName(ctx)
+	if name == "" {
+		name = PreferredUsername(ctx)
+	}
 	if name == "" {
 		name = "Cliente"
+	}
+
+	email := UserEmail(ctx)
+	if email == "" {
+		email = fmt.Sprintf("%s@keycloak.local", uid)
 	}
 
 	_, err = h.DB.User.Create().
 		SetID(uid).
 		SetName(name).
-		SetEmail(fmt.Sprintf("%s@keycloak.local", uid)).
+		SetEmail(email).
 		Save(ctx)
 	return err
 }

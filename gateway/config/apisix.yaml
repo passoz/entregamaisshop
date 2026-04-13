@@ -8,6 +8,26 @@ routes:
       nodes:
         "frontend:3000": 1
 
+  # 1.5 Keycloak Realms
+  - id: keycloak-realms
+    uri: /realms/*
+    priority: 28
+    upstream:
+      type: roundrobin
+      nodes:
+        "keycloak:8080": 1
+ 
+  # 1.6 Keycloak Resources & Admin
+  - id: keycloak-assets
+    uris: 
+      - /resources/*
+      - /js/*
+    priority: 28
+    upstream:
+      type: roundrobin
+      nodes:
+        "keycloak:8080": 1
+
   # 2. Backend API
   - id: api-routes
     uri: /api/v1/*

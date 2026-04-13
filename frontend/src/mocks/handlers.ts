@@ -1,3 +1,4 @@
+import { getRequiredRoleForPortal, normalizeRoles } from '@/lib/auth/roles'
 import { http, HttpResponse } from 'msw'
 
 // In-memory "database" for mocks
@@ -103,16 +104,34 @@ const db = {
     { id: 'cust-3', name: 'Pedro Cliente', email: 'pedro@teste.com' }
   ],
   orders: [
-    { id: 'order-101', customer_id: 'cust-1', seller_id: '1', items: [{ product_id: 'prod-1', quantity: 1 }], total_amount: 34.9, status: 'delivered', driver_id: 'driver-1', created_at: new Date(Date.now() - 86400000).toISOString() },
-    { id: 'order-102', customer_id: 'cust-2', seller_id: '3', items: [{ product_id: 'prod-9', quantity: 1 }], total_amount: 189.9, status: 'pending', driver_id: null, created_at: new Date().toISOString() },
-    { id: 'order-103', customer_id: 'cust-3', seller_id: '2', items: [{ product_id: 'prod-4', quantity: 2 }, { product_id: 'prod-7', quantity: 1 }], total_amount: 31.5, status: 'accepted', driver_id: 'driver-2', created_at: new Date(Date.now() - 1000000).toISOString() }
+    { id: 'order-101', customer_id: 'cust-1', seller_id: '1', items: [{ product_id: 'prod-1', quantity: 1 }], total_amount: 34.9, status: 'delivered', driver_id: 'driver-1', created_at: new Date(Date.now() - 86400000).toISOString(), delivery_address_json: JSON.stringify({ raw: "Rua Teste, 123" }) },
+    { id: 'order-102', customer_id: 'cust-2', seller_id: '3', items: [{ product_id: 'prod-9', quantity: 1 }], total_amount: 189.9, status: 'pending', driver_id: null, created_at: new Date().toISOString(), delivery_address_json: JSON.stringify({ raw: "Av Central, 456" }) },
+    { id: 'order-103', customer_id: 'cust-3', seller_id: '2', items: [{ product_id: 'prod-4', quantity: 2 }, { product_id: 'prod-7', quantity: 1 }], total_amount: 31.5, status: 'accepted', driver_id: 'driver-2', created_at: new Date(Date.now() - 1000000).toISOString(), delivery_address_json: JSON.stringify({ raw: "Praça da Matriz, 789" }) }
   ] as any[],
-  currentUser: null as any
+  pendingSellers: [] as any[],
+  pendingDrivers: [] as any[],
+  currentUser: null as any,
+  authUsers: {
+    'admin@entregamaisshop.com': { id: 'admin-1', name: 'Administrador', roles: ['admin'] },
+    'cliente@cliente.com': { id: 'customer-1', name: 'Cliente Demo', roles: ['customer'] },
+    'cliente@teste.com': { id: 'customer-2', name: 'Cliente Teste', roles: ['customer'] },
+    'vendedor@vendedor.com': { id: 'seller-1', name: 'Vendedor Demo', roles: ['seller'] },
+    'vendedor@teste.com': { id: 'seller-2', name: 'Vendedor Teste', roles: ['seller'] },
+    'entregador@entregador.com': { id: 'driver-1', name: 'Entregador Demo', roles: ['driver'] },
+    'entregador@teste.com': { id: 'driver-2', name: 'Entregador Teste', roles: ['driver'] },
+  } as Record<string, { id: string; name: string; roles: string[] }>
 }
 
 export const handlers = [
+  // Log all requests for debugging
+  /* http.all('*', ({ request }) => {
+    console.log(`[MSW ALL] ${request.method} ${request.url}`);
+    return undefined // Continue handling
+  }), */
+
   // --- AUTH MOCKS ---
   http.get('*/.well-known/openid-configuration', () => {
+    console.log('[MSW] GET /.well-known/openid-configuration');
     return HttpResponse.json({
       issuer: process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8081/realms/entregamais',
       authorization_endpoint: 'http://localhost/auth',
@@ -126,36 +145,186 @@ export const handlers = [
   }),
 
   http.get('*/protocol/openid-connect/certs', () => {
+    console.log('[MSW] GET /protocol/openid-connect/certs');
     return HttpResponse.json({ keys: [] })
   }),
 
-  http.get('*/api/v1/auth/session', () => {
+  http.get('*/api/auth/session', () => {
+    console.log('[MSW] GET /api/auth/session', { currentUser: db.currentUser?.email });
     return HttpResponse.json({ 
-      user: db.currentUser || { id: 'guest', name: 'Visitante', email: 'guest@teste.com', roles: [] }
+      session: db.currentUser ? { user: db.currentUser, accessToken: 'mock-token' } : null
     })
   }),
 
   http.post('*/api/auth/login', async ({ request }) => {
-    const { email, role } = await request.json() as any
-    // Simple mock logic
-    db.currentUser = { id: `mock-${role}-1`, email, name: `Teste ${role}`, roles: [role] }
-    return HttpResponse.json({ 
-      user: db.currentUser,
-      accessToken: 'mock-token'
-    })
+    try {
+      const { email, role } = await request.json() as any
+      const requestedRole = getRequiredRoleForPortal(role)
+      const cleanEmail = String(email).trim().toLowerCase()
+      console.log('[MSW] POST /api/auth/login', { cleanEmail, role, requestedRole });
+
+      const existingUser = db.authUsers[cleanEmail]
+
+      if (!existingUser || !requestedRole || !normalizeRoles(existingUser.roles).includes(requestedRole)) {
+        console.warn('[MSW] Login failed: User not found or role mismatch', { existingUser, requestedRole });
+        return HttpResponse.json({ message: 'Credenciais invalidas' }, { status: 401 })
+      }
+
+      db.currentUser = { ...existingUser, email: cleanEmail, roles: normalizeRoles(existingUser.roles) }
+      console.log('[MSW] Login success', { currentUser: db.currentUser });
+      return HttpResponse.json({ 
+        session: {
+          user: db.currentUser,
+          accessToken: 'mock-token'
+        }
+      })
+    } catch (e) {
+      console.error('[MSW] Error in /api/auth/login:', e);
+      return new HttpResponse(null, { status: 500 });
+    }
+  }),
+
+  http.post('*/api/auth/logout', () => {
+    console.log('[MSW] POST /api/auth/logout');
+    db.currentUser = null
+    return HttpResponse.json({ success: true })
   }),
 
   http.post('*/api/auth/register', async ({ request }) => {
-    const data = await request.json() as any
-    return HttpResponse.json({ 
-      user: { id: `mock-new-${data.role}-1`, ...data },
-      accessToken: 'mock-token'
-    }, { status: 201 })
+    try {
+      const data = await request.json() as any
+      const email = String(data.email || '').trim().toLowerCase()
+      const requestedRole = getRequiredRoleForPortal(data.role)
+      console.log('[MSW] POST /api/auth/register', { email, requestedRole, roleInBody: data.role });
+
+      const existingUser = db.authUsers[email]
+      const nextRoles = normalizeRoles([...(existingUser?.roles || []), requestedRole || 'customer'])
+
+      const user = {
+        id: existingUser?.id || `mock-new-${nextRoles[0]}-${Date.now()}`,
+        name: data.name || existingUser?.name || email,
+        roles: nextRoles,
+      }
+
+      db.authUsers[email] = user
+      console.log('[MSW] User registered/updated in db', user);
+
+      // Handle partnership registration
+      if (requestedRole === 'seller') {
+        db.pendingSellers.push({
+          id: user.id,
+          name: data.storeName || user.name,
+          document: data.cnpj || '00.000.000/0001-00',
+          status: 'pending',
+          created_at: new Date().toISOString()
+        })
+        console.log('[MSW] Added to pending sellers');
+      } else if (requestedRole === 'driver') {
+        db.pendingDrivers.push({
+          id: user.id,
+          status: 'pending',
+          vehicle_type: data.vehicleType || 'Moto',
+          created_at: new Date().toISOString(),
+          edges: { user: { name: user.name, email } }
+        })
+        console.log('[MSW] Added to pending drivers');
+      }
+
+      return HttpResponse.json({ 
+        user: { id: db.authUsers[email].id, ...data, roles: db.authUsers[email].roles },
+        roleAdded: requestedRole
+      }, { status: 201 })
+    } catch (e) {
+      console.error('[MSW] Error in /api/auth/register:', e);
+      return new HttpResponse(null, { status: 500 });
+    }
+  }),
+
+  // --- ADMIN MOCKS ---
+  http.get('*/api/v1/cart', () => {
+    console.log('[MSW] GET /api/v1/cart');
+    return HttpResponse.json({ items: [], total: 0 })
+  }),
+
+  http.get('*/api/v1/admin/sellers', () => {
+    return HttpResponse.json(db.pendingSellers)
+  }),
+
+  http.get('*/api/v1/admin/drivers', () => {
+    return HttpResponse.json(db.pendingDrivers)
+  }),
+
+  http.post('*/api/v1/admin/sellers/:id/approve', ({ params }) => {
+    const { id } = params
+    const seller = db.pendingSellers.find(s => s.id === id)
+    if (seller) {
+      seller.status = 'approved'
+      db.sellers.push({
+        id: seller.id,
+        name: seller.name,
+        email: 'mock@seller.com',
+        category: 'Novas Bebidas',
+        rating: 5,
+        review_count: 0,
+        time: '15-30 min',
+        min_delivery_fee: 5.0,
+        fee_label: 'R$ 5,00',
+        delivery_areas: [],
+        reviews: []
+      })
+      db.pendingSellers = db.pendingSellers.filter(s => s.id !== id)
+      return HttpResponse.json({ success: true })
+    }
+    return new HttpResponse(null, { status: 404 })
+  }),
+
+  http.post('*/api/v1/admin/drivers/:id/approve', ({ params }) => {
+    const { id } = params
+    const driver = db.pendingDrivers.find(d => d.id === id)
+    if (driver) {
+      driver.status = 'approved'
+      db.drivers.push({
+        id: driver.id,
+        name: driver.edges?.user?.name || 'Novo Entregador',
+        email: driver.edges?.user?.email || 'mock@driver.com',
+        status: 'available'
+      })
+      db.pendingDrivers = db.pendingDrivers.filter(d => d.id !== id)
+      return HttpResponse.json({ success: true })
+    }
+    return new HttpResponse(null, { status: 404 })
   }),
 
   // --- SELLER MOCKS ---
   http.get('*/api/v1/vendedor/profile', () => {
     return HttpResponse.json(db.sellers[0])
+  }),
+
+  http.get('*/api/v1/vendedor/orders', () => {
+    // Return all orders for the current seller if authenticated
+    const sellerId = db.currentUser?.id || 'seller-1'
+    const sellerOrders = db.orders.filter(o => o.seller_id === sellerId || (o.seller_id === '1' && sellerId === 'seller-1'))
+    return HttpResponse.json(sellerOrders)
+  }),
+
+  http.post('*/api/v1/vendedor/orders/:id/confirm', ({ params }) => {
+    const { id } = params
+    const order = db.orders.find(o => o.id === id)
+    if (order) {
+      order.status = 'confirmed' // Map confirmed to "Em Preparo"
+      return HttpResponse.json(order)
+    }
+    return new HttpResponse(null, { status: 404 })
+  }),
+
+  http.post('*/api/v1/vendedor/orders/:id/ready', ({ params }) => {
+    const { id } = params
+    const order = db.orders.find(o => o.id === id)
+    if (order) {
+      order.status = 'ready' // Map ready to "Pronto para Entrega"
+      return HttpResponse.json(order)
+    }
+    return new HttpResponse(null, { status: 404 })
   }),
 
   http.get('*/api/v1/vendedor/delivery-areas', () => {
@@ -182,12 +351,14 @@ export const handlers = [
   }),
 
   http.get('*/api/v1/vendedor/products', () => {
-    return HttpResponse.json(db.products.filter(p => p.seller_id === db.sellers[0].id))
+    const sellerId = db.currentUser?.id || '1'
+    return HttpResponse.json(db.products.filter(p => p.seller_id === sellerId || (p.seller_id === '1' && sellerId === 'seller-1')))
   }),
 
   http.post('*/api/v1/vendedor/products', async ({ request }) => {
     const nextProduct = await request.json() as any
-    const newProduct = { ...nextProduct, id: `prod-${Date.now()}`, seller_id: db.sellers[0].id, status: 'active' }
+    const sellerId = db.currentUser?.id || '1'
+    const newProduct = { ...nextProduct, id: `prod-${Date.now()}`, seller_id: sellerId, status: 'active' }
     db.products.push(newProduct)
     return HttpResponse.json(newProduct, { status: 201 })
   }),
@@ -216,7 +387,8 @@ export const handlers = [
 
   // Customer Orders
   http.get('*/api/v1/customers/orders', () => {
-    return HttpResponse.json(db.orders.filter(o => o.customer_id === 'cust-1').sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+    const customerId = db.currentUser?.id || 'cust-1'
+    return HttpResponse.json(db.orders.filter(o => o.customer_id === customerId).sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
   }),
 
   // Store Public Profile
@@ -281,14 +453,23 @@ export const handlers = [
 
   http.post('*/api/v1/orders', async ({ request }) => {
     const payload = await request.json() as any
+    const customerId = db.currentUser?.id || 'cust-1'
     const newOrder = {
       id: `order-${Date.now()}`,
-      customer_id: 'cust-1',
+      customer_id: customerId,
       seller_id: payload.seller_id,
       items: payload.items,
       total_amount: payload.total_amount,
-      status: 'pending',
-      created_at: new Date().toISOString()
+      status: 'created', // Start as created
+      created_at: new Date().toISOString(),
+      delivery_address_json: JSON.stringify({ raw: payload.delivery_address || "Endereço Teste" }),
+      edges: {
+        items: payload.items.map((it: any) => ({
+          ...it,
+          product: db.products.find(p => p.id === it.product_id),
+          unit_price: it.price
+        }))
+      }
     }
     db.orders.push(newOrder)
     return HttpResponse.json(newOrder, { status: 201 })
@@ -300,15 +481,17 @@ export const handlers = [
   }),
 
   http.get('*/api/v1/entregador/orders', () => {
-    return HttpResponse.json(db.orders.filter(o => o.status === 'pending' || o.driver_id === 'driver-1'))
+    const driverId = db.currentUser?.id || 'driver-1'
+    return HttpResponse.json(db.orders.filter(o => o.status === 'ready' || o.driver_id === driverId))
   }),
 
   http.post('*/api/v1/entregador/orders/:id/accept', ({ params }) => {
     const { id } = params
     const order = db.orders.find(o => o.id === id)
+    const driverId = db.currentUser?.id || 'driver-1'
     if (order) {
       order.status = 'accepted'
-      order.driver_id = 'driver-1'
+      order.driver_id = driverId
       return HttpResponse.json(order)
     }
     return new HttpResponse(null, { status: 404 })

@@ -5,6 +5,7 @@ services:
     env_file:
       - ../../../backend/.env.example
     depends_on: [postgres, redis, minio, rabbitmq]
+    restart: on-failure
 
   frontend:
     build:
@@ -13,6 +14,10 @@ services:
     image: ${FRONTEND_IMAGE:-entregamais/frontend:local}
     env_file:
       - ../../../frontend/.env.example
+    environment:
+      KEYCLOAK_INTERNAL_URL: http://keycloak:8080/realms/delivery-platform
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     depends_on: [gateway]
 
   gateway:

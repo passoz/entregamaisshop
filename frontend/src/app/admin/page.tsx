@@ -1,17 +1,80 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { PortalLayout } from "@/components/layout/PortalLayout"
 import { Users, Truck, Store, DollarSign, ArrowUpRight, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/Card"
 import Link from "next/link"
+import { apiFetch } from "@/lib/api";
+
+interface DashboardData {
+  total_sales: number;
+  new_users: number;
+  active_sellers: number;
+  total_drivers: number;
+  pending_sellers_count: number;
+}
 
 export default function AdminDashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const stats = await apiFetch<DashboardData>("/api/v1/admin/dashboard");
+        setData(stats);
+      } catch (error) {
+        console.error("Erro ao carregar dashboard:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadStats();
+  }, []);
+
   const stats = [
-    { label: "Total de Vendas", value: "R$ 42.500,00", icon: <DollarSign className="w-6 h-6 text-emerald-500" />, trend: "+12.5%", color: "emerald" },
-    { label: "Novos Usuários", value: "128", icon: <Users className="w-6 h-6 text-brand-sky" />, trend: "+25%", color: "sky" },
-    { label: "Lojistas Ativos", value: "45", icon: <Store className="w-6 h-6 text-brand-amber" />, trend: "+5%", color: "amber" },
-    { label: "Entregadores", value: "86", icon: <Truck className="w-6 h-6 text-brand-teal" />, trend: "+18%", color: "teal" },
+    { 
+      label: "Total de Vendas", 
+      value: `R$ ${(data?.total_sales || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, 
+      icon: <DollarSign className="w-6 h-6 text-emerald-500" />, 
+      trend: "+0%", 
+      color: "emerald" 
+    },
+    { 
+      label: "Novos Usuários", 
+      value: data?.new_users.toString() || "0", 
+      icon: <Users className="w-6 h-6 text-brand-sky" />, 
+      trend: "+0%", 
+      color: "sky" 
+    },
+    { 
+      label: "Lojistas Ativos", 
+      value: data?.active_sellers.toString() || "0", 
+      icon: <Store className="w-6 h-6 text-brand-amber" />, 
+      trend: "+0%", 
+      color: "amber" 
+    },
+    { 
+      label: "Entregadores", 
+      value: data?.total_drivers.toString() || "0", 
+      icon: <Truck className="w-6 h-6 text-brand-teal" />, 
+      trend: "+0%", 
+      color: "teal" 
+    },
   ]
 
-  const sellersCount = 5
+  const sellersCount = data?.pending_sellers_count || 0
+
+  if (isLoading) {
+    return (
+      <PortalLayout title="Dashboard Geral" role="admin">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ze-yellow"></div>
+        </div>
+      </PortalLayout>
+    );
+  }
 
   return (
     <PortalLayout title="Dashboard Geral" role="admin">

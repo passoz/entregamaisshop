@@ -6,7 +6,7 @@ services:
     volumes:
       - ../../../frontend:/app
       - /app/node_modules
-    command: npm run dev
+    command: npx vinext dev -p 3000 --hostname 0.0.0.0
     environment:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true

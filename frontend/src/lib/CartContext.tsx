@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth/client";
 import { apiFetch } from "./api";
 
 export interface CartItem {
@@ -30,12 +30,32 @@ interface CartContextProps {
 const CartContext = createContext<CartContextProps | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [items, setItems] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = status === "authenticated";
+
+  const mapCartItems = useCallback((cart: any): CartItem[] => {
+    const rawItems = cart?.items || cart?.edges?.items || [];
+
+    return rawItems.map((it: any) => {
+      const product = it.product || it.edges?.product;
+
+      return {
+        id: it.id,
+        product_id: it.product_id,
+        name: product?.name || "Produto",
+        price: it.unit_price,
+        seller_id: product?.seller_id || "",
+        seller_name: product?.seller_name || "",
+        quantity: it.quantity,
+        image: product?.image_url,
+        product,
+      };
+    });
+  }, []);
 
   // Initial load
   useEffect(() => {
@@ -45,17 +65,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (isAuthenticated) {
         try {
           const cart = await apiFetch<any>("/api/v1/cart");
-          if (cart.items) {
-            const mappedItems = cart.items.map((it: any) => ({
-              id: it.id,
-              product_id: it.product_id,
-              name: it.product?.name || "Produto",
-              price: it.unit_price,
-              seller_id: it.product?.seller_id || "",
-              seller_name: "", // Would need more data or just skip
-              quantity: it.quantity,
-              image: it.product?.image_url,
-            }));
+          const mappedItems = mapCartItems(cart);
+          if (mappedItems.length > 0) {
             setItems(mappedItems);
           }
           
@@ -73,16 +84,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               localStorage.removeItem("@Entregamais:cart");
               // Refresh again
               const refreshed = await apiFetch<any>("/api/v1/cart");
-              // ... map again (omitted for brevity in logic but should be done)
-              if (refreshed.items) {
-                setItems(refreshed.items.map((it: any) => ({
-                  id: it.id,
-                  product_id: it.product_id,
-                  name: it.product?.name,
-                  price: it.unit_price,
-                  seller_id: it.product?.seller_id,
-                  quantity: it.quantity,
-                })));
+              const refreshedItems = mapCartItems(refreshed);
+              if (refreshedItems.length > 0) {
+                setItems(refreshedItems);
               }
             }
           }
@@ -100,7 +104,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     loadCart();
-  }, [status, isAuthenticated]);
+  }, [status, isAuthenticated, mapCartItems]);
 
   // Save to local storage only if NOT authenticated
   useEffect(() => {
@@ -202,6 +206,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
 export function useCart() {
   const context = useContext(CartContext);
-  if (!context) throw new Error("useCart must be used within CartProvider");
+  if (!context) {
+    console.warn("useCart was called outside of a CartProvider. Returning default empty state.");
+    return {
+      items: [],
+      addItem: async () => {},
+      removeItem: async () => {},
+      updateQuantity: async () => {},
+      clearCart: async () => {},
+      subtotal: 0,
+      totalItems: 0,
+      isLoading: false
+    };
+  }
   return context;
 }

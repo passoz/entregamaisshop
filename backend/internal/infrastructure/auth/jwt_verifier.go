@@ -22,6 +22,8 @@ type Claims struct {
 		Roles []string `json:"roles"`
 	} `json:"realm_access"`
 	PreferredUsername string `json:"preferred_username"`
+	Email             string `json:"email"`
+	Name              string `json:"name"`
 }
 
 func NewJWTVerifier(issuerURL string) (*JWTVerifier, error) {

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth/client";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";

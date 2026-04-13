@@ -1,69 +1,65 @@
-import { auth } from "@/auth"
-import { NextResponse } from "next/server"
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { getSessionFromRequest } from '@/lib/auth/server'
+import { userCanAccessPortal } from '@/lib/auth/roles'
+import { AUTH_COOKIE_NAME } from '@/lib/auth/shared'
 
-export default auth((req) => {
-  const { nextUrl } = req
-  
-  // Broad host detection to handle various proxy scenarios
-  const host = (req.headers.get("host") || "").toLowerCase()
-  const forwardedHost = (req.headers.get("x-forwarded-host") || "").toLowerCase()
-  const roles = (req.auth as any)?.roles || []
+// Define which routes are protected and which portal they belong to
+const PROTECTED_CONFIG: Record<string, { portal: string, loginPath: string }> = {
+  '/admin': { portal: 'admin', loginPath: '/auth/login/admin' },
+  '/vendedor': { portal: 'vendedor', loginPath: '/auth/login/vendedor' },
+  '/entregador': { portal: 'entregador', loginPath: '/auth/login/entregador' },
+}
 
-  const isAnyAdmin = host.includes("admin.") || forwardedHost.includes("admin.")
-  const isAnyVendedor = host.includes("vendedor.") || forwardedHost.includes("vendedor.")
-  const isAnyEntregador = host.includes("entregador.") || forwardedHost.includes("entregador.")
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-  // 0. Escape hatch for static assets and auth paths
-  if (
-    nextUrl.pathname.startsWith("/_next") ||
-    nextUrl.pathname.startsWith("/api") ||
-    nextUrl.pathname.startsWith("/auth") ||
-    nextUrl.pathname.startsWith("/register")
-  ) {
+  // Find if the current path is protected
+  const protectedRoute = Object.entries(PROTECTED_CONFIG).find(([path]) => 
+    pathname === path || pathname.startsWith(`${path}/`)
+  )
+
+  if (!protectedRoute) {
     return NextResponse.next()
   }
 
-  // 1. Root Path Handling for Subdomains (Explicit Redirect)
-  if (nextUrl.pathname === "/") {
-    const url = nextUrl.clone()
-    if (isAnyAdmin) {
-      url.pathname = "/admin"
-      return NextResponse.redirect(url)
-    }
-    if (isAnyVendedor) {
-      url.pathname = "/vendedor"
-      return NextResponse.redirect(url)
-    }
-    if (isAnyEntregador) {
-      url.pathname = "/entregador"
-      return NextResponse.redirect(url)
-    }
+  const [pathPrefix, config] = protectedRoute
+  
+  // Debug cookies
+  const allCookies = request.cookies.getAll().map(c => c.name)
+  console.log(`[Middleware] Processing ${pathname}`, { 
+    hasSessionCookie: request.cookies.has(AUTH_COOKIE_NAME),
+    allCookies 
+  })
+
+  // Try to get the session from the request cookies
+  const session = await getSessionFromRequest(request)
+
+  // 1. No session -> Redirect to login
+  if (!session) {
+    const url = new URL(config.loginPath, request.url)
+    // Add callback URL to redirect back after login if needed
+    url.searchParams.set('callbackUrl', pathname)
+    return NextResponse.redirect(url)
   }
 
-  // 2. Auth Protection and Role-based Redirection
-  const isAdminRoute = nextUrl.pathname.startsWith("/admin")
-  const isVendedorRoute = nextUrl.pathname.startsWith("/vendedor")
-  const isEntregadorRoute = nextUrl.pathname.startsWith("/entregador")
-
-  if (isAdminRoute && !roles.includes("admin")) {
-    const url = nextUrl.clone()
-    url.pathname = "/auth/login/admin"
-    return NextResponse.redirect(url)
-  }
-  if (isVendedorRoute && !roles.includes("vendedor")) {
-    const url = nextUrl.clone()
-    url.pathname = "/auth/login/vendedor"
-    return NextResponse.redirect(url)
-  }
-  if (isEntregadorRoute && !roles.includes("entregador")) {
-    const url = nextUrl.clone()
-    url.pathname = "/auth/login/entregador"
-    return NextResponse.redirect(url)
+  // 2. Session exists -> Check role permissions
+  const roles = session.user.roles || []
+  if (!userCanAccessPortal(roles, config.portal)) {
+    // If they have a session but NO access to this portal, redirect to their home
+    // or to a public home if they are totally unauthorized for this portal.
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return NextResponse.next()
-})
+}
 
+// See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    '/admin/:path*',
+    '/vendedor/:path*',
+    '/entregador/:path*',
+    // Add other protected paths here if needed (e.g., /profile, /orders)
+  ],
 }

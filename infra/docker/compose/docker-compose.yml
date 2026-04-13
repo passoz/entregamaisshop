@@ -11,6 +11,9 @@ services:
     image: ${FRONTEND_IMAGE:-entregamais/frontend:local}
     env_file:
       - ../../../frontend/.env.example
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     depends_on: [gateway]
 
   gateway:

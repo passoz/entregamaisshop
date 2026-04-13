@@ -8,7 +8,7 @@ import { ShieldCheck, ArrowRight } from "lucide-react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { signIn } from "next-auth/react"
+import { signIn } from "@/lib/auth/client"
 
 export default function AdminLogin() {
   const router = useRouter()
@@ -31,12 +31,16 @@ export default function AdminLogin() {
       })
       
       if (result?.ok) {
-        router.push('/admin')
+        // Use window.location.href to ensure middleware sees the new cookie
+        setTimeout(() => {
+          window.location.href = '/admin/credentialing'
+        }, 100)
       } else {
-        setError('Acesso negado. Verifique suas credenciais.')
+        setError('Acesso negado. Suas chaves de segurança não coincidem com os registros mestre.')
       }
-    } catch (err) {
-      setError('Falha na conexão com o servidor de segurança')
+    } catch (err: any) {
+      console.error('Fatal login error:', err)
+      setError(`Instabilidade no cofre digital: ${err.message || 'Erro desconhecido'}`)
     } finally {
       setLoading(false)
     }
@@ -58,6 +62,7 @@ export default function AdminLogin() {
           <Label htmlFor="email">E-mail de Administrador</Label>
           <Input 
             id="email" 
+            name="email"
             type="email"
             placeholder="admin@entregamaisshop.com" 
             value={email}
@@ -70,6 +75,7 @@ export default function AdminLogin() {
           <Label htmlFor="password">Chave de Acesso</Label>
           <Input 
             id="password" 
+            name="password"
             type="password" 
             placeholder="••••••••" 
             value={password}

@@ -4,15 +4,17 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: ${BACKEND_IMAGE:-entregamais/backend:dev}
+    restart: on-failure
     environment:
       - ENVIRONMENT=dev
       - LOG_LEVEL=debug
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
-      - REDIS_ADDR=redis:${REDIS_PORT}
-      - MINIO_ENDPOINT=minio:${MINIO_PORT}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      - REDIS_ADDR=redis:6379
+      - MINIO_ENDPOINT=minio:9000
       - MINIO_BUCKET=uploads
-      - RABBITMQ_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:${RABBITMQ_PORT}/
+      - RABBITMQ_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
       - KEYCLOAK_ISSUER_URL=http://keycloak:8080/realms/delivery-platform
+      - KEYCLOAK_JWKS_URL=http://keycloak:8080/realms/delivery-platform/protocol/openid-connect/certs
     depends_on:
       - postgres
       - redis
@@ -26,8 +28,12 @@ services:
     image: ${FRONTEND_IMAGE:-entregamais/frontend:dev}
     environment:
       - NEXT_PUBLIC_GATEWAY_URL=http://localhost:${APISIX_PROXY_PORT}
+      - BACKEND_INTERNAL_URL=http://backend:8080
       - NEXT_PUBLIC_KEYCLOAK_URL=http://localhost:${KEYCLOAK_PORT}/realms/delivery-platform
+      - KEYCLOAK_INTERNAL_URL=http://keycloak:8080/realms/delivery-platform
       - NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=frontend
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
     ports:
       - "${FRONTEND_PORT}:3000"
     depends_on:
@@ -35,7 +41,10 @@ services:
 
   gateway:
     image: apache/apisix:3.12.0-debian
+    environment:
+      - APISIX_STAND_ALONE=true
     volumes:
+      - ./gateway/config/config.yaml:/usr/local/apisix/conf/config.yaml:ro
       - ./gateway/config/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
       - ./gateway/routes/routes.yaml:/usr/local/apisix/conf/apisix.d/routes.yaml:ro
     ports:
@@ -47,11 +56,12 @@ services:
 
   keycloak:
     build: ./auth
+    restart: on-failure
     environment:
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN:-admin}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
       - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://postgres-auth:${POSTGRES_AUTH_PORT}/${POSTGRES_AUTH_DB}
+      - KC_DB_URL=jdbc:postgresql://postgres-auth:5432/${POSTGRES_AUTH_DB}
       - KC_DB_USERNAME=${POSTGRES_AUTH_USER}
       - KC_DB_PASSWORD=${POSTGRES_AUTH_PASSWORD}
     ports:

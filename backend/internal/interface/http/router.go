@@ -13,7 +13,7 @@ import (
 func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *auth.JWTVerifier) http.Handler {
 	mux := http.NewServeMux()
 
-	mw := NewMiddleware(lg, verifier)
+	mw := NewMiddleware(lg, verifier, db)
 	h := &Handlers{Config: cfg, Logger: lg, DB: db}
 
 	mux.HandleFunc("GET /api/v1/health", h.Health)
@@ -27,6 +27,7 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *a
 	mux.HandleFunc("POST /api/v1/sellers/{id}/reviews", mw.RequireRole("customer", h.SellerReviewCreate))
 	mux.HandleFunc("GET /api/v1/products", h.ProductsList)
 	mux.HandleFunc("GET /api/v1/products/{id}", h.ProductsGet)
+	mux.HandleFunc("POST /api/v1/public/register", h.PublicRegister)
 
 	mux.HandleFunc("GET /api/v1/cart", mw.RequireAuth(h.CartGet))
 	mux.HandleFunc("POST /api/v1/cart/items", mw.RequireAuth(h.CartCreateItem))
@@ -69,6 +70,7 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *a
 	mux.HandleFunc("POST /api/v1/admin/sellers/{id}/approve", mw.RequireRole("admin", h.AdminSellerApprove))
 	mux.HandleFunc("POST /api/v1/admin/sellers", mw.RequireRole("admin", h.AdminSellersCreate))
 	mux.HandleFunc("GET /api/v1/admin/drivers", mw.RequireRole("admin", h.AdminDriversList))
+	mux.HandleFunc("POST /api/v1/admin/drivers/{id}/approve", mw.RequireRole("admin", h.AdminDriverApprove))
 	mux.HandleFunc("POST /api/v1/admin/drivers", mw.RequireRole("admin", h.AdminDriversCreate))
 	mux.HandleFunc("GET /api/v1/admin/orders", mw.RequireRole("admin", h.AdminOrdersList))
 	mux.HandleFunc("GET /api/v1/admin/users", mw.RequireRole("admin", h.AdminUsersList))

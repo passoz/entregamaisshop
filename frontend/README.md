@@ -1,9 +1,9 @@
-# Frontend (Next.js + Tailwind)
+# Frontend (Vinext + Tailwind)
 
 Aplicacao web para customer, seller, driver e admin.
 
 ## Caracteristicas
-- Next.js (SSR/Route protection)
+- Vinext (API do Next.js sobre Vite)
 - Tailwind CSS
 - Consumo de API exclusivamente via gateway (`NEXT_PUBLIC_GATEWAY_URL`)
 - Preparado para OIDC com Keycloak

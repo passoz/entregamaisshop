@@ -1,9 +1,5 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="256" cy="256" r="240" fill="#111111"/>
-  <circle cx="256" cy="256" r="208" fill="#F7E01B"/>
-  <path d="M217 124C217 114.059 225.059 106 235 106H277C286.941 106 295 114.059 295 124V151L342 202V382C342 414.033 316.033 440 284 440H228C195.967 440 170 414.033 170 382V202L217 151V124Z" fill="#111111"/>
-  <path d="M210 208H302V392C302 406.359 290.359 418 276 418H236C221.641 418 210 406.359 210 392V208Z" fill="#111111"/>
-  <rect x="224" y="355" width="64" height="51" rx="22" fill="#F7E01B"/>
-  <path d="M225 164L205 186V208H307V186L287 164V146H225V164Z" fill="#111111"/>
-  <path d="M250 223H302L272 286H305L239 392L254 319H218L250 223Z" fill="white"/>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="8" fill="#F7E01B"/>
+  <rect x="1" y="1" width="30" height="30" rx="7" stroke="#222222" stroke-width="2"/>
+  <text x="50%" y="54%" dominant-baseline="central" text-anchor="middle" fill="#222222" font-family="sans-serif" font-weight="900" font-style="italic" font-size="20">E</text>
 </svg>

@@ -15,10 +15,8 @@ import {
   Printer,
   BellRing
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 
 export default function SellerOrders() {
-  const { data: session } = useSession();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastOrderCount, setLastOrderCount] = useState(0);
@@ -27,7 +25,7 @@ export default function SellerOrders() {
     try {
       // In a real app we'd get the seller_id from the session/user profile
       // For the demo, we'll fetch orders for the first available seller if needed
-      const data = await apiFetch<any[]>('/api/v1/vendedor/orders?seller_id=seller-1'); 
+      const data = await apiFetch<any[]>('/api/v1/vendedor/orders'); 
       setOrders(data);
       
       // Notify on new orders (demo WOW factor)
@@ -104,17 +102,19 @@ export default function SellerOrders() {
 
       {/* Items List */}
       <div className="space-y-2 mb-6">
-        {order.edges?.items?.map((item: any, idx: number) => (
+        {order.edges?.items?.map((item: any, idx: number) => {
+          const product = item.product || item.edges?.product;
+          return (
           <div key={idx} className="flex justify-between items-center text-sm">
             <div className="flex items-center gap-2">
               <span className="w-6 h-6 bg-ze-yellow flex items-center justify-center rounded-lg font-black text-[10px] border border-ze-black/10">
                 {item.quantity}
               </span>
-              <span className="font-bold text-ze-black uppercase tracking-tight">{item.product?.name || "Produto"}</span>
+              <span className="font-bold text-ze-black uppercase tracking-tight">{product?.name || "Produto"}</span>
             </div>
             <span className="font-bold text-ze-black/40">R$ {item.unit_price.toFixed(2)}</span>
           </div>
-        ))}
+        )})}
       </div>
 
       <div className="pt-4 border-t-2 border-ze-black/5 flex items-center justify-between gap-4">
