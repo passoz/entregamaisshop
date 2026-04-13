@@ -36,3 +36,7 @@ __pycache__/
 
 # OS
 Thumbs.db
+
+# Data and Volumes
+dolibarr/volumes/
+fiscal/data/

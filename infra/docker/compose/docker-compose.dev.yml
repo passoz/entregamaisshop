@@ -14,10 +14,16 @@ services:
     ports: ["80:9080", "9180:9180"]
   keycloak:
     ports: ["8081:8080"]
+  fiscal:
+    ports: ["8090:8090"]
   postgres:
     ports: ["5432:5432"]
   postgres-auth:
     ports: ["5433:5432"]
+  dolibarr-db:
+    ports: ["13306:3306"]
+  dolibarr:
+    ports: ["8088:80"]
   redis:
     ports: ["6379:6379"]
   minio:

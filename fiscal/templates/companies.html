@@ -1,0 +1,100 @@
+{{ define "companies" }}{{ template "base" . }}{{ end }}
+
+{{ define "content" }}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Cadastro emissor</p>
+    <h2>Empresas e entidades fiscais</h2>
+  </div>
+</section>
+
+<section class="grid two">
+  <article class="card">
+    <h3>Nova empresa</h3>
+    <form class="stack" method="post" action="/companies">
+      <div class="form-grid">
+        <label>
+          <span>ID</span>
+          <input name="id" placeholder="matriz-rj">
+        </label>
+        <label>
+          <span>Nome</span>
+          <input name="name" placeholder="EntregaMais Fiscal Ltda">
+        </label>
+        <label>
+          <span>CNPJ</span>
+          <input name="cnpj" placeholder="12345678000199">
+        </label>
+        <label>
+          <span>UF</span>
+          <input name="state" placeholder="RJ">
+        </label>
+        <label>
+          <span>Codigo municipio</span>
+          <input name="municipality_code" placeholder="3304557">
+        </label>
+        <label>
+          <span>Regime</span>
+          <select name="regime">
+            <option value="SIMPLES">SIMPLES</option>
+            <option value="LUCRO_PRESUMIDO">LUCRO_PRESUMIDO</option>
+            <option value="LUCRO_REAL">LUCRO_REAL</option>
+          </select>
+        </label>
+        <label>
+          <span>Entidade Dolibarr</span>
+          <input name="entity" placeholder="1">
+        </label>
+        <label>
+          <span>CFOP padrao</span>
+          <input name="default_cfop" placeholder="5102">
+        </label>
+      </div>
+      <label><input type="checkbox" name="enabled" checked> Empresa habilitada</label>
+      <button class="primary" type="submit">Salvar empresa</button>
+    </form>
+  </article>
+
+  <article class="card">
+    <h3>Empresas cadastradas</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>CNPJ</th>
+            <th>UF</th>
+            <th>Regime</th>
+            <th>Entidade</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ if .Companies }}
+            {{ range .Companies }}
+              <tr>
+                <td>
+                  <strong>{{ .Name }}</strong>
+                  <small>{{ .ID }}</small>
+                </td>
+                <td>{{ .CNPJ }}</td>
+                <td>{{ .State }}</td>
+                <td>{{ .Regime }}</td>
+                <td>{{ .Entity }}</td>
+                <td>
+                  <form method="post" action="/companies/delete">
+                    <input type="hidden" name="id" value="{{ .ID }}">
+                    <button class="ghost danger" type="submit">Remover</button>
+                  </form>
+                </td>
+              </tr>
+            {{ end }}
+          {{ else }}
+            <tr><td colspan="6" class="muted">Nenhuma empresa cadastrada.</td></tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+{{ end }}

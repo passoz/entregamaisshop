@@ -20,6 +20,27 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     depends_on: [gateway]
 
+  fiscal:
+    build: ../../../fiscal
+    image: ${FISCAL_IMAGE:-entregamais/fiscal:local}
+    env_file:
+      - ../../../fiscal/.env.example
+    environment:
+      APP_ADDR: :8090
+      PUBLIC_URL: ${FISCAL_PUBLIC_URL}
+      STATE_FILE: /data/state.json
+      SESSION_SECRET: ${FISCAL_SESSION_SECRET}
+      FISCAL_API_TOKEN: ${FISCAL_API_TOKEN}
+      KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
+      KEYCLOAK_INTERNAL_URL: http://keycloak:8080
+      KEYCLOAK_REALM: delivery-platform
+      KEYCLOAK_CLIENT_ID: fiscal-gui
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_FISCAL_CLIENT_SECRET}
+      REQUIRED_ROLE: admin
+    depends_on: [keycloak]
+    volumes:
+      - ../../../fiscal/data:/data
+
   gateway:
     image: apache/apisix:3.12.0-debian
     environment:
@@ -57,6 +78,48 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
     volumes:
       - ../../../postgres-auth/init:/docker-entrypoint-initdb.d:ro
+
+  dolibarr-db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DOLIBARR_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DOLIBARR_DB_NAME}
+      MYSQL_USER: ${DOLIBARR_DB_USER}
+      MYSQL_PASSWORD: ${DOLIBARR_DB_PASSWORD}
+    volumes:
+      - ../../../dolibarr/volumes/mariadb:/var/lib/mysql
+
+  dolibarr:
+    image: dolibarr/dolibarr:latest
+    environment:
+      DOLI_INSTALL_AUTO: 1
+      DOLI_INIT_DEMO: 0
+      DOLI_PROD: 0
+      DOLI_DB_HOST: dolibarr-db
+      DOLI_DB_HOST_PORT: 3306
+      DOLI_DB_NAME: ${DOLIBARR_DB_NAME}
+      DOLI_DB_USER: ${DOLIBARR_DB_USER}
+      DOLI_DB_PASSWORD: ${DOLIBARR_DB_PASSWORD}
+      DOLI_URL_ROOT: ${DOLIBARR_PUBLIC_URL}
+      DOLI_ADMIN_LOGIN: ${DOLIBARR_ADMIN_LOGIN}
+      DOLI_ADMIN_PASSWORD: ${DOLIBARR_ADMIN_PASSWORD}
+      DOLI_ENABLE_MODULES: Societe,Commande,Facture,Stock,Api
+      DOLI_COMPANY_NAME: ${DOLIBARR_COMPANY_NAME}
+      DOLI_COMPANY_COUNTRYCODE: BR
+      WWW_USER_ID: 1000
+      WWW_GROUP_ID: 1000
+      DOLI_KEYCLOAK_ENABLED: 1
+      DOLIBARR_PUBLIC_URL: ${DOLIBARR_PUBLIC_URL}
+      KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
+      KEYCLOAK_REALM: delivery-platform
+      DOLIBARR_OIDC_CLIENT_ID: dolibarr
+      DOLIBARR_OIDC_CLIENT_SECRET: ${KEYCLOAK_DOLIBARR_CLIENT_SECRET}
+      DOLIBARR_OIDC_LOGIN_CLAIM: email
+    depends_on: [dolibarr-db, keycloak, fiscal]
+    volumes:
+      - ../../../dolibarr/volumes/documents:/var/www/documents
+      - ../../../dolibarr/custom:/var/www/html/custom
+      - ../../../dolibarr/scripts/before-starting.d:/var/www/scripts/before-starting.d:ro
 
   redis:
     image: redis:7

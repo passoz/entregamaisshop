@@ -1,0 +1,49 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ .Title }}</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <p class="eyebrow">EntregaMais</p>
+        <h1>{{ .Settings.ServiceName }}</h1>
+        <p class="muted">Motor fiscal externo para Dolibarr e operacao multicompany.</p>
+      </div>
+
+      <nav class="nav">
+        <a href="/" class="{{ if eq .CurrentPath "/" }}active{{ end }}">Dashboard</a>
+        <a href="/settings" class="{{ if eq .CurrentPath "/settings" }}active{{ end }}">Configuracoes</a>
+        <a href="/companies" class="{{ if eq .CurrentPath "/companies" }}active{{ end }}">Empresas</a>
+        <a href="/documents" class="{{ if eq .CurrentPath "/documents" }}active{{ end }}">Documentos</a>
+        <a href="/documents/new" class="{{ if eq .CurrentPath "/documents/new" }}active{{ end }}">Simulador</a>
+      </nav>
+
+      <div class="sidecard">
+        <p class="eyebrow">Autenticacao</p>
+        {{ if .AuthEnabled }}
+          <p>{{ .User.Name }}</p>
+          <p class="muted">{{ .User.Email }}</p>
+          <form action="/auth/logout" method="post">
+            <button class="ghost" type="submit">Sair do Keycloak</button>
+          </form>
+        {{ else }}
+          <p>Modo local de desenvolvimento.</p>
+        {{ end }}
+      </div>
+    </aside>
+
+    <main class="content">
+      {{ if .Flash }}<div class="flash success">{{ .Flash }}</div>{{ end }}
+      {{ if .Error }}<div class="flash error">{{ .Error }}</div>{{ end }}
+      {{ template "content" . }}
+    </main>
+  </div>
+</body>
+</html>
+{{ end }}

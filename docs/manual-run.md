@@ -32,6 +32,8 @@ Acessos:
 - Gateway: `http://localhost:9080`
 - Frontend: `http://localhost:3000`
 - Keycloak: `http://localhost:8081`
+- Modulo fiscal: `http://localhost:8090`
+- Dolibarr: `http://localhost:8088`
 - Kibana: `http://localhost:5601`
 
 ## 4. Subir ambiente de teste
@@ -46,6 +48,8 @@ Acessos (test):
 - Gateway: `http://localhost:19080`
 - Frontend: `http://localhost:13000`
 - Keycloak: `http://localhost:18081`
+- Modulo fiscal: `http://localhost:18090`
+- Dolibarr: `http://localhost:18088`
 - Kibana: `http://localhost:15601`
 
 ## 5. Subir profile de producao
@@ -70,6 +74,12 @@ curl -s -X POST http://localhost:9080/api/v1/orders \
   -d '{"items":[{"product_id":"prod-1","quantity":2}]}'
 ```
 4. Validar logs no Kibana.
+
+## 6.1 Validacao do modulo fiscal e Dolibarr
+1. Acesse a GUI fiscal em `http://localhost:8090` e autentique com `admin@entregamaisshop.com / admin123`.
+2. Abra o Dolibarr em `http://localhost:8088` com o mesmo usuario para validar `openid_connect,dolibarr`.
+3. No modulo fiscal, use a tela "Simulador" para testar `POST /v1/tax/calculate`.
+4. No Dolibarr, confirme a existencia do modulo `FiscalBridge` e da pagina de configuracao em `Home -> Setup -> Modules/Applications`.
 
 ## 7. Parar ambientes
 ```bash

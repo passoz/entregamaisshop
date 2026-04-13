@@ -1,0 +1,47 @@
+{{ define "documents" }}{{ template "base" . }}{{ end }}
+
+{{ define "content" }}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Snapshot fiscal</p>
+    <h2>Documentos calculados e emitidos</h2>
+  </div>
+  <a class="primary" href="/documents/new">Novo calculo</a>
+</section>
+
+<section class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Status</th>
+          <th>Origem</th>
+          <th>Operacao</th>
+          <th>Total</th>
+          <th>Atualizado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ if .Documents }}
+          {{ range .Documents }}
+            <tr>
+              <td>
+                <strong>{{ .ID }}</strong>
+                {{ if .ExternalRef }}<small>{{ .ExternalRef }}</small>{{ end }}
+              </td>
+              <td><span class="pill {{ .Status }}">{{ .Status }}</span></td>
+              <td>{{ .Source }}</td>
+              <td>{{ .Request.Document.OperationNature }}</td>
+              <td>{{ money .Calculation.Totals.DocumentTotal }}</td>
+              <td>{{ ts .UpdatedAt }}</td>
+            </tr>
+          {{ end }}
+        {{ else }}
+          <tr><td colspan="6" class="muted">Nenhum documento registrado.</td></tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+</section>
+{{ end }}

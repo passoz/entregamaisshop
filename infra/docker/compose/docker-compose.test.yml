@@ -7,10 +7,16 @@ services:
     ports: ["19080:9080", "19180:9180"]
   keycloak:
     ports: ["18081:8080"]
+  fiscal:
+    ports: ["18090:8090"]
   postgres:
     ports: ["15432:5432"]
   postgres-auth:
     ports: ["15433:5432"]
+  dolibarr-db:
+    ports: ["23306:3306"]
+  dolibarr:
+    ports: ["18088:80"]
   redis:
     ports: ["16379:6379"]
   minio:

@@ -1,0 +1,75 @@
+{{ define "settings" }}{{ template "base" . }}{{ end }}
+
+{{ define "content" }}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Governanca</p>
+    <h2>Configuracoes fiscais e integracoes</h2>
+  </div>
+</section>
+
+<form class="stack" method="post" action="/settings">
+  <section class="card">
+    <h3>Politicas do motor fiscal</h3>
+    <div class="form-grid">
+      <label>
+        <span>Nome do servico</span>
+        <input name="service_name" value="{{ .Settings.ServiceName }}">
+      </label>
+      <label>
+        <span>Regime padrao</span>
+        <select name="default_regime">
+          <option value="SIMPLES" {{ if eq .Settings.DefaultRegime "SIMPLES" }}selected{{ end }}>SIMPLES</option>
+          <option value="LUCRO_PRESUMIDO" {{ if eq .Settings.DefaultRegime "LUCRO_PRESUMIDO" }}selected{{ end }}>LUCRO_PRESUMIDO</option>
+          <option value="LUCRO_REAL" {{ if eq .Settings.DefaultRegime "LUCRO_REAL" }}selected{{ end }}>LUCRO_REAL</option>
+        </select>
+      </label>
+      <label class="full">
+        <span>Natureza padrao da operacao</span>
+        <input name="default_operation_nature" value="{{ .Settings.DefaultOperationNature }}">
+      </label>
+    </div>
+    <div class="checkboxes">
+      <label><input type="checkbox" name="require_calculation_on_issue" {{ if .Settings.RequireCalculationOnIssue }}checked{{ end }}> Exigir calculo final antes de emitir</label>
+      <label><input type="checkbox" name="allow_draft_without_fiscal" {{ if .Settings.AllowDraftWithoutFiscal }}checked{{ end }}> Permitir rascunho sem calculo fiscal</label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Integracao Dolibarr</h3>
+    <div class="form-grid">
+      <label>
+        <span>URL publica do Dolibarr</span>
+        <input name="dolibarr_base_url" value="{{ .Settings.Dolibarr.BaseURL }}" placeholder="http://localhost:8088">
+      </label>
+      <label>
+        <span>Base da API do Dolibarr</span>
+        <input name="dolibarr_api_base_url" value="{{ .Settings.Dolibarr.APIBaseURL }}" placeholder="http://localhost:8088/api/index.php">
+      </label>
+      <label>
+        <span>DOLAPIKEY</span>
+        <input name="dolibarr_api_key" value="{{ .Settings.Dolibarr.APIKey }}">
+      </label>
+      <label>
+        <span>Entidade multicompany</span>
+        <input name="dolibarr_entity" value="{{ .Settings.Dolibarr.Entity }}">
+      </label>
+      <label class="full">
+        <span>Segredo do webhook/bridge</span>
+        <input name="dolibarr_webhook_secret" value="{{ .Settings.Dolibarr.WebhookSecret }}">
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Autenticacao</h3>
+    <ul class="list">
+      <li>Realm protegido por `{{ .User.Email }}` com role `admin`.</li>
+      <li>GUI do modulo fiscal usa fluxo OpenID Connect com Keycloak.</li>
+      <li>O Dolibarr pode ser colocado em `openid_connect,dolibarr` com o mesmo provider.</li>
+    </ul>
+  </section>
+
+  <button class="primary" type="submit">Salvar configuracoes</button>
+</form>
+{{ end }}

@@ -1,0 +1,63 @@
+{{ define "dashboard" }}{{ template "base" . }}{{ end }}
+
+{{ define "content" }}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Painel operacional</p>
+    <h2>Fiscal adapter pronto para orquestrar calculo, snapshot e emissao.</h2>
+    <p class="muted">O Dolibarr fica responsavel pelo comercial; este modulo concentra regras, auditoria e integracao fiscal.</p>
+  </div>
+  <div class="hero-actions">
+    <a class="primary" href="/documents/new">Simular calculo</a>
+    <a class="secondary" href="/settings">Ajustar integracoes</a>
+  </div>
+</section>
+
+<section class="grid four">
+  <article class="card metric">
+    <span>Empresas</span>
+    <strong>{{ .Dashboard.CompanyCount }}</strong>
+  </article>
+  <article class="card metric">
+    <span>Documentos</span>
+    <strong>{{ .Dashboard.DocumentCount }}</strong>
+  </article>
+  <article class="card metric">
+    <span>Emitidos</span>
+    <strong>{{ .Dashboard.IssuedCount }}</strong>
+  </article>
+  <article class="card metric">
+    <span>Pendentes</span>
+    <strong>{{ .Dashboard.PendingCount }}</strong>
+  </article>
+</section>
+
+<section class="grid two">
+  <article class="card">
+    <h3>Stack conectada</h3>
+    <ul class="list">
+      <li>GUI protegida via Keycloak com role `admin`.</li>
+      <li>API pronta para `/v1/tax/calculate`, `/v1/invoice/preview`, `/v1/invoice/issue`.</li>
+      <li>Persistencia local de snapshots fiscais e trilha de auditoria.</li>
+      <li>Configuracao pensada para Dolibarr multicompany e callback externo.</li>
+    </ul>
+  </article>
+
+  <article class="card">
+    <h3>Auditoria recente</h3>
+    <div class="timeline">
+      {{ if .Dashboard.RecentAudit }}
+        {{ range .Dashboard.RecentAudit }}
+          <div class="timeline-item">
+            <strong>{{ .Action }}</strong>
+            <span>{{ .Detail }}</span>
+            <small>{{ .Actor }} · {{ ts .At }}</small>
+          </div>
+        {{ end }}
+      {{ else }}
+        <p class="muted">Nenhum evento registrado ainda.</p>
+      {{ end }}
+    </div>
+  </article>
+</section>
+{{ end }}

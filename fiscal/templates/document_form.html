@@ -1,0 +1,52 @@
+{{ define "document_form" }}{{ template "base" . }}{{ end }}
+
+{{ define "content" }}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Laboratorio fiscal</p>
+    <h2>Simular calculo ou emissao</h2>
+    <p class="muted">Use este formulario para validar o payload que o Dolibarr ou outro cliente enviara para o modulo externo.</p>
+  </div>
+</section>
+
+<section class="grid two">
+  <article class="card">
+    <form class="stack" method="post" action="/documents/new">
+      <label>
+        <span>Payload JSON</span>
+        <textarea name="payload" rows="28">{{ .FormPayload }}</textarea>
+      </label>
+      <div class="hero-actions">
+        <button class="secondary" name="action" value="calculate" type="submit">Calcular</button>
+        <button class="primary" name="action" value="issue" type="submit">Emitir snapshot</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="card">
+    <h3>Resposta</h3>
+    {{ if .CalcResponse }}
+      <div class="response-grid">
+        <div><span>Total</span><strong>{{ money .CalcResponse.Totals.DocumentTotal }}</strong></div>
+        <div><span>ICMS</span><strong>{{ money .CalcResponse.Taxes.ICMS }}</strong></div>
+        <div><span>PIS/COFINS</span><strong>{{ money .CalcResponse.Taxes.PIS }} / {{ money .CalcResponse.Taxes.COFINS }}</strong></div>
+      </div>
+      <ul class="list">
+        {{ range .CalcResponse.FiscalMetadata.Messages }}<li>{{ . }}</li>{{ end }}
+      </ul>
+    {{ end }}
+    {{ if .IssueResponse }}
+      <div class="response-grid">
+        <div><span>Invoice ID</span><strong>{{ .IssueResponse.InvoiceID }}</strong></div>
+        <div><span>Access Key</span><strong>{{ .IssueResponse.AccessKey }}</strong></div>
+        <div><span>Emitido em</span><strong>{{ ts .IssueResponse.IssuedAt }}</strong></div>
+      </div>
+    {{ end }}
+    {{ if .RawResponse }}
+      <pre>{{ .RawResponse }}</pre>
+    {{ else }}
+      <p class="muted">Nenhuma resposta ainda.</p>
+    {{ end }}
+  </article>
+</section>
+{{ end }}

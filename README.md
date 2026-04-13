@@ -27,4 +27,6 @@ Veja `docs/manual-run.md`.
 - OpenAPI: `http://localhost:8080/openapi.json`
 - Docs API: `http://localhost:8080/docs`
 - Keycloak: `http://localhost:8081`
+- Modulo fiscal: `http://localhost:8090`
+- Dolibarr: `http://localhost:8088`
 - Kibana: `http://localhost:5601`
