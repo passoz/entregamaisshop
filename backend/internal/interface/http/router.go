@@ -8,13 +8,14 @@ import (
 	"github.com/entregamais/platform/backend/internal/infrastructure/auth"
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
+	"github.com/entregamais/platform/backend/internal/infrastructure/messaging"
 )
 
-func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *auth.JWTVerifier) http.Handler {
+func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *auth.JWTVerifier, publisher messaging.Publisher) http.Handler {
 	mux := http.NewServeMux()
 
 	mw := NewMiddleware(lg, verifier, db)
-	h := &Handlers{Config: cfg, Logger: lg, DB: db}
+	h := &Handlers{Config: cfg, Logger: lg, DB: db, Publisher: publisher}
 
 	mux.HandleFunc("GET /api/v1/health", h.Health)
 	mux.HandleFunc("GET /api/v1/ready", h.Ready)
@@ -29,6 +30,10 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *a
 	mux.HandleFunc("GET /api/v1/products/{id}", h.ProductsGet)
 	mux.HandleFunc("POST /api/v1/public/register", h.PublicRegister)
 
+	mux.HandleFunc("GET /api/v1/user/profile", mw.RequireAuth(h.UserProfileGet))
+	mux.HandleFunc("PUT /api/v1/user/profile", mw.RequireAuth(h.UserProfileUpdate))
+	mux.HandleFunc("POST /api/v1/auth/change-password", mw.RequireAuth(h.AuthChangePassword))
+
 	mux.HandleFunc("GET /api/v1/cart", mw.RequireAuth(h.CartGet))
 	mux.HandleFunc("POST /api/v1/cart/items", mw.RequireAuth(h.CartCreateItem))
 	mux.HandleFunc("PUT /api/v1/cart/items/{id}", mw.RequireAuth(h.CartUpdateItem))
@@ -36,9 +41,11 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *a
 
 	mux.HandleFunc("POST /api/v1/orders", mw.RequireAuth(h.OrderCreate))
 	mux.HandleFunc("GET /api/v1/orders/{id}", mw.RequireAuth(h.OrderGet))
+	mux.HandleFunc("GET /api/v1/orders/{id}/tracking", mw.RequireAuth(h.OrderTrackingGet))
 	mux.HandleFunc("GET /api/v1/orders/me", mw.RequireAuth(h.OrderMine))
 
 	mux.HandleFunc("GET /api/v1/vendedor/profile", mw.RequireRole("vendedor", h.SellerProfile))
+	mux.HandleFunc("PUT /api/v1/vendedor/profile", mw.RequireRole("vendedor", h.SellerProfileUpdate))
 	mux.HandleFunc("GET /api/v1/vendedor/delivery-areas", mw.RequireRole("vendedor", h.SellerDeliveryAreasGet))
 	mux.HandleFunc("PUT /api/v1/vendedor/delivery-areas", mw.RequireRole("vendedor", h.SellerDeliveryAreasUpdate))
 	mux.HandleFunc("GET /api/v1/vendedor/products", mw.RequireRole("vendedor", h.SellerProductsList))
@@ -53,14 +60,17 @@ func NewRouter(cfg config.Config, lg *logger.Logger, db *ent.Client, verifier *a
 	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/confirm", mw.RequireRole("vendedor", h.SellerOrderConfirm))
 	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/prepare", mw.RequireRole("vendedor", h.SellerOrderPrepare))
 	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/ready", mw.RequireRole("vendedor", h.SellerOrderReady))
+	mux.HandleFunc("POST /api/v1/vendedor/orders/{id}/dispatch", mw.RequireRole("vendedor", h.SellerOrderDispatch))
 
 	mux.HandleFunc("GET /api/v1/entregador/profile", mw.RequireRole("entregador", h.DriverProfile))
+	mux.HandleFunc("PUT /api/v1/entregador/profile", mw.RequireRole("entregador", h.DriverProfileUpdate))
 	mux.HandleFunc("GET /api/v1/entregador/orders", mw.RequireRole("entregador", h.DriverOrdersList))
 	mux.HandleFunc("GET /api/v1/entregador/orders/{id}", mw.RequireRole("entregador", h.DriverOrdersGet))
 	mux.HandleFunc("POST /api/v1/entregador/orders/{id}/accept", mw.RequireRole("entregador", h.DriverOrderAccept))
 	mux.HandleFunc("POST /api/v1/entregador/orders/{id}/pickup", mw.RequireRole("entregador", h.DriverOrderPickup))
 	mux.HandleFunc("POST /api/v1/entregador/orders/{id}/deliver", mw.RequireRole("entregador", h.DriverOrderDeliver))
 	mux.HandleFunc("POST /api/v1/entregador/status", mw.RequireRole("entregador", h.DriverStatus))
+	mux.HandleFunc("POST /api/v1/entregador/location", mw.RequireRole("entregador", h.DriverLocationUpdate))
 
 	mux.HandleFunc("POST /api/v1/uploads", mw.RequireAuth(h.UploadCreate))
 	mux.HandleFunc("GET /api/v1/uploads/{id}", mw.RequireAuth(h.UploadGet))

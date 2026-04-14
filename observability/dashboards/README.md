@@ -1,1 +1,1 @@
-Dashboards iniciais: erros, latencia, throughput, pedidos por status e falhas auth.
+Dashboards iniciais no Grafana: erros, latencia, throughput, pedidos por status, falhas auth e logs por container Docker.

@@ -6,21 +6,18 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/entregamais/platform/backend/ent/seller"
 )
 
 func TestAdminDashboard(t *testing.T) {
 	client := prepareTestDB(t)
 	defer client.Close()
 	h := &Handlers{DB: client}
-	ctx := context.Background()
 
 	// Seed some data
-	_, _ = client.User.Create().SetID("user-1").SetEmail("u1@t.com").SetName("U1").Save(ctx)
-	_, _ = client.Seller.Create().SetID("s-1").SetName("S1").SetStatus("active").SetDocument("1").Save(ctx)
-	_, _ = client.Seller.Create().SetID("s-2").SetName("S2").SetStatus("pending").SetDocument("2").Save(ctx)
-	_, _ = client.Order.Create().SetID("o-1").SetCustomerID("user-1").SetSellerID("s-1").SetTotalAmount(150.50).Save(ctx)
+	mustCreateUser(t, client, "user-1", "u1@t.com", "U1")
+	mustCreateSeller(t, client, "s-1", "S1", "1", "active")
+	mustCreateSeller(t, client, "s-2", "S2", "2", "pending")
+	mustCreateOrder(t, client, "o-1", "user-1", "s-1", "", 150.50)
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/dashboard", nil)
 	rr := httptest.NewRecorder()
@@ -56,11 +53,10 @@ func TestSellersListFilter(t *testing.T) {
 	client := prepareTestDB(t)
 	defer client.Close()
 	h := &Handlers{DB: client}
-	ctx := context.Background()
 
 	// Only active sellers should be returned
-	_, _ = client.Seller.Create().SetID("s-active").SetName("Active").SetStatus("active").SetDocument("1").Save(ctx)
-	_, _ = client.Seller.Create().SetID("s-pending").SetName("Pending").SetStatus("pending").SetDocument("2").Save(ctx)
+	mustCreateSeller(t, client, "s-active", "Active", "1", "active")
+	mustCreateSeller(t, client, "s-pending", "Pending", "2", "pending")
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/sellers", nil)
 	rr := httptest.NewRecorder()
@@ -83,7 +79,7 @@ func TestAdminSellerApprove(t *testing.T) {
 	h := &Handlers{DB: client}
 	ctx := context.Background()
 
-	s, _ := client.Seller.Create().SetID("s-pend").SetName("To Approve").SetStatus("pending").SetDocument("3").Save(ctx)
+	mustCreateSeller(t, client, "s-pend", "To Approve", "3", "pending")
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/sellers/s-pend/approve", nil)
 	req.SetPathValue("id", "s-pend")
@@ -96,7 +92,7 @@ func TestAdminSellerApprove(t *testing.T) {
 	}
 
 	updated, _ := client.Seller.Get(ctx, "s-pend")
-	if updated.Status != seller.StatusActive {
+	if updated.Status != "active" {
 		t.Errorf("expected status active, got %s", updated.Status)
 	}
 }

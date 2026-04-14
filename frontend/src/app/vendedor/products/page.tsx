@@ -14,6 +14,7 @@ type SellerProduct = {
   name: string;
   description?: string;
   price: number;
+  quantity: number;
   status: string;
 };
 
@@ -25,6 +26,7 @@ export default function SellerProductsPage() {
     name: "",
     description: "",
     price: "",
+    quantity: "",
   });
   const { showToast } = useToast();
 
@@ -57,10 +59,11 @@ export default function SellerProductsPage() {
           name: form.name.trim(),
           description: form.description.trim(),
           price: Number(form.price),
+          quantity: Number(form.quantity),
         }),
       });
 
-      setForm({ name: "", description: "", price: "" });
+      setForm({ name: "", description: "", price: "", quantity: "" });
       showToast("Produto cadastrado com sucesso!", "success");
       await loadProducts();
     } catch (error) {
@@ -98,17 +101,29 @@ export default function SellerProductsPage() {
                 onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                 className="h-12 rounded-2xl border-2 border-ze-black/10 px-4 font-bold"
               />
-              <Input
-                name="price"
-                type="number"
-                min="0.01"
-                step="0.01"
-                placeholder="15.90"
-                value={form.price}
-                onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))}
-                className="h-12 rounded-2xl border-2 border-ze-black/10 px-4 font-bold"
-                required
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  name="price"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="Preço (ex: 15.90)"
+                  value={form.price}
+                  onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))}
+                  className="h-12 rounded-2xl border-2 border-ze-black/10 px-4 font-bold"
+                  required
+                />
+                <Input
+                  name="quantity"
+                  type="number"
+                  min="0"
+                  placeholder="Estoque inicial"
+                  value={form.quantity}
+                  onChange={(event) => setForm((current) => ({ ...current, quantity: event.target.value }))}
+                  className="h-12 rounded-2xl border-2 border-ze-black/10 px-4 font-bold"
+                  required
+                />
+              </div>
               <Button
                 type="submit"
                 disabled={saving}
@@ -144,8 +159,13 @@ export default function SellerProductsPage() {
             products.map((product) => (
               <Card key={product.id} className="rounded-[2rem] border-2 border-ze-black/10">
                 <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <h3 className="text-xl font-black uppercase tracking-tight text-ze-black">{product.name}</h3>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-xl font-black uppercase tracking-tight text-ze-black">{product.name}</h3>
+                      <Badge className={`${product.quantity <= 5 ? 'bg-ze-red text-white' : 'bg-ze-gray text-ze-black'} font-black uppercase`}>
+                        Estoque: {product.quantity}
+                      </Badge>
+                    </div>
                     <p className="mt-2 text-sm font-bold text-ze-black/60">
                       {product.description || "Sem descrição informada."}
                     </p>

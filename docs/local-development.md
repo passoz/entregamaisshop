@@ -40,11 +40,13 @@
 - backend: `8080`
 - frontend: `3000`
 - keycloak: `8081`
-- kibana: `5601`
+- grafana: `5601`
+- loki: `3100`
 
 ### test
 - gateway: `19080`
 - backend: `18080`
 - frontend: `13000`
 - keycloak: `18081`
-- kibana: `15601`
+- grafana: `15601`
+- loki: `19100`

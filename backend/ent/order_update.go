@@ -103,6 +103,120 @@ func (_u *OrderUpdate) SetNillableDeliveryAddressJSON(v *string) *OrderUpdate {
 	return _u
 }
 
+// SetDeliveryLatitude sets the "delivery_latitude" field.
+func (_u *OrderUpdate) SetDeliveryLatitude(v float64) *OrderUpdate {
+	_u.mutation.ResetDeliveryLatitude()
+	_u.mutation.SetDeliveryLatitude(v)
+	return _u
+}
+
+// SetNillableDeliveryLatitude sets the "delivery_latitude" field if the given value is not nil.
+func (_u *OrderUpdate) SetNillableDeliveryLatitude(v *float64) *OrderUpdate {
+	if v != nil {
+		_u.SetDeliveryLatitude(*v)
+	}
+	return _u
+}
+
+// AddDeliveryLatitude adds value to the "delivery_latitude" field.
+func (_u *OrderUpdate) AddDeliveryLatitude(v float64) *OrderUpdate {
+	_u.mutation.AddDeliveryLatitude(v)
+	return _u
+}
+
+// ClearDeliveryLatitude clears the value of the "delivery_latitude" field.
+func (_u *OrderUpdate) ClearDeliveryLatitude() *OrderUpdate {
+	_u.mutation.ClearDeliveryLatitude()
+	return _u
+}
+
+// SetDeliveryLongitude sets the "delivery_longitude" field.
+func (_u *OrderUpdate) SetDeliveryLongitude(v float64) *OrderUpdate {
+	_u.mutation.ResetDeliveryLongitude()
+	_u.mutation.SetDeliveryLongitude(v)
+	return _u
+}
+
+// SetNillableDeliveryLongitude sets the "delivery_longitude" field if the given value is not nil.
+func (_u *OrderUpdate) SetNillableDeliveryLongitude(v *float64) *OrderUpdate {
+	if v != nil {
+		_u.SetDeliveryLongitude(*v)
+	}
+	return _u
+}
+
+// AddDeliveryLongitude adds value to the "delivery_longitude" field.
+func (_u *OrderUpdate) AddDeliveryLongitude(v float64) *OrderUpdate {
+	_u.mutation.AddDeliveryLongitude(v)
+	return _u
+}
+
+// ClearDeliveryLongitude clears the value of the "delivery_longitude" field.
+func (_u *OrderUpdate) ClearDeliveryLongitude() *OrderUpdate {
+	_u.mutation.ClearDeliveryLongitude()
+	return _u
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (_u *OrderUpdate) SetAcceptedAt(v time.Time) *OrderUpdate {
+	_u.mutation.SetAcceptedAt(v)
+	return _u
+}
+
+// SetNillableAcceptedAt sets the "accepted_at" field if the given value is not nil.
+func (_u *OrderUpdate) SetNillableAcceptedAt(v *time.Time) *OrderUpdate {
+	if v != nil {
+		_u.SetAcceptedAt(*v)
+	}
+	return _u
+}
+
+// ClearAcceptedAt clears the value of the "accepted_at" field.
+func (_u *OrderUpdate) ClearAcceptedAt() *OrderUpdate {
+	_u.mutation.ClearAcceptedAt()
+	return _u
+}
+
+// SetDispatchedAt sets the "dispatched_at" field.
+func (_u *OrderUpdate) SetDispatchedAt(v time.Time) *OrderUpdate {
+	_u.mutation.SetDispatchedAt(v)
+	return _u
+}
+
+// SetNillableDispatchedAt sets the "dispatched_at" field if the given value is not nil.
+func (_u *OrderUpdate) SetNillableDispatchedAt(v *time.Time) *OrderUpdate {
+	if v != nil {
+		_u.SetDispatchedAt(*v)
+	}
+	return _u
+}
+
+// ClearDispatchedAt clears the value of the "dispatched_at" field.
+func (_u *OrderUpdate) ClearDispatchedAt() *OrderUpdate {
+	_u.mutation.ClearDispatchedAt()
+	return _u
+}
+
+// SetDeliveredAt sets the "delivered_at" field.
+func (_u *OrderUpdate) SetDeliveredAt(v time.Time) *OrderUpdate {
+	_u.mutation.SetDeliveredAt(v)
+	return _u
+}
+
+// SetNillableDeliveredAt sets the "delivered_at" field if the given value is not nil.
+func (_u *OrderUpdate) SetNillableDeliveredAt(v *time.Time) *OrderUpdate {
+	if v != nil {
+		_u.SetDeliveredAt(*v)
+	}
+	return _u
+}
+
+// ClearDeliveredAt clears the value of the "delivered_at" field.
+func (_u *OrderUpdate) ClearDeliveredAt() *OrderUpdate {
+	_u.mutation.ClearDeliveredAt()
+	return _u
+}
+
 // SetCustomerID sets the "customer" edge to the User entity by ID.
 func (_u *OrderUpdate) SetCustomerID(id string) *OrderUpdate {
 	_u.mutation.SetCustomerID(id)
@@ -361,6 +475,42 @@ func (_u *OrderUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.DeliveryAddressJSON(); ok {
 		_spec.SetField(order.FieldDeliveryAddressJSON, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeliveryLatitude(); ok {
+		_spec.SetField(order.FieldDeliveryLatitude, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedDeliveryLatitude(); ok {
+		_spec.AddField(order.FieldDeliveryLatitude, field.TypeFloat64, value)
+	}
+	if _u.mutation.DeliveryLatitudeCleared() {
+		_spec.ClearField(order.FieldDeliveryLatitude, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.DeliveryLongitude(); ok {
+		_spec.SetField(order.FieldDeliveryLongitude, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedDeliveryLongitude(); ok {
+		_spec.AddField(order.FieldDeliveryLongitude, field.TypeFloat64, value)
+	}
+	if _u.mutation.DeliveryLongitudeCleared() {
+		_spec.ClearField(order.FieldDeliveryLongitude, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.AcceptedAt(); ok {
+		_spec.SetField(order.FieldAcceptedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AcceptedAtCleared() {
+		_spec.ClearField(order.FieldAcceptedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DispatchedAt(); ok {
+		_spec.SetField(order.FieldDispatchedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DispatchedAtCleared() {
+		_spec.ClearField(order.FieldDispatchedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DeliveredAt(); ok {
+		_spec.SetField(order.FieldDeliveredAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeliveredAtCleared() {
+		_spec.ClearField(order.FieldDeliveredAt, field.TypeTime)
 	}
 	if _u.mutation.CustomerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -673,6 +823,120 @@ func (_u *OrderUpdateOne) SetNillableDeliveryAddressJSON(v *string) *OrderUpdate
 	return _u
 }
 
+// SetDeliveryLatitude sets the "delivery_latitude" field.
+func (_u *OrderUpdateOne) SetDeliveryLatitude(v float64) *OrderUpdateOne {
+	_u.mutation.ResetDeliveryLatitude()
+	_u.mutation.SetDeliveryLatitude(v)
+	return _u
+}
+
+// SetNillableDeliveryLatitude sets the "delivery_latitude" field if the given value is not nil.
+func (_u *OrderUpdateOne) SetNillableDeliveryLatitude(v *float64) *OrderUpdateOne {
+	if v != nil {
+		_u.SetDeliveryLatitude(*v)
+	}
+	return _u
+}
+
+// AddDeliveryLatitude adds value to the "delivery_latitude" field.
+func (_u *OrderUpdateOne) AddDeliveryLatitude(v float64) *OrderUpdateOne {
+	_u.mutation.AddDeliveryLatitude(v)
+	return _u
+}
+
+// ClearDeliveryLatitude clears the value of the "delivery_latitude" field.
+func (_u *OrderUpdateOne) ClearDeliveryLatitude() *OrderUpdateOne {
+	_u.mutation.ClearDeliveryLatitude()
+	return _u
+}
+
+// SetDeliveryLongitude sets the "delivery_longitude" field.
+func (_u *OrderUpdateOne) SetDeliveryLongitude(v float64) *OrderUpdateOne {
+	_u.mutation.ResetDeliveryLongitude()
+	_u.mutation.SetDeliveryLongitude(v)
+	return _u
+}
+
+// SetNillableDeliveryLongitude sets the "delivery_longitude" field if the given value is not nil.
+func (_u *OrderUpdateOne) SetNillableDeliveryLongitude(v *float64) *OrderUpdateOne {
+	if v != nil {
+		_u.SetDeliveryLongitude(*v)
+	}
+	return _u
+}
+
+// AddDeliveryLongitude adds value to the "delivery_longitude" field.
+func (_u *OrderUpdateOne) AddDeliveryLongitude(v float64) *OrderUpdateOne {
+	_u.mutation.AddDeliveryLongitude(v)
+	return _u
+}
+
+// ClearDeliveryLongitude clears the value of the "delivery_longitude" field.
+func (_u *OrderUpdateOne) ClearDeliveryLongitude() *OrderUpdateOne {
+	_u.mutation.ClearDeliveryLongitude()
+	return _u
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (_u *OrderUpdateOne) SetAcceptedAt(v time.Time) *OrderUpdateOne {
+	_u.mutation.SetAcceptedAt(v)
+	return _u
+}
+
+// SetNillableAcceptedAt sets the "accepted_at" field if the given value is not nil.
+func (_u *OrderUpdateOne) SetNillableAcceptedAt(v *time.Time) *OrderUpdateOne {
+	if v != nil {
+		_u.SetAcceptedAt(*v)
+	}
+	return _u
+}
+
+// ClearAcceptedAt clears the value of the "accepted_at" field.
+func (_u *OrderUpdateOne) ClearAcceptedAt() *OrderUpdateOne {
+	_u.mutation.ClearAcceptedAt()
+	return _u
+}
+
+// SetDispatchedAt sets the "dispatched_at" field.
+func (_u *OrderUpdateOne) SetDispatchedAt(v time.Time) *OrderUpdateOne {
+	_u.mutation.SetDispatchedAt(v)
+	return _u
+}
+
+// SetNillableDispatchedAt sets the "dispatched_at" field if the given value is not nil.
+func (_u *OrderUpdateOne) SetNillableDispatchedAt(v *time.Time) *OrderUpdateOne {
+	if v != nil {
+		_u.SetDispatchedAt(*v)
+	}
+	return _u
+}
+
+// ClearDispatchedAt clears the value of the "dispatched_at" field.
+func (_u *OrderUpdateOne) ClearDispatchedAt() *OrderUpdateOne {
+	_u.mutation.ClearDispatchedAt()
+	return _u
+}
+
+// SetDeliveredAt sets the "delivered_at" field.
+func (_u *OrderUpdateOne) SetDeliveredAt(v time.Time) *OrderUpdateOne {
+	_u.mutation.SetDeliveredAt(v)
+	return _u
+}
+
+// SetNillableDeliveredAt sets the "delivered_at" field if the given value is not nil.
+func (_u *OrderUpdateOne) SetNillableDeliveredAt(v *time.Time) *OrderUpdateOne {
+	if v != nil {
+		_u.SetDeliveredAt(*v)
+	}
+	return _u
+}
+
+// ClearDeliveredAt clears the value of the "delivered_at" field.
+func (_u *OrderUpdateOne) ClearDeliveredAt() *OrderUpdateOne {
+	_u.mutation.ClearDeliveredAt()
+	return _u
+}
+
 // SetCustomerID sets the "customer" edge to the User entity by ID.
 func (_u *OrderUpdateOne) SetCustomerID(id string) *OrderUpdateOne {
 	_u.mutation.SetCustomerID(id)
@@ -961,6 +1225,42 @@ func (_u *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error)
 	}
 	if value, ok := _u.mutation.DeliveryAddressJSON(); ok {
 		_spec.SetField(order.FieldDeliveryAddressJSON, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeliveryLatitude(); ok {
+		_spec.SetField(order.FieldDeliveryLatitude, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedDeliveryLatitude(); ok {
+		_spec.AddField(order.FieldDeliveryLatitude, field.TypeFloat64, value)
+	}
+	if _u.mutation.DeliveryLatitudeCleared() {
+		_spec.ClearField(order.FieldDeliveryLatitude, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.DeliveryLongitude(); ok {
+		_spec.SetField(order.FieldDeliveryLongitude, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedDeliveryLongitude(); ok {
+		_spec.AddField(order.FieldDeliveryLongitude, field.TypeFloat64, value)
+	}
+	if _u.mutation.DeliveryLongitudeCleared() {
+		_spec.ClearField(order.FieldDeliveryLongitude, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.AcceptedAt(); ok {
+		_spec.SetField(order.FieldAcceptedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AcceptedAtCleared() {
+		_spec.ClearField(order.FieldAcceptedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DispatchedAt(); ok {
+		_spec.SetField(order.FieldDispatchedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DispatchedAtCleared() {
+		_spec.ClearField(order.FieldDispatchedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DeliveredAt(); ok {
+		_spec.SetField(order.FieldDeliveredAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeliveredAtCleared() {
+		_spec.ClearField(order.FieldDeliveredAt, field.TypeTime)
 	}
 	if _u.mutation.CustomerCleared() {
 		edge := &sqlgraph.EdgeSpec{

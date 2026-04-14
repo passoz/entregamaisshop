@@ -160,9 +160,12 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeString, Default: "offline"},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
 		{Name: "vehicle_type", Type: field.TypeString, Nullable: true},
 		{Name: "available", Type: field.TypeBool, Default: false},
+		{Name: "current_latitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "current_longitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "last_location_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_driver_profile", Type: field.TypeString, Unique: true},
 	}
 	// EntregadorsTable holds the schema information for the "entregadors" table.
@@ -173,7 +176,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "entregadors_users_driver_profile",
-				Columns:    []*schema.Column{EntregadorsColumns[6]},
+				Columns:    []*schema.Column{EntregadorsColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -218,6 +221,11 @@ var (
 		{Name: "total_amount", Type: field.TypeFloat64},
 		{Name: "currency", Type: field.TypeString, Default: "BRL"},
 		{Name: "delivery_address_json", Type: field.TypeString},
+		{Name: "delivery_latitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "delivery_longitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "accepted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "dispatched_at", Type: field.TypeTime, Nullable: true},
+		{Name: "delivered_at", Type: field.TypeTime, Nullable: true},
 		{Name: "entregador_orders", Type: field.TypeString, Nullable: true},
 		{Name: "seller_orders", Type: field.TypeString},
 		{Name: "user_orders", Type: field.TypeString},
@@ -230,19 +238,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "orders_entregadors_orders",
-				Columns:    []*schema.Column{OrdersColumns[7]},
+				Columns:    []*schema.Column{OrdersColumns[12]},
 				RefColumns: []*schema.Column{EntregadorsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "orders_sellers_orders",
-				Columns:    []*schema.Column{OrdersColumns[8]},
+				Columns:    []*schema.Column{OrdersColumns[13]},
 				RefColumns: []*schema.Column{SellersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "orders_users_orders",
-				Columns:    []*schema.Column{OrdersColumns[9]},
+				Columns:    []*schema.Column{OrdersColumns[14]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

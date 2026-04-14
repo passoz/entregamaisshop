@@ -79,25 +79,63 @@ func (a *app) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	state := randomToken(24)
-	http.SetCookie(w, &http.Cookie{
-		Name:     authStateCookie,
-		Value:    state,
-		Path:     "/",
-		HttpOnly: true,
-		MaxAge:   300,
-		SameSite: http.SameSiteLaxMode,
-	})
+	if r.Method == http.MethodPost {
+		email := r.FormValue("email")
+		password := r.FormValue("password")
 
-	redirect := url.Values{
-		"client_id":     {a.cfg.KeycloakClientID},
-		"redirect_uri":  {a.cfg.RedirectURL()},
-		"response_type": {"code"},
-		"scope":         {"openid profile email"},
-		"state":         {state},
+		tokenPayload := url.Values{
+			"grant_type":    {"password"},
+			"username":      {email},
+			"password":      {password},
+			"client_id":     {a.cfg.KeycloakClientID},
+			"client_secret": {a.cfg.KeycloakClientSecret},
+			"scope":         {"openid profile email"},
+		}
+
+		req, err := http.NewRequest(http.MethodPost, a.cfg.TokenURL(), strings.NewReader(tokenPayload.Encode()))
+		if err != nil {
+			a.render(w, r, "login", viewData{Title: "Login - Motor Fiscal", Error: "Erro interno no servidor"})
+			return
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			a.render(w, r, "login", viewData{Title: "Login - Motor Fiscal", Error: "Falha na comunicacao com Keycloak"})
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			a.render(w, r, "login", viewData{Title: "Login - Motor Fiscal", Error: "Credenciais invalidas"})
+			return
+		}
+
+		var tokenResp struct {
+			AccessToken string `json:"access_token"`
+			ExpiresIn   int    `json:"expires_in"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+			a.render(w, r, "login", viewData{Title: "Login - Motor Fiscal", Error: "Resposta de token invalida"})
+			return
+		}
+
+		user, ok := parseBearerUser(tokenResp.AccessToken)
+		if !ok || !userHasRole(user.Roles, a.cfg.RequiredRole) {
+			a.render(w, r, "login", viewData{Title: "Login - Motor Fiscal", Error: "Acesso restrito a administradores"})
+			return
+		}
+		user.AccessToken = tokenResp.AccessToken
+		user.ExpiresAt = time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second)
+
+		a.writeSession(w, user)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
 	}
 
-	http.Redirect(w, r, a.cfg.AuthorizeURL()+"?"+redirect.Encode(), http.StatusSeeOther)
+	a.render(w, r, "login", viewData{
+		Title: "Login - Motor Fiscal",
+	})
 }
 
 func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {

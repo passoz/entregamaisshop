@@ -94,6 +94,76 @@ func (_c *OrderCreate) SetDeliveryAddressJSON(v string) *OrderCreate {
 	return _c
 }
 
+// SetDeliveryLatitude sets the "delivery_latitude" field.
+func (_c *OrderCreate) SetDeliveryLatitude(v float64) *OrderCreate {
+	_c.mutation.SetDeliveryLatitude(v)
+	return _c
+}
+
+// SetNillableDeliveryLatitude sets the "delivery_latitude" field if the given value is not nil.
+func (_c *OrderCreate) SetNillableDeliveryLatitude(v *float64) *OrderCreate {
+	if v != nil {
+		_c.SetDeliveryLatitude(*v)
+	}
+	return _c
+}
+
+// SetDeliveryLongitude sets the "delivery_longitude" field.
+func (_c *OrderCreate) SetDeliveryLongitude(v float64) *OrderCreate {
+	_c.mutation.SetDeliveryLongitude(v)
+	return _c
+}
+
+// SetNillableDeliveryLongitude sets the "delivery_longitude" field if the given value is not nil.
+func (_c *OrderCreate) SetNillableDeliveryLongitude(v *float64) *OrderCreate {
+	if v != nil {
+		_c.SetDeliveryLongitude(*v)
+	}
+	return _c
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (_c *OrderCreate) SetAcceptedAt(v time.Time) *OrderCreate {
+	_c.mutation.SetAcceptedAt(v)
+	return _c
+}
+
+// SetNillableAcceptedAt sets the "accepted_at" field if the given value is not nil.
+func (_c *OrderCreate) SetNillableAcceptedAt(v *time.Time) *OrderCreate {
+	if v != nil {
+		_c.SetAcceptedAt(*v)
+	}
+	return _c
+}
+
+// SetDispatchedAt sets the "dispatched_at" field.
+func (_c *OrderCreate) SetDispatchedAt(v time.Time) *OrderCreate {
+	_c.mutation.SetDispatchedAt(v)
+	return _c
+}
+
+// SetNillableDispatchedAt sets the "dispatched_at" field if the given value is not nil.
+func (_c *OrderCreate) SetNillableDispatchedAt(v *time.Time) *OrderCreate {
+	if v != nil {
+		_c.SetDispatchedAt(*v)
+	}
+	return _c
+}
+
+// SetDeliveredAt sets the "delivered_at" field.
+func (_c *OrderCreate) SetDeliveredAt(v time.Time) *OrderCreate {
+	_c.mutation.SetDeliveredAt(v)
+	return _c
+}
+
+// SetNillableDeliveredAt sets the "delivered_at" field if the given value is not nil.
+func (_c *OrderCreate) SetNillableDeliveredAt(v *time.Time) *OrderCreate {
+	if v != nil {
+		_c.SetDeliveredAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *OrderCreate) SetID(v string) *OrderCreate {
 	_c.mutation.SetID(v)
@@ -338,6 +408,26 @@ func (_c *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DeliveryAddressJSON(); ok {
 		_spec.SetField(order.FieldDeliveryAddressJSON, field.TypeString, value)
 		_node.DeliveryAddressJSON = value
+	}
+	if value, ok := _c.mutation.DeliveryLatitude(); ok {
+		_spec.SetField(order.FieldDeliveryLatitude, field.TypeFloat64, value)
+		_node.DeliveryLatitude = &value
+	}
+	if value, ok := _c.mutation.DeliveryLongitude(); ok {
+		_spec.SetField(order.FieldDeliveryLongitude, field.TypeFloat64, value)
+		_node.DeliveryLongitude = &value
+	}
+	if value, ok := _c.mutation.AcceptedAt(); ok {
+		_spec.SetField(order.FieldAcceptedAt, field.TypeTime, value)
+		_node.AcceptedAt = &value
+	}
+	if value, ok := _c.mutation.DispatchedAt(); ok {
+		_spec.SetField(order.FieldDispatchedAt, field.TypeTime, value)
+		_node.DispatchedAt = &value
+	}
+	if value, ok := _c.mutation.DeliveredAt(); ok {
+		_spec.SetField(order.FieldDeliveredAt, field.TypeTime, value)
+		_node.DeliveredAt = &value
 	}
 	if nodes := _c.mutation.CustomerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

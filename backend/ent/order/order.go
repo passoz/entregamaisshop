@@ -26,6 +26,16 @@ const (
 	FieldCurrency = "currency"
 	// FieldDeliveryAddressJSON holds the string denoting the delivery_address_json field in the database.
 	FieldDeliveryAddressJSON = "delivery_address_json"
+	// FieldDeliveryLatitude holds the string denoting the delivery_latitude field in the database.
+	FieldDeliveryLatitude = "delivery_latitude"
+	// FieldDeliveryLongitude holds the string denoting the delivery_longitude field in the database.
+	FieldDeliveryLongitude = "delivery_longitude"
+	// FieldAcceptedAt holds the string denoting the accepted_at field in the database.
+	FieldAcceptedAt = "accepted_at"
+	// FieldDispatchedAt holds the string denoting the dispatched_at field in the database.
+	FieldDispatchedAt = "dispatched_at"
+	// FieldDeliveredAt holds the string denoting the delivered_at field in the database.
+	FieldDeliveredAt = "delivered_at"
 	// EdgeCustomer holds the string denoting the customer edge name in mutations.
 	EdgeCustomer = "customer"
 	// EdgeSeller holds the string denoting the seller edge name in mutations.
@@ -93,6 +103,11 @@ var Columns = []string{
 	FieldTotalAmount,
 	FieldCurrency,
 	FieldDeliveryAddressJSON,
+	FieldDeliveryLatitude,
+	FieldDeliveryLongitude,
+	FieldAcceptedAt,
+	FieldDispatchedAt,
+	FieldDeliveredAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "orders"
@@ -173,6 +188,31 @@ func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 // ByDeliveryAddressJSON orders the results by the delivery_address_json field.
 func ByDeliveryAddressJSON(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeliveryAddressJSON, opts...).ToFunc()
+}
+
+// ByDeliveryLatitude orders the results by the delivery_latitude field.
+func ByDeliveryLatitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryLatitude, opts...).ToFunc()
+}
+
+// ByDeliveryLongitude orders the results by the delivery_longitude field.
+func ByDeliveryLongitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveryLongitude, opts...).ToFunc()
+}
+
+// ByAcceptedAt orders the results by the accepted_at field.
+func ByAcceptedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAcceptedAt, opts...).ToFunc()
+}
+
+// ByDispatchedAt orders the results by the dispatched_at field.
+func ByDispatchedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDispatchedAt, opts...).ToFunc()
+}
+
+// ByDeliveredAt orders the results by the delivered_at field.
+func ByDeliveredAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeliveredAt, opts...).ToFunc()
 }
 
 // ByCustomerField orders the results by customer field.

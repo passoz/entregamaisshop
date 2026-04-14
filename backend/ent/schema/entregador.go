@@ -15,6 +15,9 @@ func (Entregador) Fields() []ent.Field {
 		field.String("status").Default("pending"),
 		field.String("vehicle_type").Optional(),
 		field.Bool("available").Default(false),
+		field.Float("current_latitude").Optional().Nillable(),
+		field.Float("current_longitude").Optional().Nillable(),
+		field.Time("last_location_at").Optional().Nillable(),
 	}
 }
 func (Entregador) Edges() []ent.Edge {

@@ -28,6 +28,12 @@ type Entregador struct {
 	VehicleType string `json:"vehicle_type,omitempty"`
 	// Available holds the value of the "available" field.
 	Available bool `json:"available,omitempty"`
+	// CurrentLatitude holds the value of the "current_latitude" field.
+	CurrentLatitude *float64 `json:"current_latitude,omitempty"`
+	// CurrentLongitude holds the value of the "current_longitude" field.
+	CurrentLongitude *float64 `json:"current_longitude,omitempty"`
+	// LastLocationAt holds the value of the "last_location_at" field.
+	LastLocationAt *time.Time `json:"last_location_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EntregadorQuery when eager-loading is set.
 	Edges               EntregadorEdges `json:"edges"`
@@ -73,9 +79,11 @@ func (*Entregador) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case entregador.FieldAvailable:
 			values[i] = new(sql.NullBool)
+		case entregador.FieldCurrentLatitude, entregador.FieldCurrentLongitude:
+			values[i] = new(sql.NullFloat64)
 		case entregador.FieldID, entregador.FieldStatus, entregador.FieldVehicleType:
 			values[i] = new(sql.NullString)
-		case entregador.FieldCreatedAt, entregador.FieldUpdatedAt:
+		case entregador.FieldCreatedAt, entregador.FieldUpdatedAt, entregador.FieldLastLocationAt:
 			values[i] = new(sql.NullTime)
 		case entregador.ForeignKeys[0]: // user_driver_profile
 			values[i] = new(sql.NullString)
@@ -129,6 +137,27 @@ func (_m *Entregador) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field available", values[i])
 			} else if value.Valid {
 				_m.Available = value.Bool
+			}
+		case entregador.FieldCurrentLatitude:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field current_latitude", values[i])
+			} else if value.Valid {
+				_m.CurrentLatitude = new(float64)
+				*_m.CurrentLatitude = value.Float64
+			}
+		case entregador.FieldCurrentLongitude:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field current_longitude", values[i])
+			} else if value.Valid {
+				_m.CurrentLongitude = new(float64)
+				*_m.CurrentLongitude = value.Float64
+			}
+		case entregador.FieldLastLocationAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_location_at", values[i])
+			} else if value.Valid {
+				_m.LastLocationAt = new(time.Time)
+				*_m.LastLocationAt = value.Time
 			}
 		case entregador.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -197,6 +226,21 @@ func (_m *Entregador) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("available=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Available))
+	builder.WriteString(", ")
+	if v := _m.CurrentLatitude; v != nil {
+		builder.WriteString("current_latitude=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.CurrentLongitude; v != nil {
+		builder.WriteString("current_longitude=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.LastLocationAt; v != nil {
+		builder.WriteString("last_location_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

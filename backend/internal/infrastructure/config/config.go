@@ -3,11 +3,13 @@ package config
 import "os"
 
 type Config struct {
-	AppName            string
-	Environment        string
-	Port               string
-	DatabaseURL        string
-	KeycloakIssuerURL  string
+	AppName           string
+	Environment       string
+	Port              string
+	DatabaseURL       string
+	KeycloakIssuerURL string
+	RabbitMQURL       string
+	EventsExchange    string
 }
 
 func getEnv(key, fallback string) string {
@@ -24,5 +26,7 @@ func Load() Config {
 		Port:              getEnv("PORT", "8080"),
 		DatabaseURL:       getEnv("DATABASE_URL", "postgres://user:pass@localhost:5432/entregamais?sslmode=disable"),
 		KeycloakIssuerURL: getEnv("KEYCLOAK_ISSUER_URL", "http://localhost:8080/realms/delivery-platform"),
+		RabbitMQURL:       getEnv("RABBITMQ_URL", ""),
+		EventsExchange:    getEnv("EVENTS_EXCHANGE", "entregamais.events"),
 	}
 }

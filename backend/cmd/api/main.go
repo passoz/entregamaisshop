@@ -11,10 +11,11 @@ import (
 	"time"
 
 	"github.com/entregamais/platform/backend/internal/infrastructure/auth"
-	apihttp "github.com/entregamais/platform/backend/internal/interface/http"
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/db"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
+	"github.com/entregamais/platform/backend/internal/infrastructure/messaging"
+	apihttp "github.com/entregamais/platform/backend/internal/interface/http"
 )
 
 func main() {
@@ -32,6 +33,13 @@ func main() {
 		lg.Error("db_seed_failed", err, nil)
 	}
 
+	publisher, err := messaging.NewPublisher(cfg, lg)
+	if err != nil {
+		lg.Error("rabbitmq_publisher_initialization_failed", err, nil)
+		publisher = messaging.NewNoopPublisher()
+	}
+	defer publisher.Close()
+
 	// Initialize JWT Verifier
 	verifier, err := auth.NewJWTVerifier(cfg.KeycloakIssuerURL)
 	if err != nil {
@@ -39,7 +47,7 @@ func main() {
 		// We allow continuation in dev mock mode if needed, but log the error
 	}
 
-	router := apihttp.NewRouter(cfg, lg, dbClient, verifier)
+	router := apihttp.NewRouter(cfg, lg, dbClient, verifier, publisher)
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,

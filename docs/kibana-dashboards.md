@@ -1,4 +1,4 @@
-# Kibana Dashboards
+# Grafana Dashboards
 
 Dashboards iniciais recomendados:
 - erros por servico

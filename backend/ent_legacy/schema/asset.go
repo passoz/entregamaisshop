@@ -15,9 +15,11 @@ func (Asset) Fields() []ent.Field {
 		field.String("bucket").NotEmpty(),
 		field.String("object_key").NotEmpty(),
 		field.String("content_type").NotEmpty(),
-		field.Int64("size_bytes").NonNegative(),
+		field.Int64("size_bytes").Min(0),
 		field.String("checksum").Optional(),
 		field.String("status").Default("active"),
 	}
 }
-func (Asset) Edges() []ent.Edge { return []ent.Edge{edge.To("uploads", Upload.Type), edge.To("product_images", ProductImage.Type)} }
+func (Asset) Edges() []ent.Edge {
+	return []ent.Edge{edge.To("uploads", Upload.Type), edge.To("product_images", ProductImage.Type)}
+}

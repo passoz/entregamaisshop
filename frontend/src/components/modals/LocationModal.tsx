@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { CityAutocomplete } from "../ui/CityAutocomplete";
 import { Button } from "../ui/Button";
 import { MapPin, X, Navigation, CheckCircle2 } from "lucide-react";
+import { saveSelectedLocation } from "@/lib/deliveryTracking";
 import { findClosestNeighborhood } from "@/lib/nearbySellers";
 
 interface LocationModalProps {
@@ -31,6 +32,7 @@ export function LocationModal({ isOpen, onClose, onSelect }: LocationModalProps)
 
   const handleConfirm = () => {
     if (selectedLocation) {
+      saveSelectedLocation(selectedLocation, selectedCoords);
       onSelect(selectedLocation, selectedCoords);
       onClose();
     }
@@ -46,9 +48,11 @@ export function LocationModal({ isOpen, onClose, onSelect }: LocationModalProps)
         try {
           const res = await fetch("/data/neighborhoods.json");
           const neighborhoods = await res.json();
-          const name = findClosestNeighborhood(lat, lng, neighborhoods);
-          onSelect(name || "Sua localização", { lat, lng });
+          const name = findClosestNeighborhood(lat, lng, neighborhoods) || "Sua localização";
+          saveSelectedLocation(name, { lat, lng });
+          onSelect(name, { lat, lng });
         } catch (e) {
+          saveSelectedLocation("Sua localização atual", { lat, lng });
           onSelect("Sua localização atual", { lat, lng });
         }
         

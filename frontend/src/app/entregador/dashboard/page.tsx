@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { PortalLayout } from "@/components/layout/PortalLayout"
-import { Truck, MapPin, DollarSign, Clock, Star, Phone, Navigation, ShoppingBag, PackageCheck } from "lucide-react"
+import { Truck, MapPin, DollarSign, Clock, Star, Phone, Navigation, ShoppingBag, PackageCheck, Zap, ArrowRight, Wallet } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Badge } from "@/components/ui/Badge"
 import { apiFetch } from "@/lib/api";
 import { useToast } from "@/components/providers/ToastProvider";
+import Link from "next/link";
 
 export default function DriverDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -31,26 +32,6 @@ export default function DriverDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleAccept = async (id: string) => {
-    try {
-      await apiFetch(`/api/v1/entregador/orders/${id}/accept`, { method: "POST" });
-      showToast("Entrega aceita!", "success");
-      fetchOrders();
-    } catch (error) {
-      showToast("Erro ao aceitar entrega", "error");
-    }
-  };
-
-  const handleDeliver = async (id: string) => {
-    try {
-      await apiFetch(`/api/v1/entregador/orders/${id}/deliver`, { method: "POST" });
-      showToast("Entrega concluída com sucesso!", "success");
-      fetchOrders();
-    } catch (error) {
-      showToast("Erro ao concluir entrega", "error");
-    }
-  };
-
   const parseAddress = (jsonStr: string) => {
     try {
       const parsed = JSON.parse(jsonStr);
@@ -60,151 +41,135 @@ export default function DriverDashboard() {
     }
   };
 
+  const metrics = [
+    { label: "Ganhos Hoje", value: "R$ 145,20", icon: <DollarSign size={20} />, color: "bg-green-500", trend: "+12%" },
+    { label: "Entregas", value: "18", icon: <ShoppingBag size={20} />, color: "bg-ze-yellow", trend: "+2" },
+    { label: "Avaliação", value: "4.9", icon: <Star size={20} />, color: "bg-ze-red", trend: "Top" },
+  ];
+
+  const activeDeliveries = orders.filter(o => o.status === 'accepted' || o.status === 'dispatched' || o.status === 'picked_up');
+  const availableDeliveries = orders.filter(o => o.status === 'ready' && !o.driver_id);
+
   return (
-    <PortalLayout title="Portal do Entregador" role="entregador">
-      <div className="space-y-8">
-        {/* Status Section */}
-        <div className="flex flex-col md:flex-row gap-6">
-          <Card className="flex-1 border-0 shadow-lg bg-white rounded-[2.5rem] overflow-hidden">
-            <CardContent className="p-8 flex items-center justify-between">
+    <PortalLayout title="Painel do Entregador" role="entregador">
+      <div className="space-y-10">
+        
+        {/* Top Section: Status & Rapid Ganhos */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <Card className="lg:col-span-2 border-4 border-ze-black bg-white rounded-[3rem] shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+            <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="flex items-center gap-6">
-                <div className="w-20 h-20 rounded-3xl bg-brand-teal/10 flex items-center justify-center">
-                  <Truck className="w-10 h-10 text-brand-teal" />
+                <div className="w-20 h-20 rounded-3xl bg-ze-yellow border-4 border-ze-black flex items-center justify-center shadow-lg transform rotate-3">
+                  <Truck className="w-10 h-10 text-ze-black" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black text-slate-800 leading-none mb-1">Ficar Offline</h2>
-                  <p className="text-sm font-medium text-emerald-500 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Você está online e operando
-                  </p>
+                  <h2 className="text-3xl font-black text-ze-black uppercase italic tracking-tighter leading-none mb-2">Você está Online</h2>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-3 w-3 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <p className="text-xs font-black uppercase tracking-widest text-ze-black/40">Pronto para novas entregas</p>
+                  </div>
                 </div>
               </div>
-              <Button className="rounded-3xl h-16 px-12 bg-slate-900 text-white hover:bg-slate-800 font-bold border-0 text-lg">
-                Pausar
+              <Button className="w-full md:w-auto rounded-2xl h-16 px-10 bg-ze-red text-white hover:bg-ze-black font-black uppercase italic tracking-widest border-4 border-ze-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all">
+                Ficar Offline
               </Button>
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-2 gap-4 w-full md:w-[400px]">
-            <Card className="border-0 shadow-sm bg-white rounded-[2rem] p-4">
-              <div className="p-4">
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ganhos Hoje</div>
-                <div className="text-2xl font-black text-slate-800">R$ 145,20</div>
-                <div className="text-[10px] font-bold text-emerald-500 mt-1">+15% que ontem</div>
-              </div>
-            </Card>
-            <Card className="border-0 shadow-sm bg-white rounded-[2rem] p-4">
-              <div className="p-4">
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Avaliação</div>
-                <div className="text-2xl font-black text-slate-800 flex items-baseline gap-1">
-                  4.9 <Star className="w-4 h-4 text-amber-400 fill-amber-400 inline" />
-                </div>
-                <div className="text-[10px] font-bold text-slate-400 mt-1">Ótimo status</div>
-              </div>
-            </Card>
-          </div>
+          <Card className="border-4 border-ze-black bg-ze-black text-white rounded-[3rem] shadow-[12px_12px_0px_0px_rgba(247,224,27,0.3)] p-8 relative overflow-hidden group">
+            <Zap className="absolute -right-4 -bottom-4 w-32 h-32 text-ze-yellow opacity-10 group-hover:scale-110 transition-transform" />
+            <div className="relative z-10">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-ze-yellow mb-2">Saldo Atual</p>
+              <h3 className="text-4xl font-black tracking-tighter italic mb-6">R$ 1.240,00</h3>
+              <Link href="/entregador/earnings">
+                <Button className="w-full h-12 bg-ze-yellow text-ze-black hover:bg-white rounded-xl font-black uppercase italic tracking-widest text-[10px] border-0">
+                  Ver Ganhos
+                </Button>
+              </Link>
+            </div>
+          </Card>
         </div>
 
-        {/* Current Delivery / Queue */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="font-black text-2xl text-slate-800">Entregas Disponíveis</h3>
-              <Badge className="bg-brand-coral/10 text-brand-coral border-0 py-1.5 px-4 rounded-full font-bold">Ao Vivo</Badge>
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {metrics.map((m, i) => (
+            <div key={i} className="bg-white border-4 border-ze-black p-6 rounded-[2.5rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)] flex items-center justify-between group hover:translate-y-[-2px] transition-all">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-2xl ${m.color} border-2 border-ze-black flex items-center justify-center shadow-md group-hover:rotate-6 transition-transform text-white`}>
+                  {m.icon}
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase text-ze-black/40 tracking-widest leading-none">{m.label}</p>
+                  <p className="text-2xl font-black text-ze-black italic">{m.value}</p>
+                </div>
+              </div>
+              <Badge className="bg-ze-gray text-ze-black font-black border-2 border-ze-black/5 rounded-lg">{m.trend}</Badge>
             </div>
+          ))}
+        </div>
+
+        {/* Deliveries Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* Active Routes */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-black text-ze-black uppercase italic tracking-tighter flex items-center gap-3">
+              <Navigation size={24} className="text-ze-red" /> Rota em Andamento
+            </h3>
             
-            <div className="space-y-4">
-              {isLoading ? (
-                 <div className="h-40 bg-slate-100 animate-pulse rounded-[3rem]" />
-              ) : orders.length === 0 ? (
-                <Card className="border-2 border-dashed border-slate-200 rounded-[3rem] bg-slate-50 p-12 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
-                   Nenhuma entrega disponível no momento
-                </Card>
-              ) : orders.map(order => (
-                <Card key={order.id} className="border-0 shadow-xl bg-white rounded-[3rem] p-2 hover:translate-y-[-4px] transition-all">
+            {activeDeliveries.length > 0 ? (
+              activeDeliveries.map(order => (
+                <Card key={order.id} className="border-4 border-ze-black bg-ze-yellow rounded-[3rem] p-2 shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
                   <CardContent className="p-8">
-                    <div className="flex items-start justify-between mb-8">
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-brand-sky/10 flex items-center justify-center text-brand-sky">
-                          <ShoppingBag className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-slate-400 uppercase tracking-tight">Retirada em:</div>
-                          <div className="text-xl font-black text-slate-800">Depósito Parceiro</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-black text-brand-teal">R$ 5,00</div>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase">Taxa</div>
-                      </div>
+                    <div className="bg-white rounded-[2rem] border-2 border-ze-black p-6 mb-6">
+                       <div className="flex items-center justify-between mb-4">
+                         <span className="font-black text-ze-black uppercase italic tracking-widest text-xs">Corrida Ativa</span>
+                         <Badge className="bg-ze-black text-white rounded-lg">#{order.id.split('-')[0]}</Badge>
+                       </div>
+                       <p className="font-bold text-ze-black text-sm uppercase tracking-tight truncate">
+                         {parseAddress(order.delivery_address_json)}
+                       </p>
                     </div>
-
-                    <div className="space-y-4 mb-8">
-                      <div className="flex gap-4 items-center">
-                        <div className="flex flex-col items-center">
-                          <div className="w-3 h-3 rounded-full bg-brand-sky" />
-                          <div className="w-0.5 h-10 bg-slate-100" />
-                          <div className="w-3 h-3 rounded-full bg-brand-coral" />
-                        </div>
-                        <div className="flex flex-col gap-6">
-                          <div className="text-sm font-medium text-slate-500 pr-4 truncate max-w-[300px]">
-                            Retirada na Loja
-                          </div>
-                          <div className="text-sm font-bold text-slate-800 pr-4 truncate max-w-[300px]">
-                            {parseAddress(order.delivery_address_json)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4">
-                      {order.status === 'ready' ? (
-                        <Button 
-                          onClick={() => handleAccept(order.id)}
-                          className="h-16 rounded-[1.5rem] bg-brand-teal text-white font-black uppercase tracking-widest hover:bg-brand-teal/90 shadow-lg shadow-brand-teal/20"
-                        >
-                          Aceitar Entrega
-                        </Button>
-                      ) : order.status === 'accepted' ? (
-                        <Button 
-                          onClick={() => handleDeliver(order.id)}
-                          className="h-16 rounded-[1.5rem] bg-emerald-500 text-white font-black uppercase tracking-widest hover:bg-emerald-600 shadow-lg shadow-emerald-200 flex gap-2 justify-center items-center"
-                        >
-                          <PackageCheck className="w-6 h-6" /> Marcar como Entregue
-                        </Button>
-                      ) : (
-                        <Badge className="h-16 rounded-[1.5rem] bg-slate-100 text-slate-400 font-black uppercase tracking-widest flex items-center justify-center border-0">
-                           {order.status}
-                        </Badge>
-                      )}
-                    </div>
+                    <Link href="/entregador/queue">
+                      <Button className="w-full h-16 bg-ze-black text-white hover:bg-ze-dark rounded-2xl font-black uppercase italic tracking-widest flex items-center justify-center gap-2">
+                        Continuar Entrega <ArrowRight size={20} />
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="bg-ze-gray/30 border-4 border-dashed border-ze-black/10 rounded-[3rem] p-12 text-center">
+                <p className="font-black text-ze-black/20 uppercase tracking-widest italic text-sm">Nenhuma corrida ativa</p>
+              </div>
+            )}
           </div>
 
+          {/* Quick Queue Access */}
           <div className="space-y-6">
-            <h3 className="font-black text-2xl text-slate-800 px-2">Suas métricas</h3>
-            <div className="grid grid-cols-1 gap-4">
-              {[
-                { label: "Tempo médio de entrega", value: "24 min", icon: <Clock className="w-5 h-5" />, color: "sky" },
-                { label: "Distância percorrida", value: "482 km", icon: <MapPin className="w-5 h-5" />, color: "amber" },
-                { label: "Entregas concluídas", value: "1,248", icon: <Truck className="w-5 h-5" />, color: "teal" },
-              ].map((m, i) => (
-                <div key={i} className="bg-white p-6 rounded-[2rem] shadow-sm flex items-center justify-between border border-slate-50 group hover:border-brand-sky/20 transition-all">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl bg-brand-${m.color}/10 text-brand-${m.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                      {m.icon}
-                    </div>
-                    <span className="font-bold text-slate-600">{m.label}</span>
-                  </div>
-                  <span className="text-xl font-black text-slate-800">{m.value}</span>
-                </div>
-              ))}
+            <h3 className="text-2xl font-black text-ze-black uppercase italic tracking-tighter flex items-center gap-3">
+              <Zap size={24} className="text-ze-yellow fill-ze-yellow" /> Fila de Espera
+            </h3>
+            
+            <div className="bg-white border-4 border-ze-black rounded-[3rem] p-10 shadow-[10px_10px_0px_0px_rgba(0,0,0,0.05)] text-center space-y-6">
+              <div className="w-20 h-20 bg-ze-gray rounded-full flex items-center justify-center mx-auto border-2 border-ze-black shadow-inner">
+                <Navigation size={32} className="text-ze-black/20" />
+              </div>
+              <div>
+                <p className="text-xl font-black text-ze-black uppercase italic tracking-tighter">Buscar Novas Corridas</p>
+                <p className="text-xs font-bold text-ze-black/40 uppercase tracking-widest mt-1">Existem {availableDeliveries.length} entregas próximas a você</p>
+              </div>
+              <Link href="/entregador/queue">
+                <Button className="w-full h-14 bg-ze-yellow text-ze-black hover:bg-ze-black hover:text-white rounded-2xl font-black uppercase italic tracking-widest shadow-lg transition-all border-2 border-ze-black">
+                  Abrir Fila de Entregas
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
+
       </div>
     </PortalLayout>
   )

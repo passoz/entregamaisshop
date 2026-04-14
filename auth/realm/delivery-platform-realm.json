@@ -19,7 +19,7 @@
       "secret": "fiscal-secret",
       "publicClient": false,
       "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": false,
+      "directAccessGrantsEnabled": true,
       "protocol": "openid-connect",
       "redirectUris": ["http://localhost:8090/auth/callback", "http://localhost:18090/auth/callback"],
       "webOrigins": ["http://localhost:8090", "http://localhost:18090"]

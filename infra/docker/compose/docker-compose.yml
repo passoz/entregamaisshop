@@ -75,22 +75,27 @@ services:
     volumes:
       - ../../../rabbitmq/definitions/definitions.json:/etc/rabbitmq/definitions.json:ro
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
-    environment:
-      discovery.type: single-node
-      xpack.security.enabled: "false"
+  loki:
+    image: grafana/loki:3.0.0
+    command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ../../../elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ../../../infra/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
 
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.15.3
-    depends_on: [elasticsearch]
+  promtail:
+    image: grafana/promtail:3.0.0
     volumes:
-      - ../../../logstash/pipelines/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - ../../../infra/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/var/log:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on: [loki]
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.15.3
+  grafana:
+    image: grafana/grafana:10.4.2
     environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-    depends_on: [elasticsearch]
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - ../../../infra/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on: [loki]

@@ -32,6 +32,16 @@ type Order struct {
 	Currency string `json:"currency,omitempty"`
 	// DeliveryAddressJSON holds the value of the "delivery_address_json" field.
 	DeliveryAddressJSON string `json:"delivery_address_json,omitempty"`
+	// DeliveryLatitude holds the value of the "delivery_latitude" field.
+	DeliveryLatitude *float64 `json:"delivery_latitude,omitempty"`
+	// DeliveryLongitude holds the value of the "delivery_longitude" field.
+	DeliveryLongitude *float64 `json:"delivery_longitude,omitempty"`
+	// AcceptedAt holds the value of the "accepted_at" field.
+	AcceptedAt *time.Time `json:"accepted_at,omitempty"`
+	// DispatchedAt holds the value of the "dispatched_at" field.
+	DispatchedAt *time.Time `json:"dispatched_at,omitempty"`
+	// DeliveredAt holds the value of the "delivered_at" field.
+	DeliveredAt *time.Time `json:"delivered_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrderQuery when eager-loading is set.
 	Edges             OrderEdges `json:"edges"`
@@ -125,11 +135,11 @@ func (*Order) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case order.FieldTotalAmount:
+		case order.FieldTotalAmount, order.FieldDeliveryLatitude, order.FieldDeliveryLongitude:
 			values[i] = new(sql.NullFloat64)
 		case order.FieldID, order.FieldStatus, order.FieldCurrency, order.FieldDeliveryAddressJSON:
 			values[i] = new(sql.NullString)
-		case order.FieldCreatedAt, order.FieldUpdatedAt:
+		case order.FieldCreatedAt, order.FieldUpdatedAt, order.FieldAcceptedAt, order.FieldDispatchedAt, order.FieldDeliveredAt:
 			values[i] = new(sql.NullTime)
 		case order.ForeignKeys[0]: // entregador_orders
 			values[i] = new(sql.NullString)
@@ -193,6 +203,41 @@ func (_m *Order) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field delivery_address_json", values[i])
 			} else if value.Valid {
 				_m.DeliveryAddressJSON = value.String
+			}
+		case order.FieldDeliveryLatitude:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_latitude", values[i])
+			} else if value.Valid {
+				_m.DeliveryLatitude = new(float64)
+				*_m.DeliveryLatitude = value.Float64
+			}
+		case order.FieldDeliveryLongitude:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field delivery_longitude", values[i])
+			} else if value.Valid {
+				_m.DeliveryLongitude = new(float64)
+				*_m.DeliveryLongitude = value.Float64
+			}
+		case order.FieldAcceptedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field accepted_at", values[i])
+			} else if value.Valid {
+				_m.AcceptedAt = new(time.Time)
+				*_m.AcceptedAt = value.Time
+			}
+		case order.FieldDispatchedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field dispatched_at", values[i])
+			} else if value.Valid {
+				_m.DispatchedAt = new(time.Time)
+				*_m.DispatchedAt = value.Time
+			}
+		case order.FieldDeliveredAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field delivered_at", values[i])
+			} else if value.Valid {
+				_m.DeliveredAt = new(time.Time)
+				*_m.DeliveredAt = value.Time
 			}
 		case order.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -298,6 +343,31 @@ func (_m *Order) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("delivery_address_json=")
 	builder.WriteString(_m.DeliveryAddressJSON)
+	builder.WriteString(", ")
+	if v := _m.DeliveryLatitude; v != nil {
+		builder.WriteString("delivery_latitude=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.DeliveryLongitude; v != nil {
+		builder.WriteString("delivery_longitude=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.AcceptedAt; v != nil {
+		builder.WriteString("accepted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.DispatchedAt; v != nil {
+		builder.WriteString("dispatched_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.DeliveredAt; v != nil {
+		builder.WriteString("delivered_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

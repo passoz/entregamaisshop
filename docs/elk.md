@@ -1,9 +1,9 @@
-# ELK Stack
+# Loki Stack
 
-- Elasticsearch: armazenamento/indexacao
-- Logstash: parsing e enrich
-- Kibana: visualizacao
+- Loki: armazenamento/indexacao de logs
+- Promtail: coleta e enrich de logs Docker
+- Grafana: visualizacao e dashboards
 
 Acesso local:
-- Kibana: `http://localhost:5601`
-- Elasticsearch: `http://localhost:9200`
+- Grafana: `http://localhost:5601`
+- Loki: `http://localhost:3100`

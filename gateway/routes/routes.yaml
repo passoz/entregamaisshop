@@ -1,5 +1,175 @@
+ssls:
+  - id: nip-io-wildcard
+    cert: |
+      -----BEGIN CERTIFICATE-----
+      MIID8DCCAtigAwIBAgIUARxBB0bbR3sHgTLlLt2557FxLakwDQYJKoZIhvcNAQEL
+      BQAwaTELMAkGA1UEBhMCQlIxDzANBgNVBAgMBlBhcmFuYTERMA8GA1UEBwwIQ3Vy
+      aXRpYmExFDASBgNVBAoMC0VudHJlZ2FNYWlzMSAwHgYDVQQDDBcqLjE5Mi4xNjgu
+      MTAuMjIyLm5pcC5pbzAeFw0yNjA0MTQwMDEyMTJaFw0yNzA0MTQwMDEyMTJaMGkx
+      CzAJBgNVBAYTAkJSMQ8wDQYDVQQIDAZQYXJhbmExETAPBgNVBAcMCEN1cml0aWJh
+      MRQwEgYDVQQKDAtFbnRyZWdhTWFpczEgMB4GA1UEAwwXKi4xOTIuMTY4LjEwLjIy
+      Mi5uaXAuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDLxGkJcKoM
+      ZHT1E9H9JIXRN4QfPptZHiI8U2p+R5ymZkVDkCkPN7CP757wP9xzmyc/xXqG/PDR
+      uOkC70T5vaZUL0noIMIqLhgr2HyeeJu+kjiKUT9XTiV6fH/ylFBTkMqLCGHUZqtJ
+      qJRL7FVPiZVCT8zRIWZDAEuG3j5Gl2o+0Y+WF7ZC4HuymriZxCp4DZ5cznyzzseT
+      /oZnIwzyoUoWl3MK02Qn973dA0UDqDnCb1ciCIWLGUIBN7GlWWPxOV2jb/iltDv1
+      /h8Lr0q5Uop7WnXUmCJYDfnDGQbkkm0QoiOFt1ATAEm8u18dYpaXyQ6WZp+KJ+5R
+      VPd8eURRWcC3AgMBAAGjgY8wgYwwHQYDVR0OBBYEFP3DGbGoS3pnVf545IKnCp6v
+      F+tiMB8GA1UdIwQYMBaAFP3DGbGoS3pnVf545IKnCp6vF+tiMA8GA1UdEwEB/wQF
+      MAMBAf8wOQYDVR0RBDIwMIIXKi4xOTIuMTY4LjEwLjIyMi5uaXAuaW+CFTE5Mi4x
+      NjguMTAuMjIyLm5pcC5pbzANBgkqhkiG9w0BAQsFAAOCAQEADXfldPTmE6fQrEIs
+      KNveJ8lOKWTbxPE7m5x91nNIxpSqLHxAt2tHa7CucrQdsUIQUmR2samwaJCZVDAC
+      NEFg0LwjTjfM/gRWHR1dlF8DJ/a5NWv6dOKGkGcX6WjkdQsk8oOZu+wumLS6SO3+
+      dJSf/2fy3yR7hu7+De5PDpwQHp7h479hqpoc0tGoSyHUN6KQZw7bCHxRIhNg1JwL
+      JZqMzXfkkgUNJw6tuqM2hp2UYLJASL/j28bjWxT4kNP2fUvYRl5q2Qjk5Je8OoVA
+      rtSHam/RUQo01h7G5oUmKGB8P8hRtzwAXc8ibHN5HkXZvvP/yz2Q7v1APMaHNSC0
+      mIHaVw==
+      -----END CERTIFICATE-----
+    key: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDLxGkJcKoMZHT1
+      E9H9JIXRN4QfPptZHiI8U2p+R5ymZkVDkCkPN7CP757wP9xzmyc/xXqG/PDRuOkC
+      70T5vaZUL0noIMIqLhgr2HyeeJu+kjiKUT9XTiV6fH/ylFBTkMqLCGHUZqtJqJRL
+      7FVPiZVCT8zRIWZDAEuG3j5Gl2o+0Y+WF7ZC4HuymriZxCp4DZ5cznyzzseT/oZn
+      IwzyoUoWl3MK02Qn973dA0UDqDnCb1ciCIWLGUIBN7GlWWPxOV2jb/iltDv1/h8L
+      r0q5Uop7WnXUmCJYDfnDGQbkkm0QoiOFt1ATAEm8u18dYpaXyQ6WZp+KJ+5RVPd8
+      eURRWcC3AgMBAAECggEABx9NYJQX+zsxYaOYtvoA1R8eW0QUhI/qpiRLs536B+Lt
+      z/6bQMwzYGkmK3otrE1adEfAEH5k2HszHT1JxKBd8z8OwUR+JOnb1G2mAOJMVQh9
+      Xbl0bcGAgZLMv81yd5uSbWA5MyqsGSu4S0DJ6N2oGTbWRgdVQwBFfvqaiKVpX7YZ
+      abNPwUJIsUIJeZVN1Yu4qJ9TzXjtjhDnKykPZ27cY3XFUuZCc6XcSAvKFNypueiG
+      jTz1wp9nuc8VjF3M12weL+25oCab7dTm12jQ0uowWhYECAh1NGYdMcf/eJEBwNZu
+      gSefhHkAGooqOxETZWQt/J8ZHbOLshwwKhiEz/55WQKBgQD8sMiLpt5TnTAxd/Nh
+      3edyt1t8E5Zni78+ez80522WtfMiP5orYIa13VGJiE2eSmH06W4N9Ob3daKXHlBW
+      yvqlQHa8SMUjoFWtBpWlwz20IafkjKQuV4fxFWg5p9yBqbVamHcNqjrPp8Fn39ul
+      Z0kznbMZRiSOkeCo755SEWsMgwKBgQDOb5j8aBXtQXI0ebZIZ0Uq9Av/BRHdQ1CP
+      lOL/oUKRcqH2AWAvavwcZYslfzrmFvjx4qNcICHXE+3w98ooXGcv/eR7razQqn/V
+      uA8hFoFKSjvzKFHA2ZjWm5SotbhsGRMUKyIjVJ0NgcfD6y1LXzJh6iGyZkvLjPQs
+      ITTKwjksvQKBgAo7poNxSIOeU/tM3kBSWjMdFclaiba7xAzltNORo7B8wdHbPYUQ
+      LaRjyA+Hw4zrejgO0/QgvNG8o8723U4Gfkv+5lANql4c+hs9rwW9eFw5GLF6uJNf
+      3BN5SHU9RQLDOqLmlbup7yPFqWFpgV2bZy1972jQnF5hrfVpbsHoDqu9AoGBAKGY
+      zmNXf0KYZrQZSs3muUhkfjeFWnSgSyH6ZK/DJn8BAzO14/t6fhwkiQYzUIHpHbsL
+      tOFa7eKVYT+uWPu7SbNRxlfinlNCBIviZ0V5foAPGFrCBy01qOTmKTrf9Zv5DOxO
+      z4xkogR+wUfmgzBrNt9bDkG+vjp6/nDFFbRa0bLpAoGAEjbVeaFeipMAipWSLagx
+      +Be0vM4p+Gln4Pn0iq4pVIiN2IJ0lCUcvJbnqqvTguo0QjLm5ED0k/cPpPhHthBy
+      6DL4sFm56C/NEpAKOgSt/GVXvtkoTE727SfwJPTD2NIQA+YoTvKCqFjh7HXOy2jX
+      NWjnrlTNKUtJWyJHW1HDvDw=
+      -----END PRIVATE KEY-----
+    snis:
+      - "*.192.168.10.222.nip.io"
+      - "192.168.10.222.nip.io"
+
 routes:
-  # 1. Assets
+  # 1. Frontend Main
+  - id: frontend
+    hosts:
+      - "frontend.192.168.10.222.nip.io"
+      - "192.168.10.222.nip.io"
+      - "entregamais.192.168.10.222.nip.io"
+    uri: /*
+    priority: 1
+    upstream:
+      type: roundrobin
+      nodes:
+        "frontend:3000": 1
+
+  # 2. Backend API
+  - id: api
+    hosts:
+      - "api.192.168.10.222.nip.io"
+      - "backend.192.168.10.222.nip.io"
+    uri: /*
+    priority: 100
+    upstream:
+      type: roundrobin
+      nodes:
+        "backend:8080": 1
+    plugins:
+      cors: {}
+
+  # 3. Keycloak (Auth)
+  - id: auth
+    hosts:
+      - "auth.192.168.10.222.nip.io"
+      - "keycloak.192.168.10.222.nip.io"
+    uri: /*
+    priority: 100
+    upstream:
+      type: roundrobin
+      nodes:
+        "keycloak:8080": 1
+
+  # 4. Dolibarr (ERP)
+  - id: erp
+    hosts:
+      - "erp.192.168.10.222.nip.io"
+      - "dolibarr.192.168.10.222.nip.io"
+    uri: /*
+    priority: 100
+    upstream:
+      type: roundrobin
+      nodes:
+        "dolibarr:80": 1
+
+  # 5. Fiscal Module
+  - id: fiscal
+    hosts:
+      - "fiscal.192.168.10.222.nip.io"
+    uri: /*
+    priority: 100
+    upstream:
+      type: roundrobin
+      nodes:
+        "fiscal:8090": 1
+
+  # 6. Grafana (Observability)
+  - id: grafana
+    hosts:
+      - "grafana.192.168.10.222.nip.io"
+      - "grafan.192.168.10.222.nip.io"
+    uri: /*
+    priority: 100
+    upstream:
+      type: roundrobin
+      nodes:
+        "grafana:3000": 1
+
+  # 7. Minio (Storage Console)
+  - id: storage-console
+    hosts:
+      - "storage-console.192.168.10.222.nip.io"
+      - "minio-console.192.168.10.222.nip.io"
+    uri: /*
+    priority: 100
+    upstream:
+      type: roundrobin
+      nodes:
+        "minio:9001": 1
+
+  # 8. Minio (API/S3)
+  - id: storage-api
+    hosts:
+      - "storage.192.168.10.222.nip.io"
+      - "minio.192.168.10.222.nip.io"
+    uri: /*
+    priority: 100
+    upstream:
+      type: roundrobin
+      nodes:
+        "minio:9000": 1
+
+  # 9. RabbitMQ Management
+  - id: queue-manager
+    hosts:
+      - "queue.192.168.10.222.nip.io"
+      - "rabbitmq.192.168.10.222.nip.io"
+    uri: /*
+    priority: 100
+    upstream:
+      type: roundrobin
+      nodes:
+        "rabbitmq:15672": 1
+
+  # 10. Assets fallback (Internal path)
   - id: frontend-assets
     uri: /_next/*
     priority: 30
@@ -8,42 +178,4 @@ routes:
       nodes:
         "frontend:3000": 1
 
-  # 2. Backend API
-  - id: api-routes
-    uri: /api/v1/*
-    priority: 25
-    upstream:
-      type: roundrobin
-      nodes:
-        "backend:8080": 1
-    plugins:
-      cors: {}
-
-  # 3. Transparent Proxy for all Frontend Hosts
-  - id: frontend-proxy
-    hosts: 
-      - "entregamais.shop"
-      - "admin.entregamais.shop"
-      - "vendedor.entregamais.shop"
-      - "entregador.entregamais.shop"
-      - "entregamais.127.0.0.1.nip.io"
-      - "admin.entregamais.127.0.0.1.nip.io"
-      - "vendedor.entregamais.127.0.0.1.nip.io"
-      - "entregador.entregamais.127.0.0.1.nip.io"
-      - "entregamais..127.0.0.1.nip.io"
-    uri: /*
-    priority: 10
-    upstream:
-      type: roundrobin
-      nodes:
-        "frontend:3000": 1
-
-  # 4. Global Fallback
-  - id: global-fallback
-    uri: /*
-    priority: 1
-    upstream:
-      type: roundrobin
-      nodes:
-        "frontend:3000": 1
 #END

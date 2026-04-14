@@ -29,4 +29,4 @@ Veja `docs/manual-run.md`.
 - Keycloak: `http://localhost:8081`
 - Modulo fiscal: `http://localhost:8090`
 - Dolibarr: `http://localhost:8088`
-- Kibana: `http://localhost:5601`
+- Grafana: `http://localhost:5601`

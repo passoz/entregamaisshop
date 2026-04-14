@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import Image from "next/image";
 import Link from "next/link";
+import { readSelectedLocation } from "@/lib/deliveryTracking";
 
 export default function CheckoutPage() {
   const { items, subtotal, totalItems, clearCart, isLoading } = useCart();
@@ -20,6 +21,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card" | "cash">("pix");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [location, setLocation] = useState<string>("Buscando endereço...");
+  const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | undefined>();
   const [isSuccess, setIsSuccess] = useState(false);
   const emptyCartRedirectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -37,9 +39,10 @@ export default function CheckoutPage() {
     }
     
     // Get location from localStorage (saved from Home)
-    const savedLocation = localStorage.getItem("last_selected_location");
-    if (savedLocation) {
-      setLocation(savedLocation);
+    const selectedLocation = readSelectedLocation();
+    if (selectedLocation.label) {
+      setLocation(selectedLocation.label);
+      setLocationCoords(selectedLocation.coords);
     } else {
       setLocation("Endereço não selecionado");
     }
@@ -65,6 +68,8 @@ export default function CheckoutPage() {
         seller_id: sellerId,
         total_amount: subtotal + 5.0, // Subtotal + fixed delivery fee
         delivery_address: location,
+        delivery_latitude: locationCoords?.lat,
+        delivery_longitude: locationCoords?.lng,
         items: items.map(it => ({
           product_id: it.product_id,
           quantity: it.quantity,

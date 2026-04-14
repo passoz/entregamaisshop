@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { ShoppingCart, Menu, User, LogOut } from "lucide-react"
+import { X, User, ShoppingCart, Menu, LogOut, ChevronRight } from "lucide-react"
 
 import { Button } from "../ui/Button"
 import { Badge } from "../ui/Badge"
@@ -10,12 +10,13 @@ import { Logo } from "./Logo"
 import { useCart } from "@/lib/CartContext"
 import { useSession, signOut } from "@/lib/auth/client"
 
-import { normalizeRoles, getHomePathForRole } from "@/lib/auth/roles"
+import { normalizeRoles, getHomePathForRole, getProfilePathForRole } from "@/lib/auth/roles"
 
 export function Navbar() {
   const { totalItems } = useCart()
   const { data: session, status } = useSession()
   const isAuthenticated = status === "authenticated"
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
   
   // Role Detection
   const userRoles = normalizeRoles(session?.user?.roles || [])
@@ -38,98 +39,179 @@ export function Navbar() {
   }
 
   const dashboardPath = getHomePathForRole(primaryRole)
+  const profilePath = getProfilePathForRole(primaryRole)
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-ze-black/10 bg-ze-yellow shadow-md">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Logo />
-        </div>
+    <>
+      <nav className="sticky top-0 z-50 w-full border-b border-ze-black/10 bg-ze-yellow shadow-md">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Logo />
+          </div>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link href="/" className="text-sm font-black text-ze-black/80 hover:text-ze-black transition-colors uppercase tracking-wider">
-            Explorar Depósitos
-          </Link>
-          <Link href="/auth/login/vendedor" className="text-sm font-black text-ze-black/80 hover:text-ze-black transition-colors uppercase tracking-wider">
-            Sou Lojista
-          </Link>
-          <Link href="/auth/login/entregador" className="text-sm font-black text-ze-black/80 hover:text-ze-black transition-colors uppercase tracking-wider">
-            Sou Entregador
-          </Link>
-        </div>
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-6">
+            <Link href="/" className="text-sm font-black text-ze-black/80 hover:text-ze-black transition-colors uppercase tracking-wider">
+              Explorar Depósitos
+            </Link>
+            <Link href="/auth/login/vendedor" className="text-sm font-black text-ze-black/80 hover:text-ze-black transition-colors uppercase tracking-wider">
+              Sou Lojista
+            </Link>
+            <Link href="/auth/login/entregador" className="text-sm font-black text-ze-black/80 hover:text-ze-black transition-colors uppercase tracking-wider">
+              Sou Entregador
+            </Link>
+          </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
-          <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative text-ze-black hover:bg-ze-black/5 h-10 w-10">
-              <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-ze-red text-white border-2 border-ze-yellow">
-                  {totalItems}
-                </Badge>
-              )}
-            </Button>
-          </Link>
-          
-          <div className="hidden lg:flex items-center gap-3">
-            {status === "loading" ? (
-              <div className="w-32 h-10 bg-ze-black/5 animate-pulse rounded-xl" />
-            ) : isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <Link href={dashboardPath}>
-                  <Button variant="ghost" className="flex items-center gap-3 text-ze-black font-bold hover:bg-ze-black/5 rounded-xl px-4 h-11 border-2 border-transparent hover:border-ze-black/10 transition-all">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-sm ${roleStyles[primaryRole]}`}>
-                      {session?.user?.name?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                    <div className="flex flex-col items-start leading-none gap-1">
-                      <span className="text-sm font-black">{session?.user?.name?.split(' ')[0] || "Usuário"}</span>
-                      <span className="text-[10px] uppercase tracking-widest opacity-60 font-black italic">{roleLabels[primaryRole]}</span>
-                    </div>
+          <div className="flex items-center gap-2 md:gap-3">
+            <Link href="/cart">
+              <Button variant="ghost" size="icon" className="relative text-ze-black hover:bg-ze-black/5 h-10 w-10">
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-ze-red text-white border-2 border-ze-yellow">
+                    {totalItems}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+            
+            <div className="hidden lg:flex items-center gap-3">
+              {status === "loading" ? (
+                <div className="w-32 h-10 bg-ze-black/5 animate-pulse rounded-xl" />
+              ) : isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  <Link href={profilePath}>
+                    <Button variant="ghost" className="flex items-center gap-3 text-ze-black font-bold hover:bg-ze-black/5 rounded-xl px-4 h-11 border-2 border-transparent hover:border-ze-black/10 transition-all">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-sm ${roleStyles[primaryRole]}`}>
+                        {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                      <div className="flex flex-col items-start leading-none gap-1">
+                        <span className="text-sm font-black">{session?.user?.name?.split(' ')[0] || "Usuário"}</span>
+                        <span className="text-[10px] uppercase tracking-widest opacity-60 font-black italic">{roleLabels[primaryRole]}</span>
+                      </div>
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => signOut()}
+                    className="flex items-center gap-2 text-ze-red hover:bg-ze-red/10 rounded-xl px-3 h-11 font-black uppercase text-[10px] tracking-widest transition-all border-2 border-transparent hover:border-ze-red/20 shadow-sm"
+                    title="Sair da conta"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Sair</span>
                   </Button>
-                </Link>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => signOut()}
-                  className="flex items-center gap-2 text-ze-red hover:bg-ze-red/10 rounded-xl px-3 h-11 font-black uppercase text-[10px] tracking-widest transition-all border-2 border-transparent hover:border-ze-red/20 shadow-sm"
-                  title="Sair da conta"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Sair</span>
-                </Button>
+                </div>
+              ) : (
+                <>
+                  <Link href="/auth/login/customer">
+                    <Button variant="outline" className="border-ze-black/20 text-ze-black hover:bg-ze-black/5 rounded-xl font-bold">
+                      Entrar
+                    </Button>
+                  </Link>
+                  <Link href="/auth/signup/vendedor">
+                    <Button className="bg-ze-black text-ze-yellow hover:bg-ze-black/90 rounded-xl font-bold px-6 border-none">
+                      Seja Parceiro
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+
+            <Button variant="ghost" size="icon" className="lg:hidden text-ze-black h-10 w-10" onClick={toggleMenu}>
+              <Menu className="h-6 w-6" />
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Drawer Overlay */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-[100] bg-ze-black/40 backdrop-blur-sm lg:hidden" onClick={toggleMenu} />
+      )}
+
+      {/* Mobile Drawer Panel */}
+      <div className={`fixed top-0 right-0 z-[101] h-full w-[80%] max-w-[320px] bg-ze-white border-l-4 border-ze-black shadow-2xl transition-transform duration-300 transform lg:hidden ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="p-6 bg-ze-yellow border-b-4 border-ze-black flex items-center justify-between">
+            <Logo />
+            <Button variant="ghost" size="icon" onClick={toggleMenu} className="h-10 w-10 text-ze-black">
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* User Info (if logged in) */}
+            {isAuthenticated && (
+              <div className="p-4 bg-ze-gray rounded-2xl border-2 border-ze-black/5">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-black ${roleStyles[primaryRole]}`}>
+                    {session?.user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-black text-ze-black">{session?.user?.name}</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-60 italic">{roleLabels[primaryRole]}</p>
+                  </div>
+                </div>
               </div>
-            ) : (
+            )}
+
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-widest text-ze-black/40 px-2">Navegação</p>
+              <Link href="/" className="flex items-center justify-between p-4 rounded-2xl bg-ze-gray/40 hover:bg-ze-yellow/20 transition-colors group" onClick={toggleMenu}>
+                <span className="font-black uppercase text-sm tracking-wider">Explorar Depósitos</span>
+                <ChevronRight className="w-4 h-4 text-ze-black/20 group-hover:text-ze-black transition-colors" />
+              </Link>
+              
+              {isAuthenticated && (
+                <Link href={profilePath} className="flex items-center justify-between p-4 rounded-2xl bg-ze-gray/40 hover:bg-ze-yellow/20 transition-colors group" onClick={toggleMenu}>
+                  <span className="font-black uppercase text-sm tracking-wider">Meu Perfil</span>
+                  <ChevronRight className="w-4 h-4 text-ze-black/20 group-hover:text-ze-black transition-colors" />
+                </Link>
+              )}
+
+              {/* Roles (always visible or context dependent) */}
+              <p className="text-[10px] font-black uppercase tracking-widest text-ze-black/40 px-2 pt-4">Trabalhe conosco</p>
+              <Link href="/auth/login/vendedor" className="flex items-center justify-between p-4 rounded-2xl bg-ze-gray/40 hover:bg-ze-yellow/20 transition-colors group" onClick={toggleMenu}>
+                <span className="font-black uppercase text-sm tracking-wider">Lojistas</span>
+                <ChevronRight className="w-4 h-4 text-ze-black/20 group-hover:text-ze-black transition-colors" />
+              </Link>
+              <Link href="/auth/login/entregador" className="flex items-center justify-between p-4 rounded-2xl bg-ze-gray/40 hover:bg-ze-yellow/20 transition-colors group" onClick={toggleMenu}>
+                <span className="font-black uppercase text-sm tracking-wider">Entregadores</span>
+                <ChevronRight className="w-4 h-4 text-ze-black/20 group-hover:text-ze-black transition-colors" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Footer / Actions */}
+          <div className="p-6 border-t-4 border-ze-black/5 flex flex-col gap-4">
+            {!isAuthenticated ? (
               <>
-                <Link href="/auth/login/customer">
-                  <Button variant="outline" className="border-ze-black/20 text-ze-black hover:bg-ze-black/5 rounded-xl font-bold">
+                <Link href="/auth/login/customer" onClick={toggleMenu} className="w-full">
+                  <Button className="w-full h-14 rounded-2xl bg-ze-yellow text-ze-black border-2 border-ze-black font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(34,34,34,1)]">
                     Entrar
                   </Button>
                 </Link>
-                <Link href="/auth/signup/vendedor">
-                  <Button className="bg-ze-black text-ze-yellow hover:bg-ze-black/90 rounded-xl font-bold px-6 border-none">
-                    Seja Parceiro
+                <Link href="/register/customer" onClick={toggleMenu} className="w-full">
+                  <Button variant="outline" className="w-full h-14 rounded-2xl border-2 border-ze-black font-black uppercase tracking-widest">
+                    Criar Conta
                   </Button>
                 </Link>
               </>
+            ) : (
+              <Button 
+                onClick={() => { signOut(); toggleMenu(); }} 
+                className="w-full h-14 rounded-2xl bg-ze-red text-ze-white border-2 border-ze-black font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(34,34,34,1)] flex items-center justify-center gap-2"
+              >
+                <LogOut className="w-5 h-5" />
+                Sair
+              </Button>
             )}
           </div>
-
-          {/* Mobile Logout (if authenticated) */}
-          {isAuthenticated && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => signOut()}
-              className="lg:hidden text-ze-red hover:bg-ze-red/10 h-10 w-10"
-            >
-              <LogOut className="h-6 w-6" />
-            </Button>
-          )}
-
-          <Button variant="ghost" size="icon" className="md:hidden text-ze-black h-10 w-10">
-            <Menu className="h-6 w-6" />
-          </Button>
         </div>
       </div>
-    </nav>
+    </>
   )
 }

@@ -6,17 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ .Title }}</title>
   <link rel="stylesheet" href="/static/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="shell">
     <aside class="sidebar">
+      <div class="logo">ENTREGAMAIS</div>
+      
       <div class="brand">
-        <p class="eyebrow">EntregaMais</p>
-        <h1>{{ .Settings.ServiceName }}</h1>
-        <p class="muted">Motor fiscal externo para Dolibarr e operacao multicompany.</p>
+        <p class="eyebrow" style="color: var(--ze-yellow); opacity: 0.7;">{{ .Settings.ServiceName }}</p>
       </div>
 
-      <nav class="nav">
+      <nav>
         <a href="/" class="{{ if eq .CurrentPath "/" }}active{{ end }}">Dashboard</a>
         <a href="/settings" class="{{ if eq .CurrentPath "/settings" }}active{{ end }}">Configuracoes</a>
         <a href="/companies" class="{{ if eq .CurrentPath "/companies" }}active{{ end }}">Empresas</a>
@@ -24,21 +27,22 @@
         <a href="/documents/new" class="{{ if eq .CurrentPath "/documents/new" }}active{{ end }}">Simulador</a>
       </nav>
 
-      <div class="sidecard">
-        <p class="eyebrow">Autenticacao</p>
+      <div style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
         {{ if .AuthEnabled }}
-          <p>{{ .User.Name }}</p>
-          <p class="muted">{{ .User.Email }}</p>
+          <div style="margin-bottom: 1rem;">
+            <p style="font-weight: 900; font-style: italic;">{{ .User.Name }}</p>
+            <p class="eyebrow" style="font-size: 0.6rem; color: var(--ze-yellow); opacity: 0.6;">{{ .User.Email }}</p>
+          </div>
           <form action="/auth/logout" method="post">
-            <button class="ghost" type="submit">Sair do Keycloak</button>
+            <button class="secondary" style="padding: 0.5rem 1rem; font-size: 0.75rem; width: 100%;" type="submit">Sair do Sistema</button>
           </form>
         {{ else }}
-          <p>Modo local de desenvolvimento.</p>
+          <p class="eyebrow" style="font-size: 0.6rem;">Modo Desenvolvedor</p>
         {{ end }}
       </div>
     </aside>
 
-    <main class="content">
+    <main>
       {{ if .Flash }}<div class="flash success">{{ .Flash }}</div>{{ end }}
       {{ if .Error }}<div class="flash error">{{ .Error }}</div>{{ end }}
       {{ template "content" . }}

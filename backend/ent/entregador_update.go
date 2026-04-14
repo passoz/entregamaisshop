@@ -84,6 +84,80 @@ func (_u *EntregadorUpdate) SetNillableAvailable(v *bool) *EntregadorUpdate {
 	return _u
 }
 
+// SetCurrentLatitude sets the "current_latitude" field.
+func (_u *EntregadorUpdate) SetCurrentLatitude(v float64) *EntregadorUpdate {
+	_u.mutation.ResetCurrentLatitude()
+	_u.mutation.SetCurrentLatitude(v)
+	return _u
+}
+
+// SetNillableCurrentLatitude sets the "current_latitude" field if the given value is not nil.
+func (_u *EntregadorUpdate) SetNillableCurrentLatitude(v *float64) *EntregadorUpdate {
+	if v != nil {
+		_u.SetCurrentLatitude(*v)
+	}
+	return _u
+}
+
+// AddCurrentLatitude adds value to the "current_latitude" field.
+func (_u *EntregadorUpdate) AddCurrentLatitude(v float64) *EntregadorUpdate {
+	_u.mutation.AddCurrentLatitude(v)
+	return _u
+}
+
+// ClearCurrentLatitude clears the value of the "current_latitude" field.
+func (_u *EntregadorUpdate) ClearCurrentLatitude() *EntregadorUpdate {
+	_u.mutation.ClearCurrentLatitude()
+	return _u
+}
+
+// SetCurrentLongitude sets the "current_longitude" field.
+func (_u *EntregadorUpdate) SetCurrentLongitude(v float64) *EntregadorUpdate {
+	_u.mutation.ResetCurrentLongitude()
+	_u.mutation.SetCurrentLongitude(v)
+	return _u
+}
+
+// SetNillableCurrentLongitude sets the "current_longitude" field if the given value is not nil.
+func (_u *EntregadorUpdate) SetNillableCurrentLongitude(v *float64) *EntregadorUpdate {
+	if v != nil {
+		_u.SetCurrentLongitude(*v)
+	}
+	return _u
+}
+
+// AddCurrentLongitude adds value to the "current_longitude" field.
+func (_u *EntregadorUpdate) AddCurrentLongitude(v float64) *EntregadorUpdate {
+	_u.mutation.AddCurrentLongitude(v)
+	return _u
+}
+
+// ClearCurrentLongitude clears the value of the "current_longitude" field.
+func (_u *EntregadorUpdate) ClearCurrentLongitude() *EntregadorUpdate {
+	_u.mutation.ClearCurrentLongitude()
+	return _u
+}
+
+// SetLastLocationAt sets the "last_location_at" field.
+func (_u *EntregadorUpdate) SetLastLocationAt(v time.Time) *EntregadorUpdate {
+	_u.mutation.SetLastLocationAt(v)
+	return _u
+}
+
+// SetNillableLastLocationAt sets the "last_location_at" field if the given value is not nil.
+func (_u *EntregadorUpdate) SetNillableLastLocationAt(v *time.Time) *EntregadorUpdate {
+	if v != nil {
+		_u.SetLastLocationAt(*v)
+	}
+	return _u
+}
+
+// ClearLastLocationAt clears the value of the "last_location_at" field.
+func (_u *EntregadorUpdate) ClearLastLocationAt() *EntregadorUpdate {
+	_u.mutation.ClearLastLocationAt()
+	return _u
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *EntregadorUpdate) SetUserID(id string) *EntregadorUpdate {
 	_u.mutation.SetUserID(id)
@@ -212,6 +286,30 @@ func (_u *EntregadorUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.Available(); ok {
 		_spec.SetField(entregador.FieldAvailable, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CurrentLatitude(); ok {
+		_spec.SetField(entregador.FieldCurrentLatitude, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedCurrentLatitude(); ok {
+		_spec.AddField(entregador.FieldCurrentLatitude, field.TypeFloat64, value)
+	}
+	if _u.mutation.CurrentLatitudeCleared() {
+		_spec.ClearField(entregador.FieldCurrentLatitude, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.CurrentLongitude(); ok {
+		_spec.SetField(entregador.FieldCurrentLongitude, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedCurrentLongitude(); ok {
+		_spec.AddField(entregador.FieldCurrentLongitude, field.TypeFloat64, value)
+	}
+	if _u.mutation.CurrentLongitudeCleared() {
+		_spec.ClearField(entregador.FieldCurrentLongitude, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.LastLocationAt(); ok {
+		_spec.SetField(entregador.FieldLastLocationAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastLocationAtCleared() {
+		_spec.ClearField(entregador.FieldLastLocationAt, field.TypeTime)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -358,6 +456,80 @@ func (_u *EntregadorUpdateOne) SetNillableAvailable(v *bool) *EntregadorUpdateOn
 	if v != nil {
 		_u.SetAvailable(*v)
 	}
+	return _u
+}
+
+// SetCurrentLatitude sets the "current_latitude" field.
+func (_u *EntregadorUpdateOne) SetCurrentLatitude(v float64) *EntregadorUpdateOne {
+	_u.mutation.ResetCurrentLatitude()
+	_u.mutation.SetCurrentLatitude(v)
+	return _u
+}
+
+// SetNillableCurrentLatitude sets the "current_latitude" field if the given value is not nil.
+func (_u *EntregadorUpdateOne) SetNillableCurrentLatitude(v *float64) *EntregadorUpdateOne {
+	if v != nil {
+		_u.SetCurrentLatitude(*v)
+	}
+	return _u
+}
+
+// AddCurrentLatitude adds value to the "current_latitude" field.
+func (_u *EntregadorUpdateOne) AddCurrentLatitude(v float64) *EntregadorUpdateOne {
+	_u.mutation.AddCurrentLatitude(v)
+	return _u
+}
+
+// ClearCurrentLatitude clears the value of the "current_latitude" field.
+func (_u *EntregadorUpdateOne) ClearCurrentLatitude() *EntregadorUpdateOne {
+	_u.mutation.ClearCurrentLatitude()
+	return _u
+}
+
+// SetCurrentLongitude sets the "current_longitude" field.
+func (_u *EntregadorUpdateOne) SetCurrentLongitude(v float64) *EntregadorUpdateOne {
+	_u.mutation.ResetCurrentLongitude()
+	_u.mutation.SetCurrentLongitude(v)
+	return _u
+}
+
+// SetNillableCurrentLongitude sets the "current_longitude" field if the given value is not nil.
+func (_u *EntregadorUpdateOne) SetNillableCurrentLongitude(v *float64) *EntregadorUpdateOne {
+	if v != nil {
+		_u.SetCurrentLongitude(*v)
+	}
+	return _u
+}
+
+// AddCurrentLongitude adds value to the "current_longitude" field.
+func (_u *EntregadorUpdateOne) AddCurrentLongitude(v float64) *EntregadorUpdateOne {
+	_u.mutation.AddCurrentLongitude(v)
+	return _u
+}
+
+// ClearCurrentLongitude clears the value of the "current_longitude" field.
+func (_u *EntregadorUpdateOne) ClearCurrentLongitude() *EntregadorUpdateOne {
+	_u.mutation.ClearCurrentLongitude()
+	return _u
+}
+
+// SetLastLocationAt sets the "last_location_at" field.
+func (_u *EntregadorUpdateOne) SetLastLocationAt(v time.Time) *EntregadorUpdateOne {
+	_u.mutation.SetLastLocationAt(v)
+	return _u
+}
+
+// SetNillableLastLocationAt sets the "last_location_at" field if the given value is not nil.
+func (_u *EntregadorUpdateOne) SetNillableLastLocationAt(v *time.Time) *EntregadorUpdateOne {
+	if v != nil {
+		_u.SetLastLocationAt(*v)
+	}
+	return _u
+}
+
+// ClearLastLocationAt clears the value of the "last_location_at" field.
+func (_u *EntregadorUpdateOne) ClearLastLocationAt() *EntregadorUpdateOne {
+	_u.mutation.ClearLastLocationAt()
 	return _u
 }
 
@@ -519,6 +691,30 @@ func (_u *EntregadorUpdateOne) sqlSave(ctx context.Context) (_node *Entregador, 
 	}
 	if value, ok := _u.mutation.Available(); ok {
 		_spec.SetField(entregador.FieldAvailable, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CurrentLatitude(); ok {
+		_spec.SetField(entregador.FieldCurrentLatitude, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedCurrentLatitude(); ok {
+		_spec.AddField(entregador.FieldCurrentLatitude, field.TypeFloat64, value)
+	}
+	if _u.mutation.CurrentLatitudeCleared() {
+		_spec.ClearField(entregador.FieldCurrentLatitude, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.CurrentLongitude(); ok {
+		_spec.SetField(entregador.FieldCurrentLongitude, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedCurrentLongitude(); ok {
+		_spec.AddField(entregador.FieldCurrentLongitude, field.TypeFloat64, value)
+	}
+	if _u.mutation.CurrentLongitudeCleared() {
+		_spec.ClearField(entregador.FieldCurrentLongitude, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.LastLocationAt(); ok {
+		_spec.SetField(entregador.FieldLastLocationAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastLocationAtCleared() {
+		_spec.ClearField(entregador.FieldLastLocationAt, field.TypeTime)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

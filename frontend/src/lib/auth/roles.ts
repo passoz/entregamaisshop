@@ -56,3 +56,16 @@ export function getHomePathForRole(role: CanonicalRole): string {
       return "/"
   }
 }
+
+export function getProfilePathForRole(role: CanonicalRole): string {
+  switch (role) {
+    case "admin":
+      return "/admin/profile"
+    case "seller":
+      return "/vendedor/profile"
+    case "driver":
+      return "/entregador/profile"
+    case "customer":
+      return "/profile"
+  }
+}

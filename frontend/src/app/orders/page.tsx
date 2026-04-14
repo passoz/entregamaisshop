@@ -17,24 +17,48 @@ import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { apiFetch } from "@/lib/api";
+import { LeafletMap } from "@/components/maps/LeafletMap";
+import { parseAddressLabel, type OrderTracking } from "@/lib/deliveryTracking";
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
   created: { label: "Pedido Autorizado", color: "bg-ze-gray text-ze-black border-ze-black/10", icon: Clock },
   confirmed: { label: "No Preparo", color: "bg-ze-yellow text-ze-black border-ze-black", icon: Package },
   preparing: { label: "No Preparo", color: "bg-ze-yellow text-ze-black border-ze-black", icon: Package },
   ready: { label: "Aguardando Coleta", color: "bg-ze-yellow text-ze-black border-ze-black", icon: ShoppingBag },
+  accepted: { label: "Entregador Indo Coletar", color: "bg-white text-ze-black border-ze-black", icon: Truck },
+  dispatched: { label: "Saiu para Entrega", color: "bg-ze-black text-white border-ze-black", icon: Truck },
   picked_up: { label: "Em Rota de Entrega", color: "bg-ze-black text-white border-ze-black", icon: Truck },
   delivered: { label: "Entregue", color: "bg-green-100 text-green-700 border-green-200", icon: CheckCircle2 },
 };
 
+type OrderItem = {
+  quantity: number;
+  unit_price: number;
+  product?: { name?: string };
+  edges?: { product?: { name?: string } };
+};
+
+type CustomerOrder = {
+  id: string;
+  status: string;
+  created_at: string;
+  total_amount: number;
+  delivery_address_json?: string;
+  tracking?: OrderTracking;
+  edges?: {
+    seller?: { name?: string };
+    items?: OrderItem[];
+  };
+};
+
 export default function CustomerOrdersPage() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<CustomerOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const fetchOrders = async () => {
     try {
-      const data = await apiFetch<any[]>("/api/v1/orders/me");
+      const data = await apiFetch<CustomerOrder[]>("/api/v1/orders/me");
       setOrders(data);
     } catch(e) {
       console.error(e);
@@ -83,6 +107,9 @@ export default function CustomerOrdersPage() {
           orders.map((order) => {
             const config = statusConfig[order.status] || statusConfig.created;
             const StatusIcon = config.icon;
+            const tracking = order.tracking;
+            const canTrackDriver = tracking?.stage === "to_delivery" || order.status === "delivered";
+            const waitingDispatch = tracking?.stage === "to_pickup" || order.status === "accepted";
 
             return (
               <Card key={order.id} className="overflow-hidden border-4 border-ze-black rounded-[2.5rem] group shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] bg-white hover:shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] transition-all">
@@ -114,7 +141,7 @@ export default function CustomerOrdersPage() {
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div className="flex-1 space-y-4">
                        <div className="space-y-2">
-                          {(order.edges?.items || []).map((it:any, idx:number) => {
+                          {(order.edges?.items || []).map((it, idx:number) => {
                             const product = it.product || it.edges?.product;
                             return (
                             <div key={idx} className="flex items-center text-sm font-bold text-ze-black/60 gap-2 uppercase tracking-tight">
@@ -128,7 +155,7 @@ export default function CustomerOrdersPage() {
                        
                        <div className="flex items-center gap-2 text-[10px] font-bold text-ze-black/30 uppercase tracking-widest pt-2">
                           <MapPin className="h-3 w-3 text-ze-red" />
-                          <span className="truncate max-w-[250px] md:max-w-md">Endereço de Entrega Selecionado</span>
+                          <span className="truncate max-w-[250px] md:max-w-md">{parseAddressLabel(order.delivery_address_json)}</span>
                        </div>
                     </div>
 
@@ -137,6 +164,41 @@ export default function CustomerOrdersPage() {
                       <div className="font-black text-3xl text-ze-black tracking-tighter">R$ {order.total_amount?.toFixed(2).replace('.', ',')}</div>
                     </div>
                   </div>
+
+                  {canTrackDriver && (
+                    <div className="mt-8 border-t-2 border-ze-black/5 pt-8 space-y-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-ze-black/35">Mapa da entrega</p>
+                          <h4 className="text-2xl font-black text-ze-black uppercase italic tracking-tighter mt-2">Acompanhe o entregador</h4>
+                        </div>
+                        {tracking?.distance_km != null && (
+                          <Badge className="bg-ze-yellow text-ze-black font-black rounded-xl">
+                            {tracking.distance_km.toFixed(1)} km
+                          </Badge>
+                        )}
+                      </div>
+                      <LeafletMap
+                        className="h-[300px]"
+                        driver={tracking?.driver_location || undefined}
+                        pickup={tracking?.pickup_location || undefined}
+                        delivery={tracking?.delivery_location || undefined}
+                        route={tracking?.route || []}
+                        stage={tracking?.stage}
+                      />
+                    </div>
+                  )}
+
+                  {waitingDispatch && (
+                    <div className="mt-8 border-t-2 border-ze-black/5 pt-8">
+                      <div className="bg-ze-gray rounded-[2rem] border-2 border-ze-black/5 p-5">
+                        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-ze-black/35">Logística</p>
+                        <p className="font-black text-ze-black uppercase tracking-tight mt-2">
+                          O entregador já aceitou a corrida e está indo até o vendedor buscar a encomenda.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-8 flex flex-wrap gap-3 border-t-2 border-ze-black/5 pt-8">
                     <Button variant="outline" className="flex-1 md:flex-none border-4 border-ze-black font-black uppercase tracking-widest text-[10px] h-12 rounded-2xl hover:bg-ze-black hover:text-white transition-all">
@@ -149,7 +211,7 @@ export default function CustomerOrdersPage() {
                       </Button>
                     ) : (
                       <Button className="flex-1 md:flex-none bg-ze-yellow text-ze-black hover:bg-ze-black hover:text-white border-4 border-ze-black font-black uppercase tracking-widest text-[10px] h-12 rounded-2xl shadow-lg transition-all">
-                        Acompanhar Rota <ChevronRight className="w-4 h-4 ml-1" />
+                        {canTrackDriver ? "Rota ao vivo" : "Status da entrega"} <ChevronRight className="w-4 h-4 ml-1" />
                       </Button>
                     )}
                   </div>

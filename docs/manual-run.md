@@ -34,7 +34,8 @@ Acessos:
 - Keycloak: `http://localhost:8081`
 - Modulo fiscal: `http://localhost:8090`
 - Dolibarr: `http://localhost:8088`
-- Kibana: `http://localhost:5601`
+- Grafana: `http://localhost:5601`
+- Loki: `http://localhost:3100`
 
 ## 4. Subir ambiente de teste
 ```bash
@@ -50,7 +51,8 @@ Acessos (test):
 - Keycloak: `http://localhost:18081`
 - Modulo fiscal: `http://localhost:18090`
 - Dolibarr: `http://localhost:18088`
-- Kibana: `http://localhost:15601`
+- Grafana: `http://localhost:15601`
+- Loki: `http://localhost:19100`
 
 ## 5. Subir profile de producao
 ```bash
@@ -73,7 +75,7 @@ curl -s -X POST http://localhost:9080/api/v1/orders \
   -H 'Content-Type: application/json' \
   -d '{"items":[{"product_id":"prod-1","quantity":2}]}'
 ```
-4. Validar logs no Kibana.
+4. Validar logs e dashboards no Grafana.
 
 ## 6.1 Validacao do modulo fiscal e Dolibarr
 1. Acesse a GUI fiscal em `http://localhost:8090` e autentique com `admin@entregamaisshop.com / admin123`.

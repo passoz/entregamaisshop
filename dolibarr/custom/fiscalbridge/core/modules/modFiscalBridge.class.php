@@ -21,6 +21,7 @@ class modFiscalBridge extends DolibarrModules
 
         $this->module_parts = array(
             'hooks' => array('invoicecard', 'ordercard', 'admin'),
+            'css' => array('/custom/fiscalbridge/css/style.css?v=20260413-app-v3'),
         );
 
         $this->config_page_url = array('setup.php@fiscalbridge');

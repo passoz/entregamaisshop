@@ -1,8 +1,10 @@
 services:
   backend:
-    ports: ["8080:8080"]
+    # Internal only
+    ports: []
   frontend:
-    ports: ["3000:3000"]
+    # Internal only
+    ports: []
     volumes:
       - ../../../frontend:/app
       - /app/node_modules
@@ -11,11 +13,12 @@ services:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true
   gateway:
-    ports: ["80:9080", "9180:9180"]
+    # Expose APISIX on port 80 and 443 for HTTPS
+    ports: ["80:9080", "443:9443", "9180:9180"]
   keycloak:
-    ports: ["8081:8080"]
+    ports: []
   fiscal:
-    ports: ["8090:8090"]
+    ports: []
   postgres:
     ports: ["5432:5432"]
   postgres-auth:
@@ -23,14 +26,14 @@ services:
   dolibarr-db:
     ports: ["13306:3306"]
   dolibarr:
-    ports: ["8088:80"]
+    ports: []
   redis:
     ports: ["6379:6379"]
   minio:
-    ports: ["9000:9000", "9001:9001"]
+    ports: []
   rabbitmq:
-    ports: ["5672:5672", "15672:15672"]
+    ports: []
   loki:
-    ports: ["3100:3100"]
+    ports: []
   grafana:
-    ports: ["3001:3000"]
+    ports: []

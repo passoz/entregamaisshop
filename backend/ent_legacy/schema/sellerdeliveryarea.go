@@ -14,7 +14,7 @@ func (SellerDeliveryArea) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty().Unique(),
 		field.String("label").NotEmpty(),
-		field.Float("fee").NonNegative().Default(0),
+		field.Float("fee").Min(0).Default(0),
 	}
 }
 

@@ -92,6 +92,48 @@ func (_c *EntregadorCreate) SetNillableAvailable(v *bool) *EntregadorCreate {
 	return _c
 }
 
+// SetCurrentLatitude sets the "current_latitude" field.
+func (_c *EntregadorCreate) SetCurrentLatitude(v float64) *EntregadorCreate {
+	_c.mutation.SetCurrentLatitude(v)
+	return _c
+}
+
+// SetNillableCurrentLatitude sets the "current_latitude" field if the given value is not nil.
+func (_c *EntregadorCreate) SetNillableCurrentLatitude(v *float64) *EntregadorCreate {
+	if v != nil {
+		_c.SetCurrentLatitude(*v)
+	}
+	return _c
+}
+
+// SetCurrentLongitude sets the "current_longitude" field.
+func (_c *EntregadorCreate) SetCurrentLongitude(v float64) *EntregadorCreate {
+	_c.mutation.SetCurrentLongitude(v)
+	return _c
+}
+
+// SetNillableCurrentLongitude sets the "current_longitude" field if the given value is not nil.
+func (_c *EntregadorCreate) SetNillableCurrentLongitude(v *float64) *EntregadorCreate {
+	if v != nil {
+		_c.SetCurrentLongitude(*v)
+	}
+	return _c
+}
+
+// SetLastLocationAt sets the "last_location_at" field.
+func (_c *EntregadorCreate) SetLastLocationAt(v time.Time) *EntregadorCreate {
+	_c.mutation.SetLastLocationAt(v)
+	return _c
+}
+
+// SetNillableLastLocationAt sets the "last_location_at" field if the given value is not nil.
+func (_c *EntregadorCreate) SetNillableLastLocationAt(v *time.Time) *EntregadorCreate {
+	if v != nil {
+		_c.SetLastLocationAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *EntregadorCreate) SetID(v string) *EntregadorCreate {
 	_c.mutation.SetID(v)
@@ -253,6 +295,18 @@ func (_c *EntregadorCreate) createSpec() (*Entregador, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Available(); ok {
 		_spec.SetField(entregador.FieldAvailable, field.TypeBool, value)
 		_node.Available = value
+	}
+	if value, ok := _c.mutation.CurrentLatitude(); ok {
+		_spec.SetField(entregador.FieldCurrentLatitude, field.TypeFloat64, value)
+		_node.CurrentLatitude = &value
+	}
+	if value, ok := _c.mutation.CurrentLongitude(); ok {
+		_spec.SetField(entregador.FieldCurrentLongitude, field.TypeFloat64, value)
+		_node.CurrentLongitude = &value
+	}
+	if value, ok := _c.mutation.LastLocationAt(); ok {
+		_spec.SetField(entregador.FieldLastLocationAt, field.TypeTime, value)
+		_node.LastLocationAt = &value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -3,7 +3,6 @@ package http
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -17,19 +16,22 @@ func TestCartUpdateAndDelete(t *testing.T) {
 	ctx := context.Background()
 
 	// 1. Seed data
-	_, _ = client.User.Create().SetID("user-1").SetEmail("u@t.com").SetName("U").Save(ctx)
-	c, _ := client.Cart.Create().SetID("user-1-cart").SetUserID("user-1").Save(ctx)
-	s, _ := client.Seller.Create().SetID("s-1").SetName("S1").SetDocument("1").Save(ctx)
-	p, _ := client.Product.Create().SetID("p-1").SetName("P1").SetPrice(10).SetSeller(s).SetSlug("p1").Save(ctx)
-	
+	mustCreateUser(t, client, "user-1", "u@t.com", "U")
+	c := mustCreateCart(t, client, "user-1-cart", "user-1")
+	mustCreateSeller(t, client, "s-1", "S1", "1", "")
+	mustCreateCategory(t, client, "cat-1", "Categoria", "categoria")
+	p := mustCreateProduct(t, client, "p-1", "s-1", "cat-1", "P1", "p1", 10)
+
 	itemID := fmt.Sprintf("%s-%s", c.ID, p.ID)
-	_, _ = client.CartItem.Create().
+	if _, err := client.CartItem.Create().
 		SetID(itemID).
 		SetCart(c).
 		SetProduct(p).
 		SetQuantity(1).
 		SetUnitPrice(10).
-		Save(ctx)
+		Save(ctx); err != nil {
+		t.Fatalf("seed cart item: %v", err)
+	}
 
 	// 2. Update Quantity
 	body := bytes.NewBufferString(`{"quantity":5}`)

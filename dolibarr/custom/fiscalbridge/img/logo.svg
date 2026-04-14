@@ -1,0 +1,8 @@
+<svg width="320" height="72" viewBox="0 0 320 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="2" y="6" width="58" height="58" rx="14" fill="#F7E01B"/>
+  <rect x="2" y="6" width="58" height="58" rx="14" stroke="#222222" stroke-width="4"/>
+  <text x="31" y="43" text-anchor="middle" fill="#222222" font-family="'DM Sans', Arial, sans-serif" font-weight="900" font-style="italic" font-size="30">E</text>
+  <text x="76" y="39" fill="#222222" font-family="'DM Sans', Arial, sans-serif" font-weight="900" font-style="italic" font-size="34" letter-spacing="-0.7">Entrega</text>
+  <text x="220" y="39" fill="#E31B23" font-family="'DM Sans', Arial, sans-serif" font-weight="900" font-style="italic" font-size="34" letter-spacing="-0.7">Mais</text>
+  <text x="76" y="57" fill="#222222" opacity="0.45" font-family="'DM Sans', Arial, sans-serif" font-weight="800" font-style="italic" font-size="9" letter-spacing="2">BEBIDAS GELADAS EM MINUTOS</text>
+</svg>

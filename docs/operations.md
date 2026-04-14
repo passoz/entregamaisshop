@@ -5,7 +5,7 @@
 2. Validar health (`/api/v1/health`).
 3. Validar OpenAPI (`/openapi.json`).
 4. Validar login no Keycloak.
-5. Validar Kibana/ELK.
+5. Validar Grafana/Loki.
 
 ## Comandos operacionais
 ```bash
@@ -29,4 +29,4 @@ docker compose --env-file env/dev/platform.env \
 - gateway fora: verificar `gateway/routes/routes.yaml`
 - keycloak fora: verificar `postgres-auth` e realm import
 - backend fora: verificar `backend/.env.example` e dependencias
-- kibana vazio: validar pipeline Logstash + indice `logs-*`
+- grafana sem logs: validar Promtail + Loki + labels de container no datasource `Loki`

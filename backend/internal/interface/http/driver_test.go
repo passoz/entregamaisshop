@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/entregamais/platform/backend/ent/order"
 )
 
 func TestDriverOrderLifecycle(t *testing.T) {
@@ -16,19 +14,13 @@ func TestDriverOrderLifecycle(t *testing.T) {
 	ctx := context.Background()
 
 	// 1. Seed data
-	_, _ = client.User.Create().SetID("customer-1").SetEmail("c@t.com").SetName("C").Save(ctx)
-	_, _ = client.User.Create().SetID("driver-1").SetEmail("d@t.com").SetName("D").Save(ctx)
-	_, _ = client.Entregador.Create().SetID("d-entregador-1").SetUserID("driver-1").Save(ctx)
-	_, _ = client.Seller.Create().SetID("s-1").SetName("S1").SetDocument("1").Save(ctx)
-	
+	mustCreateUser(t, client, "customer-1", "c@t.com", "C")
+	mustCreateUser(t, client, "driver-1", "d@t.com", "D")
+	mustCreateDriverProfile(t, client, "d-entregador-1", "driver-1")
+	mustCreateSeller(t, client, "s-1", "S1", "1", "")
+
 	// Create a READY order
-	ord, _ := client.Order.Create().
-		SetID("order-1").
-		SetCustomerID("customer-1").
-		SetSellerID("s-1").
-		SetTotalAmount(100).
-		SetStatus("ready").
-		Save(ctx)
+	ord := mustCreateOrder(t, client, "order-1", "customer-1", "s-1", "ready", 100)
 
 	// 2. Driver Accepts Order
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/driver/orders/order-1/accept", nil)
@@ -61,7 +53,7 @@ func TestDriverOrderLifecycle(t *testing.T) {
 
 	// 5. Final Status Check
 	final, _ := client.Order.Get(ctx, ord.ID)
-	if final.Status != order.StatusDelivered {
+	if final.Status != "delivered" {
 		t.Errorf("expected status delivered, got %s", final.Status)
 	}
 }

@@ -95,6 +95,31 @@ func DeliveryAddressJSON(v string) predicate.Order {
 	return predicate.Order(sql.FieldEQ(FieldDeliveryAddressJSON, v))
 }
 
+// DeliveryLatitude applies equality check predicate on the "delivery_latitude" field. It's identical to DeliveryLatitudeEQ.
+func DeliveryLatitude(v float64) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldDeliveryLatitude, v))
+}
+
+// DeliveryLongitude applies equality check predicate on the "delivery_longitude" field. It's identical to DeliveryLongitudeEQ.
+func DeliveryLongitude(v float64) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldDeliveryLongitude, v))
+}
+
+// AcceptedAt applies equality check predicate on the "accepted_at" field. It's identical to AcceptedAtEQ.
+func AcceptedAt(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldAcceptedAt, v))
+}
+
+// DispatchedAt applies equality check predicate on the "dispatched_at" field. It's identical to DispatchedAtEQ.
+func DispatchedAt(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldDispatchedAt, v))
+}
+
+// DeliveredAt applies equality check predicate on the "delivered_at" field. It's identical to DeliveredAtEQ.
+func DeliveredAt(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldDeliveredAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Order {
 	return predicate.Order(sql.FieldEQ(FieldCreatedAt, v))
@@ -408,6 +433,256 @@ func DeliveryAddressJSONEqualFold(v string) predicate.Order {
 // DeliveryAddressJSONContainsFold applies the ContainsFold predicate on the "delivery_address_json" field.
 func DeliveryAddressJSONContainsFold(v string) predicate.Order {
 	return predicate.Order(sql.FieldContainsFold(FieldDeliveryAddressJSON, v))
+}
+
+// DeliveryLatitudeEQ applies the EQ predicate on the "delivery_latitude" field.
+func DeliveryLatitudeEQ(v float64) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldDeliveryLatitude, v))
+}
+
+// DeliveryLatitudeNEQ applies the NEQ predicate on the "delivery_latitude" field.
+func DeliveryLatitudeNEQ(v float64) predicate.Order {
+	return predicate.Order(sql.FieldNEQ(FieldDeliveryLatitude, v))
+}
+
+// DeliveryLatitudeIn applies the In predicate on the "delivery_latitude" field.
+func DeliveryLatitudeIn(vs ...float64) predicate.Order {
+	return predicate.Order(sql.FieldIn(FieldDeliveryLatitude, vs...))
+}
+
+// DeliveryLatitudeNotIn applies the NotIn predicate on the "delivery_latitude" field.
+func DeliveryLatitudeNotIn(vs ...float64) predicate.Order {
+	return predicate.Order(sql.FieldNotIn(FieldDeliveryLatitude, vs...))
+}
+
+// DeliveryLatitudeGT applies the GT predicate on the "delivery_latitude" field.
+func DeliveryLatitudeGT(v float64) predicate.Order {
+	return predicate.Order(sql.FieldGT(FieldDeliveryLatitude, v))
+}
+
+// DeliveryLatitudeGTE applies the GTE predicate on the "delivery_latitude" field.
+func DeliveryLatitudeGTE(v float64) predicate.Order {
+	return predicate.Order(sql.FieldGTE(FieldDeliveryLatitude, v))
+}
+
+// DeliveryLatitudeLT applies the LT predicate on the "delivery_latitude" field.
+func DeliveryLatitudeLT(v float64) predicate.Order {
+	return predicate.Order(sql.FieldLT(FieldDeliveryLatitude, v))
+}
+
+// DeliveryLatitudeLTE applies the LTE predicate on the "delivery_latitude" field.
+func DeliveryLatitudeLTE(v float64) predicate.Order {
+	return predicate.Order(sql.FieldLTE(FieldDeliveryLatitude, v))
+}
+
+// DeliveryLatitudeIsNil applies the IsNil predicate on the "delivery_latitude" field.
+func DeliveryLatitudeIsNil() predicate.Order {
+	return predicate.Order(sql.FieldIsNull(FieldDeliveryLatitude))
+}
+
+// DeliveryLatitudeNotNil applies the NotNil predicate on the "delivery_latitude" field.
+func DeliveryLatitudeNotNil() predicate.Order {
+	return predicate.Order(sql.FieldNotNull(FieldDeliveryLatitude))
+}
+
+// DeliveryLongitudeEQ applies the EQ predicate on the "delivery_longitude" field.
+func DeliveryLongitudeEQ(v float64) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldDeliveryLongitude, v))
+}
+
+// DeliveryLongitudeNEQ applies the NEQ predicate on the "delivery_longitude" field.
+func DeliveryLongitudeNEQ(v float64) predicate.Order {
+	return predicate.Order(sql.FieldNEQ(FieldDeliveryLongitude, v))
+}
+
+// DeliveryLongitudeIn applies the In predicate on the "delivery_longitude" field.
+func DeliveryLongitudeIn(vs ...float64) predicate.Order {
+	return predicate.Order(sql.FieldIn(FieldDeliveryLongitude, vs...))
+}
+
+// DeliveryLongitudeNotIn applies the NotIn predicate on the "delivery_longitude" field.
+func DeliveryLongitudeNotIn(vs ...float64) predicate.Order {
+	return predicate.Order(sql.FieldNotIn(FieldDeliveryLongitude, vs...))
+}
+
+// DeliveryLongitudeGT applies the GT predicate on the "delivery_longitude" field.
+func DeliveryLongitudeGT(v float64) predicate.Order {
+	return predicate.Order(sql.FieldGT(FieldDeliveryLongitude, v))
+}
+
+// DeliveryLongitudeGTE applies the GTE predicate on the "delivery_longitude" field.
+func DeliveryLongitudeGTE(v float64) predicate.Order {
+	return predicate.Order(sql.FieldGTE(FieldDeliveryLongitude, v))
+}
+
+// DeliveryLongitudeLT applies the LT predicate on the "delivery_longitude" field.
+func DeliveryLongitudeLT(v float64) predicate.Order {
+	return predicate.Order(sql.FieldLT(FieldDeliveryLongitude, v))
+}
+
+// DeliveryLongitudeLTE applies the LTE predicate on the "delivery_longitude" field.
+func DeliveryLongitudeLTE(v float64) predicate.Order {
+	return predicate.Order(sql.FieldLTE(FieldDeliveryLongitude, v))
+}
+
+// DeliveryLongitudeIsNil applies the IsNil predicate on the "delivery_longitude" field.
+func DeliveryLongitudeIsNil() predicate.Order {
+	return predicate.Order(sql.FieldIsNull(FieldDeliveryLongitude))
+}
+
+// DeliveryLongitudeNotNil applies the NotNil predicate on the "delivery_longitude" field.
+func DeliveryLongitudeNotNil() predicate.Order {
+	return predicate.Order(sql.FieldNotNull(FieldDeliveryLongitude))
+}
+
+// AcceptedAtEQ applies the EQ predicate on the "accepted_at" field.
+func AcceptedAtEQ(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldAcceptedAt, v))
+}
+
+// AcceptedAtNEQ applies the NEQ predicate on the "accepted_at" field.
+func AcceptedAtNEQ(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldNEQ(FieldAcceptedAt, v))
+}
+
+// AcceptedAtIn applies the In predicate on the "accepted_at" field.
+func AcceptedAtIn(vs ...time.Time) predicate.Order {
+	return predicate.Order(sql.FieldIn(FieldAcceptedAt, vs...))
+}
+
+// AcceptedAtNotIn applies the NotIn predicate on the "accepted_at" field.
+func AcceptedAtNotIn(vs ...time.Time) predicate.Order {
+	return predicate.Order(sql.FieldNotIn(FieldAcceptedAt, vs...))
+}
+
+// AcceptedAtGT applies the GT predicate on the "accepted_at" field.
+func AcceptedAtGT(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldGT(FieldAcceptedAt, v))
+}
+
+// AcceptedAtGTE applies the GTE predicate on the "accepted_at" field.
+func AcceptedAtGTE(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldGTE(FieldAcceptedAt, v))
+}
+
+// AcceptedAtLT applies the LT predicate on the "accepted_at" field.
+func AcceptedAtLT(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldLT(FieldAcceptedAt, v))
+}
+
+// AcceptedAtLTE applies the LTE predicate on the "accepted_at" field.
+func AcceptedAtLTE(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldLTE(FieldAcceptedAt, v))
+}
+
+// AcceptedAtIsNil applies the IsNil predicate on the "accepted_at" field.
+func AcceptedAtIsNil() predicate.Order {
+	return predicate.Order(sql.FieldIsNull(FieldAcceptedAt))
+}
+
+// AcceptedAtNotNil applies the NotNil predicate on the "accepted_at" field.
+func AcceptedAtNotNil() predicate.Order {
+	return predicate.Order(sql.FieldNotNull(FieldAcceptedAt))
+}
+
+// DispatchedAtEQ applies the EQ predicate on the "dispatched_at" field.
+func DispatchedAtEQ(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldDispatchedAt, v))
+}
+
+// DispatchedAtNEQ applies the NEQ predicate on the "dispatched_at" field.
+func DispatchedAtNEQ(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldNEQ(FieldDispatchedAt, v))
+}
+
+// DispatchedAtIn applies the In predicate on the "dispatched_at" field.
+func DispatchedAtIn(vs ...time.Time) predicate.Order {
+	return predicate.Order(sql.FieldIn(FieldDispatchedAt, vs...))
+}
+
+// DispatchedAtNotIn applies the NotIn predicate on the "dispatched_at" field.
+func DispatchedAtNotIn(vs ...time.Time) predicate.Order {
+	return predicate.Order(sql.FieldNotIn(FieldDispatchedAt, vs...))
+}
+
+// DispatchedAtGT applies the GT predicate on the "dispatched_at" field.
+func DispatchedAtGT(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldGT(FieldDispatchedAt, v))
+}
+
+// DispatchedAtGTE applies the GTE predicate on the "dispatched_at" field.
+func DispatchedAtGTE(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldGTE(FieldDispatchedAt, v))
+}
+
+// DispatchedAtLT applies the LT predicate on the "dispatched_at" field.
+func DispatchedAtLT(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldLT(FieldDispatchedAt, v))
+}
+
+// DispatchedAtLTE applies the LTE predicate on the "dispatched_at" field.
+func DispatchedAtLTE(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldLTE(FieldDispatchedAt, v))
+}
+
+// DispatchedAtIsNil applies the IsNil predicate on the "dispatched_at" field.
+func DispatchedAtIsNil() predicate.Order {
+	return predicate.Order(sql.FieldIsNull(FieldDispatchedAt))
+}
+
+// DispatchedAtNotNil applies the NotNil predicate on the "dispatched_at" field.
+func DispatchedAtNotNil() predicate.Order {
+	return predicate.Order(sql.FieldNotNull(FieldDispatchedAt))
+}
+
+// DeliveredAtEQ applies the EQ predicate on the "delivered_at" field.
+func DeliveredAtEQ(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldEQ(FieldDeliveredAt, v))
+}
+
+// DeliveredAtNEQ applies the NEQ predicate on the "delivered_at" field.
+func DeliveredAtNEQ(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldNEQ(FieldDeliveredAt, v))
+}
+
+// DeliveredAtIn applies the In predicate on the "delivered_at" field.
+func DeliveredAtIn(vs ...time.Time) predicate.Order {
+	return predicate.Order(sql.FieldIn(FieldDeliveredAt, vs...))
+}
+
+// DeliveredAtNotIn applies the NotIn predicate on the "delivered_at" field.
+func DeliveredAtNotIn(vs ...time.Time) predicate.Order {
+	return predicate.Order(sql.FieldNotIn(FieldDeliveredAt, vs...))
+}
+
+// DeliveredAtGT applies the GT predicate on the "delivered_at" field.
+func DeliveredAtGT(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldGT(FieldDeliveredAt, v))
+}
+
+// DeliveredAtGTE applies the GTE predicate on the "delivered_at" field.
+func DeliveredAtGTE(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldGTE(FieldDeliveredAt, v))
+}
+
+// DeliveredAtLT applies the LT predicate on the "delivered_at" field.
+func DeliveredAtLT(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldLT(FieldDeliveredAt, v))
+}
+
+// DeliveredAtLTE applies the LTE predicate on the "delivered_at" field.
+func DeliveredAtLTE(v time.Time) predicate.Order {
+	return predicate.Order(sql.FieldLTE(FieldDeliveredAt, v))
+}
+
+// DeliveredAtIsNil applies the IsNil predicate on the "delivered_at" field.
+func DeliveredAtIsNil() predicate.Order {
+	return predicate.Order(sql.FieldIsNull(FieldDeliveredAt))
+}
+
+// DeliveredAtNotNil applies the NotNil predicate on the "delivered_at" field.
+func DeliveredAtNotNil() predicate.Order {
+	return predicate.Order(sql.FieldNotNull(FieldDeliveredAt))
 }
 
 // HasCustomer applies the HasEdge predicate on the "customer" edge.

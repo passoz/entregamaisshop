@@ -43,6 +43,7 @@ func mustLoadTemplates() *templateSet {
 		t := template.Must(template.New("base").Funcs(funcs).ParseFS(templatesFS, "templates/base.html", "templates/"+name+".html"))
 		pages[name] = t
 	}
+	pages["login"] = template.Must(template.New("login").Funcs(funcs).ParseFS(templatesFS, "templates/login.html"))
 	return &templateSet{pages: pages}
 }
 
@@ -50,6 +51,9 @@ func (t *templateSet) render(w io.Writer, name string, data viewData) error {
 	page, ok := t.pages[name]
 	if !ok {
 		return fmt.Errorf("unknown template %q", name)
+	}
+	if name == "login" {
+		return page.ExecuteTemplate(w, "login.html", data)
 	}
 	return page.ExecuteTemplate(w, name, data)
 }

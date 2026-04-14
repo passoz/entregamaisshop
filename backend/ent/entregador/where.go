@@ -90,6 +90,21 @@ func Available(v bool) predicate.Entregador {
 	return predicate.Entregador(sql.FieldEQ(FieldAvailable, v))
 }
 
+// CurrentLatitude applies equality check predicate on the "current_latitude" field. It's identical to CurrentLatitudeEQ.
+func CurrentLatitude(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldEQ(FieldCurrentLatitude, v))
+}
+
+// CurrentLongitude applies equality check predicate on the "current_longitude" field. It's identical to CurrentLongitudeEQ.
+func CurrentLongitude(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldEQ(FieldCurrentLongitude, v))
+}
+
+// LastLocationAt applies equality check predicate on the "last_location_at" field. It's identical to LastLocationAtEQ.
+func LastLocationAt(v time.Time) predicate.Entregador {
+	return predicate.Entregador(sql.FieldEQ(FieldLastLocationAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Entregador {
 	return predicate.Entregador(sql.FieldEQ(FieldCreatedAt, v))
@@ -318,6 +333,156 @@ func AvailableEQ(v bool) predicate.Entregador {
 // AvailableNEQ applies the NEQ predicate on the "available" field.
 func AvailableNEQ(v bool) predicate.Entregador {
 	return predicate.Entregador(sql.FieldNEQ(FieldAvailable, v))
+}
+
+// CurrentLatitudeEQ applies the EQ predicate on the "current_latitude" field.
+func CurrentLatitudeEQ(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldEQ(FieldCurrentLatitude, v))
+}
+
+// CurrentLatitudeNEQ applies the NEQ predicate on the "current_latitude" field.
+func CurrentLatitudeNEQ(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldNEQ(FieldCurrentLatitude, v))
+}
+
+// CurrentLatitudeIn applies the In predicate on the "current_latitude" field.
+func CurrentLatitudeIn(vs ...float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldIn(FieldCurrentLatitude, vs...))
+}
+
+// CurrentLatitudeNotIn applies the NotIn predicate on the "current_latitude" field.
+func CurrentLatitudeNotIn(vs ...float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldNotIn(FieldCurrentLatitude, vs...))
+}
+
+// CurrentLatitudeGT applies the GT predicate on the "current_latitude" field.
+func CurrentLatitudeGT(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldGT(FieldCurrentLatitude, v))
+}
+
+// CurrentLatitudeGTE applies the GTE predicate on the "current_latitude" field.
+func CurrentLatitudeGTE(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldGTE(FieldCurrentLatitude, v))
+}
+
+// CurrentLatitudeLT applies the LT predicate on the "current_latitude" field.
+func CurrentLatitudeLT(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldLT(FieldCurrentLatitude, v))
+}
+
+// CurrentLatitudeLTE applies the LTE predicate on the "current_latitude" field.
+func CurrentLatitudeLTE(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldLTE(FieldCurrentLatitude, v))
+}
+
+// CurrentLatitudeIsNil applies the IsNil predicate on the "current_latitude" field.
+func CurrentLatitudeIsNil() predicate.Entregador {
+	return predicate.Entregador(sql.FieldIsNull(FieldCurrentLatitude))
+}
+
+// CurrentLatitudeNotNil applies the NotNil predicate on the "current_latitude" field.
+func CurrentLatitudeNotNil() predicate.Entregador {
+	return predicate.Entregador(sql.FieldNotNull(FieldCurrentLatitude))
+}
+
+// CurrentLongitudeEQ applies the EQ predicate on the "current_longitude" field.
+func CurrentLongitudeEQ(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldEQ(FieldCurrentLongitude, v))
+}
+
+// CurrentLongitudeNEQ applies the NEQ predicate on the "current_longitude" field.
+func CurrentLongitudeNEQ(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldNEQ(FieldCurrentLongitude, v))
+}
+
+// CurrentLongitudeIn applies the In predicate on the "current_longitude" field.
+func CurrentLongitudeIn(vs ...float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldIn(FieldCurrentLongitude, vs...))
+}
+
+// CurrentLongitudeNotIn applies the NotIn predicate on the "current_longitude" field.
+func CurrentLongitudeNotIn(vs ...float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldNotIn(FieldCurrentLongitude, vs...))
+}
+
+// CurrentLongitudeGT applies the GT predicate on the "current_longitude" field.
+func CurrentLongitudeGT(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldGT(FieldCurrentLongitude, v))
+}
+
+// CurrentLongitudeGTE applies the GTE predicate on the "current_longitude" field.
+func CurrentLongitudeGTE(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldGTE(FieldCurrentLongitude, v))
+}
+
+// CurrentLongitudeLT applies the LT predicate on the "current_longitude" field.
+func CurrentLongitudeLT(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldLT(FieldCurrentLongitude, v))
+}
+
+// CurrentLongitudeLTE applies the LTE predicate on the "current_longitude" field.
+func CurrentLongitudeLTE(v float64) predicate.Entregador {
+	return predicate.Entregador(sql.FieldLTE(FieldCurrentLongitude, v))
+}
+
+// CurrentLongitudeIsNil applies the IsNil predicate on the "current_longitude" field.
+func CurrentLongitudeIsNil() predicate.Entregador {
+	return predicate.Entregador(sql.FieldIsNull(FieldCurrentLongitude))
+}
+
+// CurrentLongitudeNotNil applies the NotNil predicate on the "current_longitude" field.
+func CurrentLongitudeNotNil() predicate.Entregador {
+	return predicate.Entregador(sql.FieldNotNull(FieldCurrentLongitude))
+}
+
+// LastLocationAtEQ applies the EQ predicate on the "last_location_at" field.
+func LastLocationAtEQ(v time.Time) predicate.Entregador {
+	return predicate.Entregador(sql.FieldEQ(FieldLastLocationAt, v))
+}
+
+// LastLocationAtNEQ applies the NEQ predicate on the "last_location_at" field.
+func LastLocationAtNEQ(v time.Time) predicate.Entregador {
+	return predicate.Entregador(sql.FieldNEQ(FieldLastLocationAt, v))
+}
+
+// LastLocationAtIn applies the In predicate on the "last_location_at" field.
+func LastLocationAtIn(vs ...time.Time) predicate.Entregador {
+	return predicate.Entregador(sql.FieldIn(FieldLastLocationAt, vs...))
+}
+
+// LastLocationAtNotIn applies the NotIn predicate on the "last_location_at" field.
+func LastLocationAtNotIn(vs ...time.Time) predicate.Entregador {
+	return predicate.Entregador(sql.FieldNotIn(FieldLastLocationAt, vs...))
+}
+
+// LastLocationAtGT applies the GT predicate on the "last_location_at" field.
+func LastLocationAtGT(v time.Time) predicate.Entregador {
+	return predicate.Entregador(sql.FieldGT(FieldLastLocationAt, v))
+}
+
+// LastLocationAtGTE applies the GTE predicate on the "last_location_at" field.
+func LastLocationAtGTE(v time.Time) predicate.Entregador {
+	return predicate.Entregador(sql.FieldGTE(FieldLastLocationAt, v))
+}
+
+// LastLocationAtLT applies the LT predicate on the "last_location_at" field.
+func LastLocationAtLT(v time.Time) predicate.Entregador {
+	return predicate.Entregador(sql.FieldLT(FieldLastLocationAt, v))
+}
+
+// LastLocationAtLTE applies the LTE predicate on the "last_location_at" field.
+func LastLocationAtLTE(v time.Time) predicate.Entregador {
+	return predicate.Entregador(sql.FieldLTE(FieldLastLocationAt, v))
+}
+
+// LastLocationAtIsNil applies the IsNil predicate on the "last_location_at" field.
+func LastLocationAtIsNil() predicate.Entregador {
+	return predicate.Entregador(sql.FieldIsNull(FieldLastLocationAt))
+}
+
+// LastLocationAtNotNil applies the NotNil predicate on the "last_location_at" field.
+func LastLocationAtNotNil() predicate.Entregador {
+	return predicate.Entregador(sql.FieldNotNull(FieldLastLocationAt))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

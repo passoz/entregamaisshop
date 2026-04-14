@@ -17,13 +17,21 @@ func seedSellerStorefrontData(t *testing.T) *Handlers {
 	client := prepareTestDB(t)
 	ctx := context.Background()
 
-	_, _ = client.User.Create().SetID("customer-1").SetEmail("customer@test.com").SetName("Cliente").Save(ctx)
-	_, _ = client.User.Create().SetID("seller-owner-1").SetEmail("seller@test.com").SetName("Vendedor").Save(ctx)
-	_, _ = client.Seller.Create().SetID("seller-1").SetName("Deposito Teste").SetDocument("123").Save(ctx)
-	_, _ = client.SellerUser.Create().SetID("seller-user-1").SetSellerID("seller-1").SetUserID("seller-owner-1").SetRole("owner").Save(ctx)
-	_, _ = client.SellerDeliveryArea.Create().SetID("area-1").SetSellerID("seller-1").SetLabel("Cabo Frio").SetFee(0).Save(ctx)
-	_, _ = client.SellerDeliveryArea.Create().SetID("area-2").SetSellerID("seller-1").SetLabel("Arraial").SetFee(4.9).Save(ctx)
-	_, _ = client.SellerReview.Create().SetID("review-1").SetSellerID("seller-1").SetCustomerID("customer-1").SetScore(4).SetComment("Boa").Save(ctx)
+	mustCreateUser(t, client, "customer-1", "customer@test.com", "Cliente")
+	mustCreateUser(t, client, "seller-owner-1", "seller@test.com", "Vendedor")
+	mustCreateSeller(t, client, "seller-1", "Deposito Teste", "123", "")
+	if _, err := client.SellerUser.Create().SetID("seller-user-1").SetSellerID("seller-1").SetUserID("seller-owner-1").SetRole("owner").Save(ctx); err != nil {
+		t.Fatalf("seed seller user: %v", err)
+	}
+	if _, err := client.SellerDeliveryArea.Create().SetID("area-1").SetSellerID("seller-1").SetLabel("Cabo Frio").SetFee(0).Save(ctx); err != nil {
+		t.Fatalf("seed delivery area area-1: %v", err)
+	}
+	if _, err := client.SellerDeliveryArea.Create().SetID("area-2").SetSellerID("seller-1").SetLabel("Arraial").SetFee(4.9).Save(ctx); err != nil {
+		t.Fatalf("seed delivery area area-2: %v", err)
+	}
+	if _, err := client.SellerReview.Create().SetID("review-1").SetSellerID("seller-1").SetCustomerID("customer-1").SetScore(4).SetComment("Boa").Save(ctx); err != nil {
+		t.Fatalf("seed review: %v", err)
+	}
 
 	return &Handlers{DB: client}
 }

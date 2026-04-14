@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestEndToEndOrderFlow(t *testing.T) {
@@ -19,28 +17,21 @@ func TestEndToEndOrderFlow(t *testing.T) {
 	ctx := context.Background()
 
 	// 1. Setup Data
-	s, _ := client.Seller.Create().SetID("seller-1").SetName("Test Seller").SetDocument("123").Save(ctx)
-	cat, _ := client.Category.Create().SetID("cat-1").SetName("Drinks").SetSlug("drinks").Save(ctx)
-	_, _ = client.Product.Create().
-		SetID("prod-1").
-		SetName("Beer").
-		SetPrice(10.0).
-		SetSeller(s).
-		SetCategory(cat).
-		SetSlug("beer").
-		Save(ctx)
-	_, _ = client.User.Create().SetID("user-1").SetEmail("test@test.com").SetName("Test User").Save(ctx)
+	mustCreateSeller(t, client, "seller-1", "Test Seller", "123", "")
+	mustCreateCategory(t, client, "cat-1", "Drinks", "drinks")
+	mustCreateProduct(t, client, "prod-1", "seller-1", "cat-1", "Beer", "beer", 10.0)
+	mustCreateUser(t, client, "user-1", "test@test.com", "Test User")
 
 	// 2. Add to Cart
 	payload := map[string]any{"product_id": "prod-1", "quantity": 2}
 	body, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", "/api/v1/cart/items", bytes.NewBuffer(body))
 	req = req.WithContext(context.WithValue(req.Context(), userIDKey, "user-1"))
-	
+
 	rr := httptest.NewRecorder()
 	// Create cart first as expected by handler
-	_, _ = client.Cart.Create().SetID("user-1-cart").SetUserID("user-1").Save(ctx)
-	
+	mustCreateCart(t, client, "user-1-cart", "user-1")
+
 	h.CartCreateItem(rr, req)
 
 	if rr.Code != http.StatusCreated {
@@ -80,7 +71,10 @@ func TestEndToEndOrderFlow(t *testing.T) {
 	}
 
 	// 5. Seller Confirm
-	ords, _ := client.Order.Query().All(ctx)
+	ords, err := client.Order.Query().All(ctx)
+	if err != nil {
+		t.Fatalf("query orders: %v", err)
+	}
 	orderID := ords[0].ID
 
 	req, _ = http.NewRequest("POST", "/api/v1/vendedor/orders/"+orderID+"/confirm", nil)

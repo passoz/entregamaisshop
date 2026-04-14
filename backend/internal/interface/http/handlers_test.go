@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +8,6 @@ import (
 
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestHealthHandler(t *testing.T) {
@@ -60,10 +58,10 @@ func TestReadyHandler(t *testing.T) {
 func TestCategoriesList(t *testing.T) {
 	client := prepareTestDB(t)
 	defer client.Close()
-	
+
 	h := &Handlers{DB: client}
 	// Add a category
-	client.Category.Create().SetID("cat-1").SetName("Food").SetSlug("food").Save(context.Background())
+	mustCreateCategory(t, client, "cat-1", "Food", "food")
 
 	req, _ := http.NewRequest("GET", "/api/v1/categories", nil)
 	rr := httptest.NewRecorder()

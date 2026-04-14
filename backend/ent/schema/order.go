@@ -16,6 +16,11 @@ func (Order) Fields() []ent.Field {
 		field.Float("total_amount").Positive(),
 		field.String("currency").Default("BRL"),
 		field.String("delivery_address_json").NotEmpty(),
+		field.Float("delivery_latitude").Optional().Nillable(),
+		field.Float("delivery_longitude").Optional().Nillable(),
+		field.Time("accepted_at").Optional().Nillable(),
+		field.Time("dispatched_at").Optional().Nillable(),
+		field.Time("delivered_at").Optional().Nillable(),
 	}
 }
 func (Order) Edges() []ent.Edge {

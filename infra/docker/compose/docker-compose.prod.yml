@@ -24,9 +24,10 @@ services:
     restart: always
   rabbitmq:
     restart: always
-  elasticsearch:
+  loki:
     restart: always
-  logstash:
+  promtail:
     restart: always
-  kibana:
+  grafana:
     restart: always
+    ports: ["5601:3000"]

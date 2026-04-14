@@ -4906,23 +4906,28 @@ func (m *CategoryMutation) ResetEdge(name string) error {
 // EntregadorMutation represents an operation that mutates the Entregador nodes in the graph.
 type EntregadorMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	status        *string
-	vehicle_type  *string
-	available     *bool
-	clearedFields map[string]struct{}
-	user          *string
-	cleareduser   bool
-	orders        map[string]struct{}
-	removedorders map[string]struct{}
-	clearedorders bool
-	done          bool
-	oldValue      func(context.Context) (*Entregador, error)
-	predicates    []predicate.Entregador
+	op                   Op
+	typ                  string
+	id                   *string
+	created_at           *time.Time
+	updated_at           *time.Time
+	status               *string
+	vehicle_type         *string
+	available            *bool
+	current_latitude     *float64
+	addcurrent_latitude  *float64
+	current_longitude    *float64
+	addcurrent_longitude *float64
+	last_location_at     *time.Time
+	clearedFields        map[string]struct{}
+	user                 *string
+	cleareduser          bool
+	orders               map[string]struct{}
+	removedorders        map[string]struct{}
+	clearedorders        bool
+	done                 bool
+	oldValue             func(context.Context) (*Entregador, error)
+	predicates           []predicate.Entregador
 }
 
 var _ ent.Mutation = (*EntregadorMutation)(nil)
@@ -5222,6 +5227,195 @@ func (m *EntregadorMutation) ResetAvailable() {
 	m.available = nil
 }
 
+// SetCurrentLatitude sets the "current_latitude" field.
+func (m *EntregadorMutation) SetCurrentLatitude(f float64) {
+	m.current_latitude = &f
+	m.addcurrent_latitude = nil
+}
+
+// CurrentLatitude returns the value of the "current_latitude" field in the mutation.
+func (m *EntregadorMutation) CurrentLatitude() (r float64, exists bool) {
+	v := m.current_latitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrentLatitude returns the old "current_latitude" field's value of the Entregador entity.
+// If the Entregador object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EntregadorMutation) OldCurrentLatitude(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrentLatitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrentLatitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrentLatitude: %w", err)
+	}
+	return oldValue.CurrentLatitude, nil
+}
+
+// AddCurrentLatitude adds f to the "current_latitude" field.
+func (m *EntregadorMutation) AddCurrentLatitude(f float64) {
+	if m.addcurrent_latitude != nil {
+		*m.addcurrent_latitude += f
+	} else {
+		m.addcurrent_latitude = &f
+	}
+}
+
+// AddedCurrentLatitude returns the value that was added to the "current_latitude" field in this mutation.
+func (m *EntregadorMutation) AddedCurrentLatitude() (r float64, exists bool) {
+	v := m.addcurrent_latitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCurrentLatitude clears the value of the "current_latitude" field.
+func (m *EntregadorMutation) ClearCurrentLatitude() {
+	m.current_latitude = nil
+	m.addcurrent_latitude = nil
+	m.clearedFields[entregador.FieldCurrentLatitude] = struct{}{}
+}
+
+// CurrentLatitudeCleared returns if the "current_latitude" field was cleared in this mutation.
+func (m *EntregadorMutation) CurrentLatitudeCleared() bool {
+	_, ok := m.clearedFields[entregador.FieldCurrentLatitude]
+	return ok
+}
+
+// ResetCurrentLatitude resets all changes to the "current_latitude" field.
+func (m *EntregadorMutation) ResetCurrentLatitude() {
+	m.current_latitude = nil
+	m.addcurrent_latitude = nil
+	delete(m.clearedFields, entregador.FieldCurrentLatitude)
+}
+
+// SetCurrentLongitude sets the "current_longitude" field.
+func (m *EntregadorMutation) SetCurrentLongitude(f float64) {
+	m.current_longitude = &f
+	m.addcurrent_longitude = nil
+}
+
+// CurrentLongitude returns the value of the "current_longitude" field in the mutation.
+func (m *EntregadorMutation) CurrentLongitude() (r float64, exists bool) {
+	v := m.current_longitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrentLongitude returns the old "current_longitude" field's value of the Entregador entity.
+// If the Entregador object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EntregadorMutation) OldCurrentLongitude(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrentLongitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrentLongitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrentLongitude: %w", err)
+	}
+	return oldValue.CurrentLongitude, nil
+}
+
+// AddCurrentLongitude adds f to the "current_longitude" field.
+func (m *EntregadorMutation) AddCurrentLongitude(f float64) {
+	if m.addcurrent_longitude != nil {
+		*m.addcurrent_longitude += f
+	} else {
+		m.addcurrent_longitude = &f
+	}
+}
+
+// AddedCurrentLongitude returns the value that was added to the "current_longitude" field in this mutation.
+func (m *EntregadorMutation) AddedCurrentLongitude() (r float64, exists bool) {
+	v := m.addcurrent_longitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCurrentLongitude clears the value of the "current_longitude" field.
+func (m *EntregadorMutation) ClearCurrentLongitude() {
+	m.current_longitude = nil
+	m.addcurrent_longitude = nil
+	m.clearedFields[entregador.FieldCurrentLongitude] = struct{}{}
+}
+
+// CurrentLongitudeCleared returns if the "current_longitude" field was cleared in this mutation.
+func (m *EntregadorMutation) CurrentLongitudeCleared() bool {
+	_, ok := m.clearedFields[entregador.FieldCurrentLongitude]
+	return ok
+}
+
+// ResetCurrentLongitude resets all changes to the "current_longitude" field.
+func (m *EntregadorMutation) ResetCurrentLongitude() {
+	m.current_longitude = nil
+	m.addcurrent_longitude = nil
+	delete(m.clearedFields, entregador.FieldCurrentLongitude)
+}
+
+// SetLastLocationAt sets the "last_location_at" field.
+func (m *EntregadorMutation) SetLastLocationAt(t time.Time) {
+	m.last_location_at = &t
+}
+
+// LastLocationAt returns the value of the "last_location_at" field in the mutation.
+func (m *EntregadorMutation) LastLocationAt() (r time.Time, exists bool) {
+	v := m.last_location_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastLocationAt returns the old "last_location_at" field's value of the Entregador entity.
+// If the Entregador object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EntregadorMutation) OldLastLocationAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastLocationAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastLocationAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastLocationAt: %w", err)
+	}
+	return oldValue.LastLocationAt, nil
+}
+
+// ClearLastLocationAt clears the value of the "last_location_at" field.
+func (m *EntregadorMutation) ClearLastLocationAt() {
+	m.last_location_at = nil
+	m.clearedFields[entregador.FieldLastLocationAt] = struct{}{}
+}
+
+// LastLocationAtCleared returns if the "last_location_at" field was cleared in this mutation.
+func (m *EntregadorMutation) LastLocationAtCleared() bool {
+	_, ok := m.clearedFields[entregador.FieldLastLocationAt]
+	return ok
+}
+
+// ResetLastLocationAt resets all changes to the "last_location_at" field.
+func (m *EntregadorMutation) ResetLastLocationAt() {
+	m.last_location_at = nil
+	delete(m.clearedFields, entregador.FieldLastLocationAt)
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *EntregadorMutation) SetUserID(id string) {
 	m.user = &id
@@ -5349,7 +5543,7 @@ func (m *EntregadorMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EntregadorMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, entregador.FieldCreatedAt)
 	}
@@ -5364,6 +5558,15 @@ func (m *EntregadorMutation) Fields() []string {
 	}
 	if m.available != nil {
 		fields = append(fields, entregador.FieldAvailable)
+	}
+	if m.current_latitude != nil {
+		fields = append(fields, entregador.FieldCurrentLatitude)
+	}
+	if m.current_longitude != nil {
+		fields = append(fields, entregador.FieldCurrentLongitude)
+	}
+	if m.last_location_at != nil {
+		fields = append(fields, entregador.FieldLastLocationAt)
 	}
 	return fields
 }
@@ -5383,6 +5586,12 @@ func (m *EntregadorMutation) Field(name string) (ent.Value, bool) {
 		return m.VehicleType()
 	case entregador.FieldAvailable:
 		return m.Available()
+	case entregador.FieldCurrentLatitude:
+		return m.CurrentLatitude()
+	case entregador.FieldCurrentLongitude:
+		return m.CurrentLongitude()
+	case entregador.FieldLastLocationAt:
+		return m.LastLocationAt()
 	}
 	return nil, false
 }
@@ -5402,6 +5611,12 @@ func (m *EntregadorMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldVehicleType(ctx)
 	case entregador.FieldAvailable:
 		return m.OldAvailable(ctx)
+	case entregador.FieldCurrentLatitude:
+		return m.OldCurrentLatitude(ctx)
+	case entregador.FieldCurrentLongitude:
+		return m.OldCurrentLongitude(ctx)
+	case entregador.FieldLastLocationAt:
+		return m.OldLastLocationAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Entregador field %s", name)
 }
@@ -5446,6 +5661,27 @@ func (m *EntregadorMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAvailable(v)
 		return nil
+	case entregador.FieldCurrentLatitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrentLatitude(v)
+		return nil
+	case entregador.FieldCurrentLongitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrentLongitude(v)
+		return nil
+	case entregador.FieldLastLocationAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastLocationAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Entregador field %s", name)
 }
@@ -5453,13 +5689,26 @@ func (m *EntregadorMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *EntregadorMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addcurrent_latitude != nil {
+		fields = append(fields, entregador.FieldCurrentLatitude)
+	}
+	if m.addcurrent_longitude != nil {
+		fields = append(fields, entregador.FieldCurrentLongitude)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *EntregadorMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case entregador.FieldCurrentLatitude:
+		return m.AddedCurrentLatitude()
+	case entregador.FieldCurrentLongitude:
+		return m.AddedCurrentLongitude()
+	}
 	return nil, false
 }
 
@@ -5468,6 +5717,20 @@ func (m *EntregadorMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *EntregadorMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case entregador.FieldCurrentLatitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCurrentLatitude(v)
+		return nil
+	case entregador.FieldCurrentLongitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCurrentLongitude(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Entregador numeric field %s", name)
 }
@@ -5478,6 +5741,15 @@ func (m *EntregadorMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(entregador.FieldVehicleType) {
 		fields = append(fields, entregador.FieldVehicleType)
+	}
+	if m.FieldCleared(entregador.FieldCurrentLatitude) {
+		fields = append(fields, entregador.FieldCurrentLatitude)
+	}
+	if m.FieldCleared(entregador.FieldCurrentLongitude) {
+		fields = append(fields, entregador.FieldCurrentLongitude)
+	}
+	if m.FieldCleared(entregador.FieldLastLocationAt) {
+		fields = append(fields, entregador.FieldLastLocationAt)
 	}
 	return fields
 }
@@ -5495,6 +5767,15 @@ func (m *EntregadorMutation) ClearField(name string) error {
 	switch name {
 	case entregador.FieldVehicleType:
 		m.ClearVehicleType()
+		return nil
+	case entregador.FieldCurrentLatitude:
+		m.ClearCurrentLatitude()
+		return nil
+	case entregador.FieldCurrentLongitude:
+		m.ClearCurrentLongitude()
+		return nil
+	case entregador.FieldLastLocationAt:
+		m.ClearLastLocationAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Entregador nullable field %s", name)
@@ -5518,6 +5799,15 @@ func (m *EntregadorMutation) ResetField(name string) error {
 		return nil
 	case entregador.FieldAvailable:
 		m.ResetAvailable()
+		return nil
+	case entregador.FieldCurrentLatitude:
+		m.ResetCurrentLatitude()
+		return nil
+	case entregador.FieldCurrentLongitude:
+		m.ResetCurrentLongitude()
+		return nil
+	case entregador.FieldLastLocationAt:
+		m.ResetLastLocationAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Entregador field %s", name)
@@ -6327,6 +6617,13 @@ type OrderMutation struct {
 	addtotal_amount       *float64
 	currency              *string
 	delivery_address_json *string
+	delivery_latitude     *float64
+	adddelivery_latitude  *float64
+	delivery_longitude    *float64
+	adddelivery_longitude *float64
+	accepted_at           *time.Time
+	dispatched_at         *time.Time
+	delivered_at          *time.Time
 	clearedFields         map[string]struct{}
 	customer              *string
 	clearedcustomer       bool
@@ -6688,6 +6985,293 @@ func (m *OrderMutation) ResetDeliveryAddressJSON() {
 	m.delivery_address_json = nil
 }
 
+// SetDeliveryLatitude sets the "delivery_latitude" field.
+func (m *OrderMutation) SetDeliveryLatitude(f float64) {
+	m.delivery_latitude = &f
+	m.adddelivery_latitude = nil
+}
+
+// DeliveryLatitude returns the value of the "delivery_latitude" field in the mutation.
+func (m *OrderMutation) DeliveryLatitude() (r float64, exists bool) {
+	v := m.delivery_latitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeliveryLatitude returns the old "delivery_latitude" field's value of the Order entity.
+// If the Order object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderMutation) OldDeliveryLatitude(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeliveryLatitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeliveryLatitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeliveryLatitude: %w", err)
+	}
+	return oldValue.DeliveryLatitude, nil
+}
+
+// AddDeliveryLatitude adds f to the "delivery_latitude" field.
+func (m *OrderMutation) AddDeliveryLatitude(f float64) {
+	if m.adddelivery_latitude != nil {
+		*m.adddelivery_latitude += f
+	} else {
+		m.adddelivery_latitude = &f
+	}
+}
+
+// AddedDeliveryLatitude returns the value that was added to the "delivery_latitude" field in this mutation.
+func (m *OrderMutation) AddedDeliveryLatitude() (r float64, exists bool) {
+	v := m.adddelivery_latitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDeliveryLatitude clears the value of the "delivery_latitude" field.
+func (m *OrderMutation) ClearDeliveryLatitude() {
+	m.delivery_latitude = nil
+	m.adddelivery_latitude = nil
+	m.clearedFields[order.FieldDeliveryLatitude] = struct{}{}
+}
+
+// DeliveryLatitudeCleared returns if the "delivery_latitude" field was cleared in this mutation.
+func (m *OrderMutation) DeliveryLatitudeCleared() bool {
+	_, ok := m.clearedFields[order.FieldDeliveryLatitude]
+	return ok
+}
+
+// ResetDeliveryLatitude resets all changes to the "delivery_latitude" field.
+func (m *OrderMutation) ResetDeliveryLatitude() {
+	m.delivery_latitude = nil
+	m.adddelivery_latitude = nil
+	delete(m.clearedFields, order.FieldDeliveryLatitude)
+}
+
+// SetDeliveryLongitude sets the "delivery_longitude" field.
+func (m *OrderMutation) SetDeliveryLongitude(f float64) {
+	m.delivery_longitude = &f
+	m.adddelivery_longitude = nil
+}
+
+// DeliveryLongitude returns the value of the "delivery_longitude" field in the mutation.
+func (m *OrderMutation) DeliveryLongitude() (r float64, exists bool) {
+	v := m.delivery_longitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeliveryLongitude returns the old "delivery_longitude" field's value of the Order entity.
+// If the Order object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderMutation) OldDeliveryLongitude(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeliveryLongitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeliveryLongitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeliveryLongitude: %w", err)
+	}
+	return oldValue.DeliveryLongitude, nil
+}
+
+// AddDeliveryLongitude adds f to the "delivery_longitude" field.
+func (m *OrderMutation) AddDeliveryLongitude(f float64) {
+	if m.adddelivery_longitude != nil {
+		*m.adddelivery_longitude += f
+	} else {
+		m.adddelivery_longitude = &f
+	}
+}
+
+// AddedDeliveryLongitude returns the value that was added to the "delivery_longitude" field in this mutation.
+func (m *OrderMutation) AddedDeliveryLongitude() (r float64, exists bool) {
+	v := m.adddelivery_longitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDeliveryLongitude clears the value of the "delivery_longitude" field.
+func (m *OrderMutation) ClearDeliveryLongitude() {
+	m.delivery_longitude = nil
+	m.adddelivery_longitude = nil
+	m.clearedFields[order.FieldDeliveryLongitude] = struct{}{}
+}
+
+// DeliveryLongitudeCleared returns if the "delivery_longitude" field was cleared in this mutation.
+func (m *OrderMutation) DeliveryLongitudeCleared() bool {
+	_, ok := m.clearedFields[order.FieldDeliveryLongitude]
+	return ok
+}
+
+// ResetDeliveryLongitude resets all changes to the "delivery_longitude" field.
+func (m *OrderMutation) ResetDeliveryLongitude() {
+	m.delivery_longitude = nil
+	m.adddelivery_longitude = nil
+	delete(m.clearedFields, order.FieldDeliveryLongitude)
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (m *OrderMutation) SetAcceptedAt(t time.Time) {
+	m.accepted_at = &t
+}
+
+// AcceptedAt returns the value of the "accepted_at" field in the mutation.
+func (m *OrderMutation) AcceptedAt() (r time.Time, exists bool) {
+	v := m.accepted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAcceptedAt returns the old "accepted_at" field's value of the Order entity.
+// If the Order object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderMutation) OldAcceptedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAcceptedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAcceptedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAcceptedAt: %w", err)
+	}
+	return oldValue.AcceptedAt, nil
+}
+
+// ClearAcceptedAt clears the value of the "accepted_at" field.
+func (m *OrderMutation) ClearAcceptedAt() {
+	m.accepted_at = nil
+	m.clearedFields[order.FieldAcceptedAt] = struct{}{}
+}
+
+// AcceptedAtCleared returns if the "accepted_at" field was cleared in this mutation.
+func (m *OrderMutation) AcceptedAtCleared() bool {
+	_, ok := m.clearedFields[order.FieldAcceptedAt]
+	return ok
+}
+
+// ResetAcceptedAt resets all changes to the "accepted_at" field.
+func (m *OrderMutation) ResetAcceptedAt() {
+	m.accepted_at = nil
+	delete(m.clearedFields, order.FieldAcceptedAt)
+}
+
+// SetDispatchedAt sets the "dispatched_at" field.
+func (m *OrderMutation) SetDispatchedAt(t time.Time) {
+	m.dispatched_at = &t
+}
+
+// DispatchedAt returns the value of the "dispatched_at" field in the mutation.
+func (m *OrderMutation) DispatchedAt() (r time.Time, exists bool) {
+	v := m.dispatched_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDispatchedAt returns the old "dispatched_at" field's value of the Order entity.
+// If the Order object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderMutation) OldDispatchedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDispatchedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDispatchedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDispatchedAt: %w", err)
+	}
+	return oldValue.DispatchedAt, nil
+}
+
+// ClearDispatchedAt clears the value of the "dispatched_at" field.
+func (m *OrderMutation) ClearDispatchedAt() {
+	m.dispatched_at = nil
+	m.clearedFields[order.FieldDispatchedAt] = struct{}{}
+}
+
+// DispatchedAtCleared returns if the "dispatched_at" field was cleared in this mutation.
+func (m *OrderMutation) DispatchedAtCleared() bool {
+	_, ok := m.clearedFields[order.FieldDispatchedAt]
+	return ok
+}
+
+// ResetDispatchedAt resets all changes to the "dispatched_at" field.
+func (m *OrderMutation) ResetDispatchedAt() {
+	m.dispatched_at = nil
+	delete(m.clearedFields, order.FieldDispatchedAt)
+}
+
+// SetDeliveredAt sets the "delivered_at" field.
+func (m *OrderMutation) SetDeliveredAt(t time.Time) {
+	m.delivered_at = &t
+}
+
+// DeliveredAt returns the value of the "delivered_at" field in the mutation.
+func (m *OrderMutation) DeliveredAt() (r time.Time, exists bool) {
+	v := m.delivered_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeliveredAt returns the old "delivered_at" field's value of the Order entity.
+// If the Order object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderMutation) OldDeliveredAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeliveredAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeliveredAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeliveredAt: %w", err)
+	}
+	return oldValue.DeliveredAt, nil
+}
+
+// ClearDeliveredAt clears the value of the "delivered_at" field.
+func (m *OrderMutation) ClearDeliveredAt() {
+	m.delivered_at = nil
+	m.clearedFields[order.FieldDeliveredAt] = struct{}{}
+}
+
+// DeliveredAtCleared returns if the "delivered_at" field was cleared in this mutation.
+func (m *OrderMutation) DeliveredAtCleared() bool {
+	_, ok := m.clearedFields[order.FieldDeliveredAt]
+	return ok
+}
+
+// ResetDeliveredAt resets all changes to the "delivered_at" field.
+func (m *OrderMutation) ResetDeliveredAt() {
+	m.delivered_at = nil
+	delete(m.clearedFields, order.FieldDeliveredAt)
+}
+
 // SetCustomerID sets the "customer" edge to the User entity by id.
 func (m *OrderMutation) SetCustomerID(id string) {
 	m.customer = &id
@@ -7001,7 +7585,7 @@ func (m *OrderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, order.FieldCreatedAt)
 	}
@@ -7019,6 +7603,21 @@ func (m *OrderMutation) Fields() []string {
 	}
 	if m.delivery_address_json != nil {
 		fields = append(fields, order.FieldDeliveryAddressJSON)
+	}
+	if m.delivery_latitude != nil {
+		fields = append(fields, order.FieldDeliveryLatitude)
+	}
+	if m.delivery_longitude != nil {
+		fields = append(fields, order.FieldDeliveryLongitude)
+	}
+	if m.accepted_at != nil {
+		fields = append(fields, order.FieldAcceptedAt)
+	}
+	if m.dispatched_at != nil {
+		fields = append(fields, order.FieldDispatchedAt)
+	}
+	if m.delivered_at != nil {
+		fields = append(fields, order.FieldDeliveredAt)
 	}
 	return fields
 }
@@ -7040,6 +7639,16 @@ func (m *OrderMutation) Field(name string) (ent.Value, bool) {
 		return m.Currency()
 	case order.FieldDeliveryAddressJSON:
 		return m.DeliveryAddressJSON()
+	case order.FieldDeliveryLatitude:
+		return m.DeliveryLatitude()
+	case order.FieldDeliveryLongitude:
+		return m.DeliveryLongitude()
+	case order.FieldAcceptedAt:
+		return m.AcceptedAt()
+	case order.FieldDispatchedAt:
+		return m.DispatchedAt()
+	case order.FieldDeliveredAt:
+		return m.DeliveredAt()
 	}
 	return nil, false
 }
@@ -7061,6 +7670,16 @@ func (m *OrderMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldCurrency(ctx)
 	case order.FieldDeliveryAddressJSON:
 		return m.OldDeliveryAddressJSON(ctx)
+	case order.FieldDeliveryLatitude:
+		return m.OldDeliveryLatitude(ctx)
+	case order.FieldDeliveryLongitude:
+		return m.OldDeliveryLongitude(ctx)
+	case order.FieldAcceptedAt:
+		return m.OldAcceptedAt(ctx)
+	case order.FieldDispatchedAt:
+		return m.OldDispatchedAt(ctx)
+	case order.FieldDeliveredAt:
+		return m.OldDeliveredAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Order field %s", name)
 }
@@ -7112,6 +7731,41 @@ func (m *OrderMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeliveryAddressJSON(v)
 		return nil
+	case order.FieldDeliveryLatitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeliveryLatitude(v)
+		return nil
+	case order.FieldDeliveryLongitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeliveryLongitude(v)
+		return nil
+	case order.FieldAcceptedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAcceptedAt(v)
+		return nil
+	case order.FieldDispatchedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDispatchedAt(v)
+		return nil
+	case order.FieldDeliveredAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeliveredAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Order field %s", name)
 }
@@ -7123,6 +7777,12 @@ func (m *OrderMutation) AddedFields() []string {
 	if m.addtotal_amount != nil {
 		fields = append(fields, order.FieldTotalAmount)
 	}
+	if m.adddelivery_latitude != nil {
+		fields = append(fields, order.FieldDeliveryLatitude)
+	}
+	if m.adddelivery_longitude != nil {
+		fields = append(fields, order.FieldDeliveryLongitude)
+	}
 	return fields
 }
 
@@ -7133,6 +7793,10 @@ func (m *OrderMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case order.FieldTotalAmount:
 		return m.AddedTotalAmount()
+	case order.FieldDeliveryLatitude:
+		return m.AddedDeliveryLatitude()
+	case order.FieldDeliveryLongitude:
+		return m.AddedDeliveryLongitude()
 	}
 	return nil, false
 }
@@ -7149,6 +7813,20 @@ func (m *OrderMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddTotalAmount(v)
 		return nil
+	case order.FieldDeliveryLatitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeliveryLatitude(v)
+		return nil
+	case order.FieldDeliveryLongitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeliveryLongitude(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Order numeric field %s", name)
 }
@@ -7156,7 +7834,23 @@ func (m *OrderMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *OrderMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(order.FieldDeliveryLatitude) {
+		fields = append(fields, order.FieldDeliveryLatitude)
+	}
+	if m.FieldCleared(order.FieldDeliveryLongitude) {
+		fields = append(fields, order.FieldDeliveryLongitude)
+	}
+	if m.FieldCleared(order.FieldAcceptedAt) {
+		fields = append(fields, order.FieldAcceptedAt)
+	}
+	if m.FieldCleared(order.FieldDispatchedAt) {
+		fields = append(fields, order.FieldDispatchedAt)
+	}
+	if m.FieldCleared(order.FieldDeliveredAt) {
+		fields = append(fields, order.FieldDeliveredAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -7169,6 +7863,23 @@ func (m *OrderMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *OrderMutation) ClearField(name string) error {
+	switch name {
+	case order.FieldDeliveryLatitude:
+		m.ClearDeliveryLatitude()
+		return nil
+	case order.FieldDeliveryLongitude:
+		m.ClearDeliveryLongitude()
+		return nil
+	case order.FieldAcceptedAt:
+		m.ClearAcceptedAt()
+		return nil
+	case order.FieldDispatchedAt:
+		m.ClearDispatchedAt()
+		return nil
+	case order.FieldDeliveredAt:
+		m.ClearDeliveredAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Order nullable field %s", name)
 }
 
@@ -7193,6 +7904,21 @@ func (m *OrderMutation) ResetField(name string) error {
 		return nil
 	case order.FieldDeliveryAddressJSON:
 		m.ResetDeliveryAddressJSON()
+		return nil
+	case order.FieldDeliveryLatitude:
+		m.ResetDeliveryLatitude()
+		return nil
+	case order.FieldDeliveryLongitude:
+		m.ResetDeliveryLongitude()
+		return nil
+	case order.FieldAcceptedAt:
+		m.ResetAcceptedAt()
+		return nil
+	case order.FieldDispatchedAt:
+		m.ResetDispatchedAt()
+		return nil
+	case order.FieldDeliveredAt:
+		m.ResetDeliveredAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Order field %s", name)

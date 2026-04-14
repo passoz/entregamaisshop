@@ -24,6 +24,12 @@ const (
 	FieldVehicleType = "vehicle_type"
 	// FieldAvailable holds the string denoting the available field in the database.
 	FieldAvailable = "available"
+	// FieldCurrentLatitude holds the string denoting the current_latitude field in the database.
+	FieldCurrentLatitude = "current_latitude"
+	// FieldCurrentLongitude holds the string denoting the current_longitude field in the database.
+	FieldCurrentLongitude = "current_longitude"
+	// FieldLastLocationAt holds the string denoting the last_location_at field in the database.
+	FieldLastLocationAt = "last_location_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeOrders holds the string denoting the orders edge name in mutations.
@@ -54,6 +60,9 @@ var Columns = []string{
 	FieldStatus,
 	FieldVehicleType,
 	FieldAvailable,
+	FieldCurrentLatitude,
+	FieldCurrentLongitude,
+	FieldLastLocationAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "entregadors"
@@ -123,6 +132,21 @@ func ByVehicleType(opts ...sql.OrderTermOption) OrderOption {
 // ByAvailable orders the results by the available field.
 func ByAvailable(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAvailable, opts...).ToFunc()
+}
+
+// ByCurrentLatitude orders the results by the current_latitude field.
+func ByCurrentLatitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrentLatitude, opts...).ToFunc()
+}
+
+// ByCurrentLongitude orders the results by the current_longitude field.
+func ByCurrentLongitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrentLongitude, opts...).ToFunc()
+}
+
+// ByLastLocationAt orders the results by the last_location_at field.
+func ByLastLocationAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastLocationAt, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

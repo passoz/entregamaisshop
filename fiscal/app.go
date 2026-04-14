@@ -58,6 +58,7 @@ func (a *app) routes() http.Handler {
 	mux.Handle("GET /health", http.HandlerFunc(a.handleHealth))
 	mux.Handle("GET /static/app.css", http.HandlerFunc(a.handleCSS))
 	mux.Handle("GET /auth/login", http.HandlerFunc(a.handleLogin))
+	mux.Handle("POST /auth/login", http.HandlerFunc(a.handleLogin))
 	mux.Handle("GET /auth/callback", http.HandlerFunc(a.handleCallback))
 	mux.Handle("POST /auth/logout", http.HandlerFunc(a.handleLogout))
 

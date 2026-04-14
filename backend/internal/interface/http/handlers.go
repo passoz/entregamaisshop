@@ -21,12 +21,14 @@ import (
 	"github.com/entregamais/platform/backend/ent/user"
 	"github.com/entregamais/platform/backend/internal/infrastructure/config"
 	"github.com/entregamais/platform/backend/internal/infrastructure/logger"
+	"github.com/entregamais/platform/backend/internal/infrastructure/messaging"
 )
 
 type Handlers struct {
-	Config config.Config
-	Logger *logger.Logger
-	DB     *ent.Client
+	Config    config.Config
+	Logger    *logger.Logger
+	DB        *ent.Client
+	Publisher messaging.Publisher
 }
 
 func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
@@ -235,10 +237,12 @@ func (h *Handlers) OrderCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload struct {
-		SellerID        string  `json:"seller_id"`
-		TotalAmount     float64 `json:"total_amount"`
-		DeliveryAddress string  `json:"delivery_address"`
-		Items           []struct {
+		SellerID          string   `json:"seller_id"`
+		TotalAmount       float64  `json:"total_amount"`
+		DeliveryAddress   string   `json:"delivery_address"`
+		DeliveryLatitude  *float64 `json:"delivery_latitude"`
+		DeliveryLongitude *float64 `json:"delivery_longitude"`
+		Items             []struct {
 			ProductID string  `json:"product_id"`
 			Quantity  int     `json:"quantity"`
 			Price     float64 `json:"price"`
@@ -305,18 +309,36 @@ func (h *Handlers) OrderCreate(w http.ResponseWriter, r *http.Request) {
 
 	// Transaction to create order and items
 	err := h.WithTx(ctx, func(tx *ent.Tx) error {
-		addressJSON := "{}"
+		addressPayload := map[string]any{}
 		if payload.DeliveryAddress != "" {
-			addressJSON = fmt.Sprintf(`{"raw": "%s"}`, payload.DeliveryAddress)
+			addressPayload["raw"] = payload.DeliveryAddress
+			addressPayload["label"] = payload.DeliveryAddress
+		}
+		if payload.DeliveryLatitude != nil {
+			addressPayload["lat"] = *payload.DeliveryLatitude
+		}
+		if payload.DeliveryLongitude != nil {
+			addressPayload["lng"] = *payload.DeliveryLongitude
+		}
+		addressRaw, err := json.Marshal(addressPayload)
+		if err != nil {
+			return err
 		}
 
-		ord, err := tx.Order.Create().
+		create := tx.Order.Create().
 			SetID(orderID).
 			SetCustomerID(uid).
 			SetSellerID(payload.SellerID).
 			SetTotalAmount(payload.TotalAmount).
-			SetDeliveryAddressJSON(addressJSON).
-			Save(ctx)
+			SetDeliveryAddressJSON(string(addressRaw))
+		if payload.DeliveryLatitude != nil {
+			create.SetDeliveryLatitude(*payload.DeliveryLatitude)
+		}
+		if payload.DeliveryLongitude != nil {
+			create.SetDeliveryLongitude(*payload.DeliveryLongitude)
+		}
+
+		ord, err := create.Save(ctx)
 		if err != nil {
 			return err
 		}
@@ -345,18 +367,40 @@ func (h *Handlers) OrderCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	createdOrder, err := h.queryOrderWithTracking(ctx, orderID)
+	if err == nil {
+		h.publishDeliveryOffer(ctx, createdOrder)
+	}
+
 	writeSuccess(w, http.StatusCreated, map[string]any{"status": "created", "id": orderID}, nil)
 }
 
 func (h *Handlers) OrderGet(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
-	item, err := h.DB.Order.Query().Where(order.IDEQ(id)).WithItems(func(q *ent.OrderItemQuery) { q.WithProduct() }).Only(ctx)
+	item, err := h.queryOrderWithTracking(ctx, id)
 	if err != nil {
 		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "order not found"})
 		return
 	}
-	writeSuccess(w, http.StatusOK, item, nil)
+	writeSuccess(w, http.StatusOK, buildOrderResponse(item, 0, nil), nil)
+}
+
+func (h *Handlers) OrderTrackingGet(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := r.PathValue("id")
+	item, err := h.queryOrderWithTracking(ctx, id)
+	if err != nil {
+		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "order not found"})
+		return
+	}
+
+	writeSuccess(w, http.StatusOK, map[string]any{
+		"order_id":   item.ID,
+		"status":     item.Status,
+		"tracking":   buildTrackingPayload(item, 0),
+		"updated_at": item.UpdatedAt,
+	}, nil)
 }
 
 func (h *Handlers) OrderMine(w http.ResponseWriter, r *http.Request) {
@@ -369,6 +413,7 @@ func (h *Handlers) OrderMine(w http.ResponseWriter, r *http.Request) {
 	list, err := h.DB.Order.Query().
 		Where(order.HasCustomerWith(user.IDEQ(uid))).
 		WithSeller().
+		WithDriver().
 		WithItems(func(q *ent.OrderItemQuery) {
 			q.WithProduct()
 		}).
@@ -378,7 +423,13 @@ func (h *Handlers) OrderMine(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to query orders"})
 		return
 	}
-	writeSuccess(w, http.StatusOK, list, nil)
+
+	response := make([]map[string]any, 0, len(list))
+	for _, item := range list {
+		response = append(response, buildOrderResponse(item, 0, nil))
+	}
+
+	writeSuccess(w, http.StatusOK, response, nil)
 }
 
 func (h *Handlers) WithTx(ctx context.Context, fn func(*ent.Tx) error) error {
@@ -526,6 +577,7 @@ func (h *Handlers) SellerOrdersList(w http.ResponseWriter, r *http.Request) {
 		Where(order.HasSellerWith(seller.IDEQ(sellerProfile.ID))).
 		WithSeller().
 		WithCustomer().
+		WithDriver().
 		WithItems(func(q *ent.OrderItemQuery) {
 			q.WithProduct()
 		}).
@@ -535,7 +587,14 @@ func (h *Handlers) SellerOrdersList(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to query orders"})
 		return
 	}
-	writeSuccess(w, http.StatusOK, list, nil)
+
+	response := make([]map[string]any, 0, len(list))
+	for _, item := range list {
+		nearbyDrivers, _ := h.listNearbyDrivers(ctx, sellerIDFromOrder(item))
+		response = append(response, buildOrderResponse(item, len(nearbyDrivers), nil))
+	}
+
+	writeSuccess(w, http.StatusOK, response, nil)
 }
 
 func (h *Handlers) SellerOrdersGet(w http.ResponseWriter, r *http.Request) { h.OrderGet(w, r) }
@@ -554,8 +613,37 @@ func (h *Handlers) SellerOrderPrepare(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) SellerOrderReady(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	h.DB.Order.UpdateOneID(id).SetStatus("ready").Exec(r.Context())
+	ctx := r.Context()
+	if err := h.DB.Order.UpdateOneID(id).SetStatus("ready").Exec(ctx); err != nil {
+		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to mark order as ready"})
+		return
+	}
+
+	updatedOrder, err := h.queryOrderWithTracking(ctx, id)
+	if err == nil {
+		h.publishDeliveryOffer(ctx, updatedOrder)
+	}
 	writeSuccess(w, http.StatusOK, map[string]any{"status": "ready"}, nil)
+}
+
+func (h *Handlers) SellerOrderDispatch(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := r.PathValue("id")
+	now := time.Now().UTC()
+
+	if err := h.DB.Order.UpdateOneID(id).
+		SetStatus("dispatched").
+		SetDispatchedAt(now).
+		Exec(ctx); err != nil {
+		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to dispatch order"})
+		return
+	}
+
+	if updatedOrder, err := h.queryOrderWithTracking(ctx, id); err == nil {
+		h.publishTrackingUpdate(ctx, "orders.dispatched", updatedOrder)
+	}
+
+	writeSuccess(w, http.StatusOK, map[string]any{"status": "dispatched"}, nil)
 }
 
 func (h *Handlers) DriverProfile(w http.ResponseWriter, r *http.Request) {
@@ -580,10 +668,11 @@ func (h *Handlers) DriverOrdersList(w http.ResponseWriter, r *http.Request) {
 	list, err := h.DB.Order.Query().
 		Where(order.Or(
 			order.StatusEQ("ready"),
-			order.And(order.StatusIn("accepted", "picked_up"), order.HasDriverWith(entregador.IDEQ(driverProfile.ID))),
+			order.And(order.StatusIn("accepted", "dispatched", "picked_up"), order.HasDriverWith(entregador.IDEQ(driverProfile.ID))),
 		)).
 		WithSeller().
 		WithCustomer().
+		WithDriver().
 		WithItems(func(q *ent.OrderItemQuery) {
 			q.WithProduct()
 		}).
@@ -593,7 +682,19 @@ func (h *Handlers) DriverOrdersList(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to query orders"})
 		return
 	}
-	writeSuccess(w, http.StatusOK, list, nil)
+
+	response := make([]map[string]any, 0, len(list))
+	for _, item := range list {
+		distanceKm := sellerDistanceToDriver(item, driverProfile)
+		if item.Status == "ready" && distanceKm != nil && *distanceKm > defaultNearbyDriverRadiusKm {
+			continue
+		}
+
+		nearbyDrivers, _ := h.listNearbyDrivers(ctx, sellerIDFromOrder(item))
+		response = append(response, buildOrderResponse(item, len(nearbyDrivers), distanceKm))
+	}
+
+	writeSuccess(w, http.StatusOK, response, nil)
 }
 
 func (h *Handlers) DriverOrdersGet(w http.ResponseWriter, r *http.Request) { h.OrderGet(w, r) }
@@ -607,30 +708,161 @@ func (h *Handlers) DriverOrderAccept(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.DB.Order.UpdateOneID(id).SetStatus("accepted").SetDriverID(driverProfile.ID).Exec(ctx); err != nil {
+	if err := h.DB.Order.UpdateOneID(id).
+		SetStatus("accepted").
+		SetDriverID(driverProfile.ID).
+		SetAcceptedAt(time.Now().UTC()).
+		Exec(ctx); err != nil {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to accept order"})
 		return
 	}
+
+	if updatedOrder, qerr := h.queryOrderWithTracking(ctx, id); qerr == nil {
+		h.publishTrackingUpdate(ctx, "orders.accepted", updatedOrder)
+	}
+
 	writeSuccess(w, http.StatusOK, map[string]any{"status": "accepted"}, nil)
 }
 
 func (h *Handlers) DriverOrderPickup(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	h.DB.Order.UpdateOneID(id).SetStatus("picked_up").Exec(r.Context())
-	writeSuccess(w, http.StatusOK, map[string]any{"status": "picked_up"}, nil)
+	ctx := r.Context()
+	now := time.Now().UTC()
+	if err := h.DB.Order.UpdateOneID(id).SetStatus("dispatched").SetDispatchedAt(now).Exec(ctx); err != nil {
+		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to confirm pickup"})
+		return
+	}
+
+	if updatedOrder, err := h.queryOrderWithTracking(ctx, id); err == nil {
+		h.publishTrackingUpdate(ctx, "orders.dispatched", updatedOrder)
+	}
+
+	writeSuccess(w, http.StatusOK, map[string]any{"status": "dispatched"}, nil)
 }
 
 func (h *Handlers) DriverOrderDeliver(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	if err := h.DB.Order.UpdateOneID(id).SetStatus("delivered").Exec(r.Context()); err != nil {
+	ctx := r.Context()
+	if err := h.DB.Order.UpdateOneID(id).SetStatus("delivered").SetDeliveredAt(time.Now().UTC()).Exec(ctx); err != nil {
 		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to deliver order"})
 		return
 	}
+
+	if updatedOrder, err := h.queryOrderWithTracking(ctx, id); err == nil {
+		h.publishTrackingUpdate(ctx, "orders.delivered", updatedOrder)
+	}
+
 	writeSuccess(w, http.StatusOK, map[string]any{"status": "delivered"}, nil)
 }
 
 func (h *Handlers) DriverStatus(w http.ResponseWriter, r *http.Request) {
-	writeSuccess(w, http.StatusOK, map[string]any{"status": "online"}, nil)
+	ctx := r.Context()
+	driverProfile, err := h.DB.Entregador.Query().Where(entregador.HasUserWith(user.IDEQ(UserID(ctx)))).Only(ctx)
+	if err != nil {
+		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "driver profile not found"})
+		return
+	}
+
+	var payload struct {
+		Online *bool `json:"online"`
+	}
+	_ = json.NewDecoder(r.Body).Decode(&payload)
+
+	online := true
+	if payload.Online != nil {
+		online = *payload.Online
+	}
+
+	item, err := h.DB.Entregador.UpdateOneID(driverProfile.ID).SetAvailable(online).Save(ctx)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to update driver status"})
+		return
+	}
+
+	if h.Publisher != nil {
+		_ = h.Publisher.Publish(ctx, "drivers.status.updated", map[string]any{
+			"driver_id":   item.ID,
+			"available":   online,
+			"occurred_at": time.Now().UTC(),
+		})
+	}
+
+	statusLabel := "offline"
+	if online {
+		statusLabel = "online"
+	}
+
+	writeSuccess(w, http.StatusOK, map[string]any{"status": statusLabel, "online": online}, nil)
+}
+
+func (h *Handlers) DriverLocationUpdate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	driverProfile, err := h.DB.Entregador.Query().Where(entregador.HasUserWith(user.IDEQ(UserID(ctx)))).Only(ctx)
+	if err != nil {
+		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "driver profile not found"})
+		return
+	}
+
+	var payload struct {
+		Latitude  float64 `json:"latitude"`
+		Longitude float64 `json:"longitude"`
+		Online    *bool   `json:"online"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, http.StatusBadRequest, APIError{Code: "bad_request", Message: "invalid payload"})
+		return
+	}
+
+	now := time.Now().UTC()
+	update := h.DB.Entregador.UpdateOneID(driverProfile.ID).
+		SetCurrentLatitude(payload.Latitude).
+		SetCurrentLongitude(payload.Longitude).
+		SetLastLocationAt(now)
+	if payload.Online != nil {
+		update.SetAvailable(*payload.Online)
+	}
+
+	item, err := update.Save(ctx)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to persist driver location"})
+		return
+	}
+
+	if h.Publisher != nil {
+		_ = h.Publisher.Publish(ctx, "drivers.location.updated", map[string]any{
+			"driver_id":   item.ID,
+			"latitude":    payload.Latitude,
+			"longitude":   payload.Longitude,
+			"occurred_at": now,
+			"available":   item.Available,
+		})
+	}
+
+	activeOrders, err := h.DB.Order.Query().
+		Where(order.And(
+			order.HasDriverWith(entregador.IDEQ(item.ID)),
+			order.StatusIn("accepted", "dispatched", "picked_up"),
+		)).
+		WithSeller().
+		WithCustomer().
+		WithDriver().
+		WithItems(func(q *ent.OrderItemQuery) {
+			q.WithProduct()
+		}).
+		All(ctx)
+	if err == nil {
+		for _, activeOrder := range activeOrders {
+			h.publishTrackingUpdate(ctx, "orders.tracking.updated", activeOrder)
+		}
+	}
+
+	writeSuccess(w, http.StatusOK, map[string]any{
+		"driver_id":        item.ID,
+		"latitude":         payload.Latitude,
+		"longitude":        payload.Longitude,
+		"last_location_at": now,
+		"available":        item.Available,
+	}, nil)
 }
 
 func (h *Handlers) AdminSellerApprove(w http.ResponseWriter, r *http.Request) {
@@ -731,4 +963,108 @@ func (h *Handlers) UploadCreate(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) UploadGet(w http.ResponseWriter, r *http.Request) {
 	writeSuccess(w, http.StatusOK, map[string]any{"url": "/mock/asset.jpg"}, nil)
+}
+
+func (h *Handlers) UserProfileGet(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	uid := UserID(ctx)
+	item, err := h.DB.User.Get(ctx, uid)
+	if err != nil {
+		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "user not found"})
+		return
+	}
+	writeSuccess(w, http.StatusOK, item, nil)
+}
+
+func (h *Handlers) UserProfileUpdate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	uid := UserID(ctx)
+	var payload struct {
+		Name  string `json:"name"`
+		Phone string `json:"phone"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, http.StatusBadRequest, APIError{Code: "bad_request", Message: "invalid payload"})
+		return
+	}
+
+	item, err := h.DB.User.UpdateOneID(uid).
+		SetName(payload.Name).
+		SetPhone(payload.Phone).
+		Save(ctx)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to update profile"})
+		return
+	}
+	writeSuccess(w, http.StatusOK, item, nil)
+}
+
+func (h *Handlers) SellerProfileUpdate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	sellerProfile, err := h.resolveSellerForUser(ctx)
+	if err != nil {
+		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "seller profile not found"})
+		return
+	}
+
+	var payload struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, http.StatusBadRequest, APIError{Code: "bad_request", Message: "invalid payload"})
+		return
+	}
+
+	item, err := h.DB.Seller.UpdateOneID(sellerProfile.ID).
+		SetName(payload.Name).
+		Save(ctx)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to update seller profile"})
+		return
+	}
+	writeSuccess(w, http.StatusOK, item, nil)
+}
+
+func (h *Handlers) DriverProfileUpdate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	uid := UserID(ctx)
+	driverProfile, err := h.DB.Entregador.Query().Where(entregador.HasUserWith(user.IDEQ(uid))).Only(ctx)
+	if err != nil {
+		writeError(w, http.StatusNotFound, APIError{Code: "not_found", Message: "driver profile not found"})
+		return
+	}
+
+	var payload struct {
+		VehicleType string `json:"vehicle_type"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, http.StatusBadRequest, APIError{Code: "bad_request", Message: "invalid payload"})
+		return
+	}
+
+	item, err := h.DB.Entregador.UpdateOneID(driverProfile.ID).
+		SetVehicleType(payload.VehicleType).
+		Save(ctx)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, APIError{Code: "internal_error", Message: "failed to update driver profile"})
+		return
+	}
+	writeSuccess(w, http.StatusOK, item, nil)
+}
+
+func (h *Handlers) AuthChangePassword(w http.ResponseWriter, r *http.Request) {
+	// In a real scenario, this would call Keycloak Admin API or Account API
+	// using the user's access token or a service account.
+	var payload struct {
+		CurrentPassword string `json:"current_password"`
+		NewPassword     string `json:"new_password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, http.StatusBadRequest, APIError{Code: "bad_request", Message: "invalid payload"})
+		return
+	}
+
+	// Mocking success
+	writeSuccess(w, http.StatusOK, map[string]any{"status": "password_changed"}, nil)
 }

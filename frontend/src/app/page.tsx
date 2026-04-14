@@ -24,6 +24,7 @@ import {
   type Seller,
   findClosestNeighborhood
 } from "@/lib/nearbySellers";
+import { saveSelectedLocation } from "@/lib/deliveryTracking";
 
 export default function Home() {
   const [allSellers, setAllSellers] = useState<Seller[]>([]);
@@ -75,12 +76,12 @@ export default function Home() {
                 const name = findClosestNeighborhood(lat, lng, neighborhoods);
                 const resolvedLocation = name || "Sua localização";
                 setLocationLabel(resolvedLocation);
-                localStorage.setItem("last_selected_location", resolvedLocation);
+                saveSelectedLocation(resolvedLocation, { lat, lng });
               } catch (e) {
                 console.error("Erro ao identificar bairro:", e);
                 const fallbackLocation = "Sua localização atual";
                 setLocationLabel(fallbackLocation);
-                localStorage.setItem("last_selected_location", fallbackLocation);
+                saveSelectedLocation(fallbackLocation, { lat, lng });
               }
               
               setIsLoadingNearby(false);
@@ -122,7 +123,7 @@ export default function Home() {
       const sellersByDistance = findNearbySellers(allSellers, locationToUse);
       setNearbySellers(sellersByDistance);
       setLocationLabel(locationToUse.label);
-      localStorage.setItem("last_selected_location", locationToUse.label);
+      saveSelectedLocation(locationToUse.label, { lat: locationToUse.lat, lng: locationToUse.lng });
     }
     
     setIsLocationModalOpen(false);

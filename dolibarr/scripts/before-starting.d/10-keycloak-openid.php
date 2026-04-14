@@ -20,12 +20,13 @@ $dbName = getenv('DOLI_DB_NAME') ?: 'dolidb';
 $dbUser = getenv('DOLI_DB_USER') ?: 'dolibarr';
 $dbPassword = getenv('DOLI_DB_PASSWORD') ?: 'dolibarr';
 
-$keycloakBase = rtrim(getenv('KEYCLOAK_PUBLIC_URL') ?: 'http://localhost:8081', '/');
+$keycloakBase = rtrim(getenv('KEYCLOAK_PUBLIC_URL') ?: 'http://auth.192.168.10.222.nip.io', '/');
 $realm = getenv('KEYCLOAK_REALM') ?: 'delivery-platform';
-$dolibarrPublicURL = rtrim(getenv('DOLIBARR_PUBLIC_URL') ?: 'http://localhost:8088', '/');
+$dolibarrPublicURL = rtrim(getenv('DOLIBARR_PUBLIC_URL') ?: 'http://erp.192.168.10.222.nip.io', '/');
 $clientId = getenv('DOLIBARR_OIDC_CLIENT_ID') ?: 'dolibarr';
 $clientSecret = getenv('DOLIBARR_OIDC_CLIENT_SECRET') ?: '';
 $loginClaim = getenv('DOLIBARR_OIDC_LOGIN_CLAIM') ?: 'email';
+$themeVersion = '20260413-app-v3';
 
 $constants = array(
     'MAIN_AUTHENTICATION_OIDC_CLIENT_ID' => $clientId,
@@ -37,6 +38,19 @@ $constants = array(
     'MAIN_AUTHENTICATION_OIDC_LOGIN_CLAIM' => $loginClaim,
     'MAIN_LOGOUT_GOTO_URL' => $keycloakBase . '/realms/' . $realm . '/protocol/openid-connect/logout?client_id=' . rawurlencode($clientId) . '&post_logout_redirect_uri=' . rawurlencode($dolibarrPublicURL),
     'MAIN_MODULE_FISCALBRIDGE' => '1',
+    'MAIN_HTML_HEADER' => '<link rel="stylesheet" type="text/css" href="/custom/fiscalbridge/css/style.css?v=' . $themeVersion . '">',
+    'MAIN_INFO_SOCIETE_LOGO' => '/custom/fiscalbridge/img/logo.svg',
+    'MAIN_LOGIN_LOGO' => '/custom/fiscalbridge/img/logo.svg',
+    'MAIN_FAVICONURL' => '/custom/fiscalbridge/img/logo.svg',
+    'MAIN_APPLICATION_TITLE' => 'EntregaMais Shop Admin',
+    'THEME_ELDY_USE_CUSTOM_FONT' => '1',
+    'THEME_ELDY_CUSTOM_FONT' => 'DM Sans, sans-serif',
+    'THEME_ELDY_COLOR_BACK_TOP_MENU' => '222222',
+    'THEME_ELDY_COLOR_BACK_SIDE_MENU' => '222222',
+    'THEME_ELDY_COLOR_TEXT_TOP_MENU' => 'F7E01B',
+    'THEME_ELDY_COLOR_TEXT_SIDE_MENU' => 'F7E01B',
+    'THEME_ELDY_COLOR_BACK_MAIN' => 'F4F4F4',
+    'THEME_ELDY_COLOR_TEXT_MAIN' => '222222',
 );
 
 $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $dbHost, $dbPort, $dbName);
